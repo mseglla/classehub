@@ -943,13 +943,18 @@ function App() {
   return (
     <main className="page">
       <header className="hero">
-        <div>
-          <p className="eyebrow">ClasseHub · {classInfo.school_year}</p>
-          <h1>
-            {classInfo.emoji} {classInfo.name}
-          </h1>
-          <p>Tot el que necessites saber, quan ho vols saber.</p>
-        </div>
+      <div className="hero-main">
+  <div>
+    <p className="eyebrow">ClasseHub · {classInfo.school_year}</p>
+    <h1>
+      {classInfo.emoji} {classInfo.name}
+    </h1>
+  </div>
+
+  <div className="hero-badge">
+  ✨ Sempre al dia
+</div>
+</div>
 
         <div className="hero-card">
           <span>Famílies</span>
