@@ -605,6 +605,17 @@ select {
   .calendar-row {
     grid-template-columns: 1fr;
   }
+  .info-link {
+    color: #ea580c;
+    font-size: 14px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+  .timeline-row:hover .info-link,
+.calendar-row:hover .info-link,
+.next-event:hover .info-link {
+  text-decoration: underline;
+}
 
   .poll-form,
   .registration-form,

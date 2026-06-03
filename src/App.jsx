@@ -1027,7 +1027,9 @@ function App() {
                 <strong>
                   {typeMeta[event.event_type]?.icon} {event.title}
                 </strong>
-                <ChevronRight size={18} />
+                <span className="info-link">
+  + Info
+</span>
               </button>
             ))}
           </div>
