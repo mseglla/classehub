@@ -935,9 +935,9 @@ function App() {
 
   const nextEvent = futureEvents[0];
 
-  const visibleEvents = showFullCalendar
-    ? futureEvents
-    : futureEvents.slice(0, 5);
+const visibleEvents = showFullCalendar
+  ? futureEvents.slice(1)
+  : futureEvents.slice(1, 5);
     async function handleOrganizationRegistration(
       organizationId,
       familyId,
