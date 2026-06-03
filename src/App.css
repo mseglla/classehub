@@ -467,12 +467,14 @@ select {
   border-radius: 22px;
   padding: 14px;
   background: #ffffff;
-}.result-column strong {
-  display: block;
-  margin-bottom: 12px;
-  color: #111827;
-  font-size: 16px;
-  font-weight: 950;
+  .result-column strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
 }.result-column.yes,
 .result-column.adults {
   background: #ecfdf5;
@@ -485,15 +487,26 @@ select {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
-}.person-card {
-  display: block;
-  padding: 10px 11px;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.86);
-  color: #111827;
-  font-size: 14px;
-  font-weight: 750;
+  .person-card {
+    display: block;
+    padding: 10px 11px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #d1fae5;
+    color: #065f46;
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .person-card::before {
+    content: "✓ ";
+    color: #10b981;
+    font-weight: 900;
+  }
+  .person-card.pending {
+    color: #9a3412;
+    border-color: #fed7aa;
+    background: #fff7ed;
+  }
 }.person-card.pending {
   color: #9a3412;
 }.empty-result {
@@ -542,7 +555,20 @@ select {
   font-size: 12px;
   font-weight: 700;
 }
-
+.poll-question {
+  margin: 0 0 18px;
+  color: #4b5563;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 700;
+}
+.poll-results-title {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.2;
+}
 @media (max-width: 820px) {
   .page {
     width: min(100% - 20px, 1180px);

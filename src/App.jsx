@@ -134,12 +134,12 @@ function DetailModal({ item, checklist, onClose }) {
   );
 }
 
-function PollCard({ poll, families, votes, onVote }) {
+function PollCard({ poll, families, votes, onVote, onOpenResults }) {
   const [familyId, setFamilyId] = useState("");
   const [optionId, setOptionId] = useState("");
 
-  const pollVotes = votes.filter((v) => v.poll_id === poll.id);
-  const votedFamilies = new Set(pollVotes.map((v) => v.family_id));
+  const pollVotes = votes.filter((vote) => vote.poll_id === poll.id);
+  const votedFamilies = new Set(pollVotes.map((vote) => vote.family_id));
 
   async function submitVote(e) {
     e.preventDefault();
@@ -153,36 +153,122 @@ function PollCard({ poll, families, votes, onVote }) {
   return (
     <div className="poll-card">
       <div>
-        <p className="tag">Tanca {shortDate(poll.close_date)}</p>
+        <p className="tag">Votació</p>
         <h3>{poll.question}</h3>
         {poll.description && <p>{poll.description}</p>}
-        <small>{votedFamilies.size}/{families.length} famílies han votat</small>
+        <small>
+          {votedFamilies.size}/{families.length} famílies han votat
+        </small>
       </div>
 
-      <form className="poll-form" onSubmit={submitVote}>
-        <select value={familyId} onChange={(e) => setFamilyId(e.target.value)}>
-          <option value="">Selecciona família</option>
-          {families.map((family) => (
-            <option key={family.id} value={family.id}>
-              {votedFamilies.has(family.id) ? "✓ " : ""}
-              {family.student_name}
-            </option>
-          ))}
-        </select>
+      <form className="registration-form" onSubmit={submitVote}>
+        <label className="span-all">
+          Família
+          <select value={familyId} onChange={(e) => setFamilyId(e.target.value)}>
+            <option value="">Selecciona família</option>
+            {families.map((family) => (
+              <option key={family.id} value={family.id}>
+                {votedFamilies.has(family.id) ? "✓ " : ""}
+                {family.student_name}
+              </option>
+            ))}
+          </select>
+        </label>
 
-        <select value={optionId} onChange={(e) => setOptionId(e.target.value)}>
-          <option value="">Tria opció</option>
-          {poll.ch_poll_options?.map((option) => (
-            <option key={option.id} value={option.id}>{option.text}</option>
-          ))}
-        </select>
+        <label className="span-all">
+          Resposta
+          <select value={optionId} onChange={(e) => setOptionId(e.target.value)}>
+            <option value="">Tria opció</option>
+            {poll.ch_poll_options?.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.text}
+              </option>
+            ))}
+          </select>
+        </label>
 
-        <button>Votar</button>
+        <button className="span-all">Votar</button>
       </form>
+
+      <button className="secondary-action" onClick={() => onOpenResults(poll)}>
+        Veure resultats
+      </button>
     </div>
   );
 }
+function PollResultsModal({ poll, families, votes, onClose }) {
+  if (!poll) return null;
 
+  const pollVotes = votes.filter((vote) => vote.poll_id === poll.id);
+  const votedFamilies = new Set(pollVotes.map((vote) => vote.family_id));
+
+  const pendingFamilies = families.filter(
+    (family) => !votedFamilies.has(family.id)
+  );
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <article className="modal" onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>
+          Tancar
+        </button>
+
+        <p className="eyebrow">Resultats de la votació</p>
+
+        <h3 className="poll-results-title">
+  🗳️ Resultats
+</h3>
+
+<p className="poll-question">
+  {poll.question}
+</p>
+
+        {poll.description && <p className="detail-text">{poll.description}</p>}
+
+        <div className="organization-results">
+          {poll.ch_poll_options?.map((option) => {
+            const optionVotes = pollVotes.filter(
+              (vote) => vote.option_id === option.id
+            );
+
+            return (
+              <div className="result-column" key={option.id}>
+                <strong>
+                  {option.text} ({optionVotes.length})
+                </strong>
+
+                <div className="people-grid">
+                  {optionVotes.length === 0 ? (
+                    <span className="empty-result">Cap vot encara</span>
+                  ) : (
+                    optionVotes.map((vote) => {
+                      const family = families.find(
+                        (entry) => entry.id === vote.family_id
+                      );
+
+                      return (
+                        <span className="person-card" key={vote.id}>
+                          {family?.student_name || "Família"}
+                        </span>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="result-column pending">
+            <strong>Pendents ({pendingFamilies.length})</strong>
+            <span className="empty-result">
+              {pendingFamilies.length} famílies encara no han votat
+            </span>
+          </div>
+        </div>
+      </article>
+    </div>
+  );
+}
 function getAttendanceData(organization, families, participants, responses) {
   const participantFamilyIds = new Set(
     participants
@@ -735,6 +821,7 @@ function App() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedOrganization, setSelectedOrganization] = useState(null);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
+  const [selectedPoll, setSelectedPoll] = useState(null);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -1101,12 +1188,13 @@ function App() {
             ) : (
               polls.map((poll) => (
                 <PollCard
-                  key={poll.id}
-                  poll={poll}
-                  families={families}
-                  votes={votes}
-                  onVote={handleVote}
-                />
+  key={poll.id}
+  poll={poll}
+  families={families}
+  votes={votes}
+  onVote={handleVote}
+  onOpenResults={setSelectedPoll}
+/>
               ))
             )}
           </div>
@@ -1138,6 +1226,12 @@ function App() {
   registrations={organizationRegistrations}
   onRegister={handleOrganizationRegistration}
   onClose={() => setSelectedRegistration(null)}
+/>
+<PollResultsModal
+  poll={selectedPoll}
+  families={families}
+  votes={votes}
+  onClose={() => setSelectedPoll(null)}
 />
     </main>
   );
