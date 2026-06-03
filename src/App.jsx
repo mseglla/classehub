@@ -990,7 +990,9 @@ function App() {
                 </small>
               </div>
 
-              <ChevronRight size={24} />
+              <span className="info-link">
+  + Info
+</span>
             </button>
           ) : (
             <p>No hi ha cap esdeveniment proper.</p>
