@@ -726,17 +726,17 @@ function RegistrationOrganizationModal({
 
   <label>
     Adults
-    <input type="number" min="0" value={adultsCount} onChange={(event) => setAdultsCount(event.target.value)} />
+    <input type="number" min="0" value={adultsCount} onChange={(event) => setAdultsCount(Number(event.target.value))}/>
   </label>
 
   <label>
     Infants
-    <input type="number" min="0" value={childrenCount} onChange={(event) => setChildrenCount(event.target.value)} />
+    <input type="number" min="0" value={childrenCount} onChange={(event) => setChildrenCount(Number(event.target.value))} />
   </label>
 
   <label>
     Menors de 3 anys
-    <input type="number" min="0" value={under3Count} onChange={(event) => setUnder3Count(event.target.value)} />
+    <input type="number" min="0" value={under3Count} onChange={(event) => setUnder3Count(Number(event.target.value))} />
   </label>
 
   <label className="span-all">
@@ -806,7 +806,200 @@ function RegistrationOrganizationModal({
     </div>
   );
 }
+
+function AdminPage() {
+  const [classes, setClasses] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [title, setTitle] = useState("");
+  const [eventType, setEventType] = useState("classe");
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    async function loadClasses() {
+      const { data, error } = await supabase
+        .from("ch_classes")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        console.error(error);
+        setMessage("No s'han pogut carregar les classes.");
+        return;
+      }
+
+      setClasses(data || []);
+
+      if (data?.length) {
+        setSelectedClassId(String(data[0].id));
+      }
+    }
+
+    loadClasses();
+  }, []);
+
+  async function handleCreateEvent(event) {
+    event.preventDefault();
+    setMessage("");
+
+    if (!selectedClassId || !title || !startDate) {
+      setMessage("Cal indicar com a mínim classe, títol i data.");
+      return;
+    }
+
+    setSaving(true);
+
+    const { error } = await supabase.from("ch_events").insert({
+      class_id: Number(selectedClassId),
+      title,
+      event_type: eventType,
+      start_date: startDate,
+      start_time: startTime || null,
+      location,
+      summary: description,
+      details: description,
+    });
+
+    setSaving(false);
+
+    if (error) {
+      console.error(error);
+    
+      setMessage(
+        `Error: ${error.message} (${error.code || "No s'ha pogut crear d'esdeveniment"})`
+      );
+    
+      return;
+    }
+
+    setTitle("");
+    setEventType("classe");
+    setStartDate("");
+    setStartTime("");
+    setLocation("");
+    setDescription("");
+    setMessage("Esdeveniment creat correctament.");
+  }
+
+  return (
+    <main className="page">
+      <header className="hero">
+        <div className="hero-main">
+          <div>
+            <p className="eyebrow">ClasseHub Admin</p>
+            <h1>Administració</h1>
+          </div>
+
+          <div className="hero-badge">🛠️ Mode delegat</div>
+        </div>
+      </header>
+
+      <section className="layout">
+        <Card className="span-2">
+          <SectionTitle
+            icon={<CalendarDays size={22} />}
+            title="Crear esdeveniment"
+            subtitle="Afegeix un nou esdeveniment al calendari de la classe."
+          />
+
+          <form className="registration-form" onSubmit={handleCreateEvent}>
+            <label>
+              Classe
+              <select
+                value={selectedClassId}
+                onChange={(event) => setSelectedClassId(event.target.value)}
+              >
+                {classes.map((classItem) => (
+                  <option key={classItem.id} value={classItem.id}>
+                    {classItem.emoji} {classItem.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Tipus
+              <select
+                value={eventType}
+                onChange={(event) => setEventType(event.target.value)}
+              >
+                <option value="classe">Classe</option>
+                <option value="escola">Escola</option>
+                <option value="comunitat">Comunitat</option>
+              </select>
+            </label>
+
+            <label>
+              Data
+              <input
+                type="date"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+              />
+            </label>
+
+            <label className="span-all">
+              Títol
+              <input
+                type="text"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="Ex: Aniversari Oliver"
+              />
+            </label>
+
+            <label>
+              Hora
+              <input
+                type="time"
+                value={startTime}
+                onChange={(event) => setStartTime(event.target.value)}
+              />
+            </label>
+
+            <label className="span-all">
+              Lloc
+              <input
+                type="text"
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+                placeholder="Ex: Parc, escola, platja..."
+              />
+            </label>
+
+            <label className="span-all">
+              Descripció
+              <input
+                type="text"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Informació breu per a les famílies"
+              />
+            </label>
+
+            <button className="span-all" disabled={saving}>
+              {saving ? "Guardant..." : "Crear esdeveniment"}
+            </button>
+          </form>
+
+          {message && <p className="admin-message">{message}</p>}
+        </Card>
+      </section>
+    </main>
+  );
+}
+
 function App() {
+  const isAdmin = window.location.pathname.startsWith("/admin");
+
+  if (isAdmin) {
+    return <AdminPage />;
+  }
+
   const [slug] = useState(getSlug());
   const [classInfo, setClassInfo] = useState(null);
   const [families, setFamilies] = useState([]);
@@ -1025,6 +1218,9 @@ const visibleEvents = showFullCalendar
         <div className="loading">{error}</div>
       </main>
     );
+  }
+  if (isAdmin) {
+    return <AdminPage />;
   }
   return (
     <main className="page">
