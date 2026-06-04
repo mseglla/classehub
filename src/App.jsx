@@ -575,7 +575,7 @@ function RegistrationOrganizationCard({
           <span>Persones</span>
         </div>
 
-        <button onClick={() => onOpen(organization)}>Veure i inscriure</button>
+        <button onClick={() => onOpen(organization)}>Confirmació i resultats</button>
       </div>
     </div>
   );
@@ -1014,7 +1014,7 @@ const visibleEvents = showFullCalendar
   if (loading) {
     return (
       <main className="page">
-        <div className="loading">Carregant ClasseHub...</div>
+        <div className="loading">Carregant l'agenda de les Orenetes...</div>
       </main>
     );
   }
@@ -1026,36 +1026,25 @@ const visibleEvents = showFullCalendar
       </main>
     );
   }
-
   return (
     <main className="page">
       <header className="hero">
-      <div className="hero-main">
-  <div>
-    <p className="eyebrow">ClasseHub · {classInfo.school_year}</p>
-    <h1>
-      {classInfo.emoji} {classInfo.name}
-    </h1>
-  </div>
-
-  <div className="hero-badge">
-  ✨ Sempre al dia
-</div>
-</div>
-
-        <div className="hero-card">
-          <span>Famílies</span>
-          <strong>{families.length}</strong>
-          <small>
-            {polls.length} votacions · {organizations.length} organitzacions
-          </small>
+        <div className="hero-main">
+          <div>
+            <p className="eyebrow">Curs {classInfo.school_year}</p>
+            <h1>
+              {classInfo.emoji} {classInfo.name}
+            </h1>
+          </div>
+  
+          <div className="hero-badge">✨ Sempre al dia</div>
         </div>
       </header>
-
+  
       <section className="layout">
         <Card className="span-2 next-event-card">
           <p className="eyebrow">Proper esdeveniment</p>
-
+  
           {nextEvent ? (
             <button
               className="next-event"
@@ -1065,35 +1054,35 @@ const visibleEvents = showFullCalendar
                 <strong>{shortDate(nextEvent.start_date)}</strong>
                 <span>{daysUntil(nextEvent.start_date)}</span>
               </div>
-
+  
               <div>
                 <h2>
                   {typeMeta[nextEvent.event_type]?.icon} {nextEvent.title}
                 </h2>
                 <p>{nextEvent.description}</p>
                 <small>
-                {nextEvent.start_time ? `${nextEvent.start_time.slice(0, 5)} · ` : ""}
+                  {nextEvent.start_time
+                    ? `${nextEvent.start_time.slice(0, 5)} · `
+                    : ""}
                   {nextEvent.location || typeMeta[nextEvent.event_type]?.label}
                 </small>
               </div>
-
-              <span className="info-link">
-  + Info
-</span>
+  
+              <span className="info-link">+ Info</span>
             </button>
           ) : (
             <p>No hi ha cap esdeveniment proper.</p>
           )}
         </Card>
-
+  
         <Card className="span-2">
           <div className="section-title-row">
             <SectionTitle
               icon={<CalendarDays size={22} />}
-              title="Propers esdeveniments"
-              subtitle="Agenda resumida de la classe."
+              title="Agenda d'Orenetes"
+              subtitle="Tot el que vols saber, quan ho vols saber."
             />
-
+  
             <button
               className="secondary-action"
               onClick={() => setShowFullCalendar((value) => !value)}
@@ -1101,36 +1090,68 @@ const visibleEvents = showFullCalendar
               {showFullCalendar ? "Veure menys" : "Veure més"}
             </button>
           </div>
-
+  
           <div className="timeline">
-            {visibleEvents.map((event) => (
-              <button
-                key={event.id}
-                className="timeline-row"
-                onClick={() => setSelectedItem(eventToDetail(event))}
-              >
-                <span>
-  {shortDate(event.start_date)}
-  {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
-</span>
-                <strong>
-                  {typeMeta[event.event_type]?.icon} {event.title}
-                </strong>
-                <span className="info-link">
-  + Info
-</span>
-              </button>
-            ))}
+            {visibleEvents.map((event) => {
+              const linkedOrganization = organizations.find(
+                (org) => org.event_id === event.id
+              );
+  
+              return (
+                <button
+                  key={event.id}
+                  className="timeline-row"
+                  onClick={() => setSelectedItem(eventToDetail(event))}
+                >
+                  <span>
+                    {shortDate(event.start_date)}
+                    {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
+                  </span>
+  
+                  <strong>
+                    {typeMeta[event.event_type]?.icon} {event.title}
+                  </strong>
+  
+                  <div className="timeline-actions">
+                    {linkedOrganization && (
+                      <button
+                        type="button"
+                        className="event-action"
+                        onClick={(e) => {
+                          e.stopPropagation();
+  
+                          if (
+                            linkedOrganization.organization_type === "attendance"
+                          ) {
+                            setSelectedOrganization(linkedOrganization);
+                          }
+  
+                          if (
+                            linkedOrganization.organization_type === "registration"
+                          ) {
+                            setSelectedRegistration(linkedOrganization);
+                          }
+                        }}
+                      >
+                        Confirmar assistència
+                      </button>
+                    )}
+  
+                    <span className="info-link">+ Info</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </Card>
-
+  
         <Card className="span-2">
           <SectionTitle
             icon={<PartyPopper size={22} />}
             title="Organitzacions actives"
             subtitle="Confirmacions, assistències i gestions obertes."
           />
-
+  
           <div className="org-list">
             {organizations.length === 0 ? (
               <p>No hi ha organitzacions actives.</p>
@@ -1160,13 +1181,13 @@ const visibleEvents = showFullCalendar
                     className="org-row"
                     href={org.external_url || "#"}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                   >
                     <div>
                       <strong>{org.title}</strong>
                       <p>{org.description}</p>
                     </div>
-
+  
                     {org.external_url && <ExternalLink size={18} />}
                   </a>
                 )
@@ -1174,43 +1195,43 @@ const visibleEvents = showFullCalendar
             )}
           </div>
         </Card>
-
+  
         <Card className="span-2">
           <SectionTitle
             icon={<Vote size={22} />}
             title="Votacions obertes"
             subtitle="Decisions sense perdre's al WhatsApp."
           />
-
+  
           <div className="polls">
             {polls.length === 0 ? (
               <p>No hi ha votacions obertes.</p>
             ) : (
               polls.map((poll) => (
                 <PollCard
-  key={poll.id}
-  poll={poll}
-  families={families}
-  votes={votes}
-  onVote={handleVote}
-  onOpenResults={setSelectedPoll}
-/>
+                  key={poll.id}
+                  poll={poll}
+                  families={families}
+                  votes={votes}
+                  onVote={handleVote}
+                  onOpenResults={setSelectedPoll}
+                />
               ))
             )}
           </div>
         </Card>
       </section>
-
+  
       <footer className="footer">
         <Home size={16} /> Ara no hi ha excusa per no estar al dia de tot!
       </footer>
-
+  
       <DetailModal
         item={selectedItem}
         checklist={selectedChecklist}
         onClose={() => setSelectedItem(null)}
       />
-
+  
       <AttendanceOrganizationModal
         organization={selectedOrganization}
         families={families}
@@ -1219,22 +1240,24 @@ const visibleEvents = showFullCalendar
         onRespond={handleOrganizationResponse}
         onClose={() => setSelectedOrganization(null)}
       />
+  
       <RegistrationOrganizationModal
-  organization={selectedRegistration}
-  families={families}
-  participants={organizationParticipants}
-  registrations={organizationRegistrations}
-  onRegister={handleOrganizationRegistration}
-  onClose={() => setSelectedRegistration(null)}
-/>
-<PollResultsModal
-  poll={selectedPoll}
-  families={families}
-  votes={votes}
-  onClose={() => setSelectedPoll(null)}
-/>
+        organization={selectedRegistration}
+        families={families}
+        participants={organizationParticipants}
+        registrations={organizationRegistrations}
+        onRegister={handleOrganizationRegistration}
+        onClose={() => setSelectedRegistration(null)}
+      />
+  
+      <PollResultsModal
+        poll={selectedPoll}
+        families={families}
+        votes={votes}
+        onClose={() => setSelectedPoll(null)}
+      />
     </main>
   );
-}
-
-export default App;
+  }
+  
+  export default App;
