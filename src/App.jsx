@@ -809,6 +809,7 @@ function RegistrationOrganizationModal({
 
 function AdminPage() {
   const [classes, setClasses] = useState([]);
+  const [adminEvents, setAdminEvents] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
@@ -818,6 +819,25 @@ function AdminPage() {
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const [editingEventId, setEditingEventId] = useState(null);
+  async function loadAdminEvents(classId) {
+    if (!classId) return;
+  
+    const { data, error } = await supabase
+      .from("ch_events")
+      .select("*")
+      .eq("class_id", Number(classId))
+      .order("start_date");
+  
+    if (error) {
+      console.error(error);
+      setMessage("No s'han pogut carregar els esdeveniments.");
+      return;
+    }
+  
+    setAdminEvents(data || []);
+  }
 
   useEffect(() => {
     async function loadClasses() {
@@ -836,11 +856,22 @@ function AdminPage() {
 
       if (data?.length) {
         setSelectedClassId(String(data[0].id));
+        loadAdminEvents(data[0].id);
       }
     }
 
     loadClasses();
   }, []);
+  function handleStartEdit(eventItem) {
+    setEditingEventId(eventItem.id);
+    setTitle(eventItem.title || "");
+    setEventType(eventItem.event_type || "classe");
+    setStartDate(eventItem.start_date || "");
+    setStartTime(eventItem.start_time ? eventItem.start_time.slice(0, 5) : "");
+    setLocation(eventItem.location || "");
+    setDescription(eventItem.summary || eventItem.details || "");
+    setMessage("Estàs editant aquest esdeveniment.");
+  }
 
   async function handleCreateEvent(event) {
     event.preventDefault();
@@ -853,7 +884,7 @@ function AdminPage() {
 
     setSaving(true);
 
-    const { error } = await supabase.from("ch_events").insert({
+    const payload = {
       class_id: Number(selectedClassId),
       title,
       event_type: eventType,
@@ -862,7 +893,20 @@ function AdminPage() {
       location,
       summary: description,
       details: description,
-    });
+    };
+    
+    const { data, error } = editingEventId
+  ? await supabase
+      .from("ch_events")
+      .update(payload)
+      .eq("id", editingEventId)
+      .select()
+  : await supabase
+      .from("ch_events")
+      .insert(payload)
+      .select();
+
+console.log("Resultat guardar esdeveniment:", { data, error });
 
     setSaving(false);
 
@@ -877,14 +921,36 @@ function AdminPage() {
     }
 
     setTitle("");
-    setEventType("classe");
-    setStartDate("");
-    setStartTime("");
-    setLocation("");
-    setDescription("");
-    setMessage("Esdeveniment creat correctament.");
+setEventType("classe");
+setStartDate("");
+setStartTime("");
+setLocation("");
+setDescription("");
+setEditingEventId(null);
+setMessage(
+  editingEventId
+    ? "Esdeveniment actualitzat correctament."
+    : "Esdeveniment creat correctament."
+);
+await loadAdminEvents(selectedClassId);
   }
-
+  async function handleDeleteEvent(eventId) {
+    const { error } = await supabase
+      .from("ch_events")
+      .delete()
+      .eq("id", eventId);
+  
+    if (error) {
+      console.error(error);
+      setMessage("No s'ha pogut eliminar l'esdeveniment.");
+      return;
+    }
+  
+    setEventToDelete(null);
+    setMessage("Esdeveniment eliminat correctament.");
+    await loadAdminEvents(selectedClassId);
+  }
+   
   return (
     <main className="page">
       <header className="hero">
@@ -911,8 +977,10 @@ function AdminPage() {
               Classe
               <select
                 value={selectedClassId}
-                onChange={(event) => setSelectedClassId(event.target.value)}
-              >
+                onChange={(event) => {
+                  setSelectedClassId(event.target.value);
+                  loadAdminEvents(event.target.value);
+                }}              >
                 {classes.map((classItem) => (
                   <option key={classItem.id} value={classItem.id}>
                     {classItem.emoji} {classItem.name}
@@ -980,26 +1048,107 @@ function AdminPage() {
                 placeholder="Informació breu per a les famílies"
               />
             </label>
-
+            {editingEventId && (
+  <button
+    type="button"
+    className="secondary-action span-all"
+    onClick={() => {
+      setEditingEventId(null);
+      setTitle("");
+      setEventType("classe");
+      setStartDate("");
+      setStartTime("");
+      setLocation("");
+      setDescription("");
+      setMessage("");
+    }}
+  >
+    Cancel·lar edició
+  </button>
+)}
             <button className="span-all" disabled={saving}>
-              {saving ? "Guardant..." : "Crear esdeveniment"}
-            </button>
+  {saving
+    ? "Guardant..."
+    : editingEventId
+      ? "Guardar canvis"
+      : "Crear esdeveniment"}
+</button>
           </form>
 
           {message && <p className="admin-message">{message}</p>}
+        </Card>
+
+        <Card className="span-2">
+          <SectionTitle
+            icon={<CalendarDays size={22} />}
+            title="Esdeveniments creats"
+            subtitle="Revisa els esdeveniments de la classe seleccionada."
+          />
+
+          <div className="admin-list">
+  <h3>Esdeveniments creats</h3>
+
+  {adminEvents.length === 0 ? (
+    <p>No hi ha esdeveniments per aquesta classe.</p>
+  ) : (
+    adminEvents.map((event) => (
+      <div className="admin-row" key={event.id}>
+        <div>
+          <strong>{event.title}</strong>
+          <p>
+            {shortDate(event.start_date)}
+            {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
+            {event.location ? ` · ${event.location}` : ""}
+          </p>
+        </div>
+
+        <div className="admin-row-actions">
+        <button
+  type="button"
+  className="secondary-action"
+  onClick={() => handleStartEdit(event)}
+>
+  Editar
+</button>
+  {eventToDelete === event.id ? (
+    <>
+      <button
+        type="button"
+        className="secondary-action"
+        onClick={() => setEventToDelete(null)}
+      >
+        Cancel·lar
+      </button>
+
+      <button
+        type="button"
+        className="secondary-action danger-text"
+        onClick={() => handleDeleteEvent(event.id)}
+      >
+        Confirmar
+      </button>
+    </>
+  ) : (
+    <button
+      type="button"
+      className="secondary-action danger-text"
+      onClick={() => setEventToDelete(event.id)}
+    >
+      Eliminar
+    </button>
+  )}
+</div>
+      </div>
+    ))
+  )}
+</div>
         </Card>
       </section>
     </main>
   );
 }
 
-function App() {
-  const isAdmin = window.location.pathname.startsWith("/admin");
-
-  if (isAdmin) {
-    return <AdminPage />;
-  }
-
+function PublicApp() {
   const [slug] = useState(getSlug());
   const [classInfo, setClassInfo] = useState(null);
   const [families, setFamilies] = useState([]);
@@ -1219,9 +1368,7 @@ const visibleEvents = showFullCalendar
       </main>
     );
   }
-  if (isAdmin) {
-    return <AdminPage />;
-  }
+  
   return (
     <main className="page">
       <header className="hero">
@@ -1236,6 +1383,7 @@ const visibleEvents = showFullCalendar
           <div className="hero-badge">✨ Sempre al dia</div>
         </div>
       </header>
+    
   
       <section className="layout">
         <Card className="span-2 next-event-card">
@@ -1255,7 +1403,7 @@ const visibleEvents = showFullCalendar
                 <h2>
                   {typeMeta[nextEvent.event_type]?.icon} {nextEvent.title}
                 </h2>
-                <p>{nextEvent.description}</p>
+                <p>{nextEvent.summary || nextEvent.details}</p>
                 <small>
                   {nextEvent.start_time
                     ? `${nextEvent.start_time.slice(0, 5)} · `
@@ -1287,11 +1435,18 @@ const visibleEvents = showFullCalendar
     );
 
     return (
-      <button
-        key={event.id}
-        className="timeline-row"
-        onClick={() => setSelectedItem(eventToDetail(event))}
-      >
+      <div
+  key={event.id}
+  className="timeline-row"
+  role="button"
+  tabIndex={0}
+  onClick={() => setSelectedItem(eventToDetail(event))}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      setSelectedItem(eventToDetail(event));
+    }
+  }}
+>
         <span>
           {shortDate(event.start_date)}
           {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
@@ -1324,7 +1479,7 @@ const visibleEvents = showFullCalendar
 
           <span className="info-link">+ Info</span>
         </div>
-      </button>
+      </div>
     );
   })}
 </div>
@@ -1451,5 +1606,13 @@ const visibleEvents = showFullCalendar
     </main>
   );
   }
+  function App() {
+    const isAdmin = window.location.pathname.startsWith("/admin");
   
+    if (isAdmin) {
+      return <AdminPage />;
+    }
+  
+    return <PublicApp />;
+  }
   export default App;
