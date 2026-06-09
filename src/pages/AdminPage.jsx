@@ -165,8 +165,12 @@ await loadAdminEvents(selectedClassId);
         <Card className="span-2">
           <SectionTitle
             icon={<CalendarDays size={22} />}
-            title="Crear esdeveniment"
-            subtitle="Afegeix un nou esdeveniment al calendari de la classe."
+            title={editingEventId ? "Editar esdeveniment" : "Crear esdeveniment"}
+            subtitle={
+              editingEventId
+                ? "Modifica les dades de l’esdeveniment seleccionat."
+                : "Afegeix un nou esdeveniment al calendari de la classe."
+            }
           />
 
           {editingEventId && (
