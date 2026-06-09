@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { Card, SectionTitle } from "../components/LayoutComponents";
 
 function shortDate(value) {
   if (!value) return "Pendent";
@@ -8,22 +9,6 @@ function shortDate(value) {
     day: "numeric",
     month: "short",
   }).format(new Date(`${value}T12:00:00`));
-}
-
-function Card({ children, className = "" }) {
-  return <section className={`card ${className}`}>{children}</section>;
-}
-
-function SectionTitle({ icon, title, subtitle }) {
-  return (
-    <div className="section-title">
-      <div className="section-icon">{icon}</div>
-      <div>
-        <h2>{title}</h2>
-        {subtitle && <p>{subtitle}</p>}
-      </div>
-    </div>
-  );
 }
 
 export default function AdminPage() {

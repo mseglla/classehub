@@ -8,6 +8,7 @@ import {
   Vote,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { Card, SectionTitle } from "../components/LayoutComponents";
 
 const typeMeta = {
   escola: { label: "Escola", icon: "🏫" },
@@ -50,22 +51,6 @@ function getSlug() {
   const classIndex = parts.indexOf("classe");
   if (classIndex >= 0 && parts[classIndex + 1]) return parts[classIndex + 1];
   return "orenetes";
-}
-
-function Card({ children, className = "" }) {
-  return <section className={`card ${className}`}>{children}</section>;
-}
-
-function SectionTitle({ icon, title, subtitle }) {
-  return (
-    <div className="section-title">
-      <div className="section-icon">{icon}</div>
-      <div>
-        <h2>{title}</h2>
-        {subtitle && <p>{subtitle}</p>}
-      </div>
-    </div>
-  );
 }
 
 function eventToDetail(event) {
