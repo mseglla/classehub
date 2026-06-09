@@ -310,13 +310,15 @@ await loadAdminEvents(selectedClassId);
         </div>
 
         <div className="admin-row-actions">
-        <button
-  type="button"
-  className="secondary-action"
-  onClick={() => handleStartEdit(event)}
->
-  Editar
-</button>
+        {editingEventId !== event.id && (
+          <button
+            type="button"
+            className="secondary-action"
+            onClick={() => handleStartEdit(event)}
+          >
+            Editar
+          </button>
+        )}
   {eventToDelete === event.id ? (
     <>
       <button
