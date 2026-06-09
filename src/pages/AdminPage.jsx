@@ -169,6 +169,12 @@ await loadAdminEvents(selectedClassId);
             subtitle="Afegeix un nou esdeveniment al calendari de la classe."
           />
 
+          {editingEventId && (
+            <div className="admin-message">
+              ✏️ Mode edició actiu: <strong>{title || "Esdeveniment seleccionat"}</strong>
+            </div>
+          )}
+
           <form className="registration-form" onSubmit={handleCreateEvent}>
             <label>
               Classe
