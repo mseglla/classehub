@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { Card, SectionTitle } from "../components/LayoutComponents";
+import { shortDate } from "../utils/dateHelpers";
 
 const typeMeta = {
   escola: { label: "Escola", icon: "🏫" },
@@ -22,14 +23,6 @@ function formatDate(value) {
     weekday: "long",
     day: "numeric",
     month: "long",
-  }).format(new Date(`${value}T12:00:00`));
-}
-
-function shortDate(value) {
-  if (!value) return "Pendent";
-  return new Intl.DateTimeFormat("ca-ES", {
-    day: "numeric",
-    month: "short",
   }).format(new Date(`${value}T12:00:00`));
 }
 
