@@ -10,29 +10,13 @@ import {
 import { supabase } from "../lib/supabase";
 import { Card, SectionTitle } from "../components/LayoutComponents";
 import { daysUntil, formatDate, shortDate } from "../utils/dateHelpers";
-
-const typeMeta = {
-  escola: { label: "Escola", icon: "🏫" },
-  classe: { label: "Classe", icon: "👨‍👩‍👧‍👦" },
-  comunitat: { label: "Comunitat", icon: "🎉" },
-};
+import { eventToDetail, typeMeta } from "../utils/eventHelpers";
 
 function getSlug() {
   const parts = window.location.pathname.split("/").filter(Boolean);
   const classIndex = parts.indexOf("classe");
   if (classIndex >= 0 && parts[classIndex + 1]) return parts[classIndex + 1];
   return "orenetes";
-}
-
-function eventToDetail(event) {
-  return {
-    ...event,
-    kind: "event",
-    kindLabel: typeMeta[event.event_type]?.label || "Esdeveniment",
-    icon: typeMeta[event.event_type]?.icon || "📅",
-    date: event.start_date,
-    time: event.start_time?.slice(0, 5),
-  };
 }
 
 function DetailModal({ item, checklist, onClose }) {
