@@ -448,48 +448,12 @@ function AttendanceOrganizationModal({
           </div>
         )}
 
-<div className="organization-results">
-  <div className="result-column yes">
-    <strong>Sí ({yesFamilies.length})</strong>
-    <div className="people-grid">
-      {yesFamilies.length === 0 ? (
-        <span className="empty-result">Cap resposta encara</span>
-      ) : (
-        yesFamilies.map((family) => (
-          <span className="person-card" key={family.id}>
-            {family.student_name}
-          </span>
-        ))
-      )}
-    </div>
-  </div>
-
-  <div className="result-column no">
-    <strong>No ({noFamilies.length})</strong>
-    <div className="people-grid">
-      {noFamilies.length === 0 ? (
-        <span className="empty-result">Cap resposta encara</span>
-      ) : (
-        noFamilies.map((family) => (
-          <span className="person-card" key={family.id}>
-            {family.student_name}
-          </span>
-        ))
-      )}
-    </div>
-  </div>
-
-  <div className="result-column pending">
-    <strong>Pendents ({pendingFamilies.length})</strong>
-    <div className="people-grid">
-      {pendingFamilies.map((family) => (
-        <span className="person-card pending" key={family.id}>
-          {family.student_name}
-        </span>
-      ))}
-    </div>
-  </div>
-</div>
+        <div className="organization-results">
+          <div className="result-column yes">
+            <strong>{yesFamilies.length + noFamilies.length} famílies han respost</strong>
+            <span>{yesFamilies.length} sí · {noFamilies.length} no</span>
+          </div>
+        </div>
       </article>
     </div>
   );
@@ -732,8 +696,13 @@ function RegistrationOrganizationModal({
 
         <div className="organization-results">
           <div className="result-column adults">
-            <strong>{orgRegistrations.length} famílies inscrites</strong>
-            <span>{totalAdults + totalChildren} persones inscrites</span>
+            <strong>{orgRegistrations.length}</strong>
+            <span>famílies</span>
+          </div>
+
+          <div className="result-column children">
+            <strong>{totalAdults + totalChildren}</strong>
+            <span>persones</span>
           </div>
         </div>
       </article>

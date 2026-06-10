@@ -467,14 +467,24 @@ select {
   border-radius: 22px;
   padding: 14px;
   background: #ffffff;
-  .result-column strong {
-    display: block;
-    margin-bottom: 10px;
-    color: #4b5563;
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1.5;
-  }
+  text-align: center;
+}
+
+.result-column strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.result-column span {
+  display: block;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
 }.result-column.yes,
 .result-column.adults {
   background: #ecfdf5;
