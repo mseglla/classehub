@@ -731,54 +731,11 @@ function RegistrationOrganizationModal({
         </div>
 
         <div className="organization-results">
-  <div className="result-column adults">
-    <strong>Adults ({totalAdults})</strong>
-    <div className="people-grid">
-      {orgRegistrations.length === 0 ? (
-        <span className="empty-result">Cap inscripció encara</span>
-      ) : (
-        orgRegistrations.map((item) => {
-          const family = families.find((entry) => entry.id === item.family_id);
-          return (
-            <span className="person-card" key={item.id}>
-              {family?.student_name || "Família"} · {item.adults_count || 0}
-            </span>
-          );
-        })
-      )}
-    </div>
-  </div>
-
-  <div className="result-column children">
-    <strong>Infants ({totalChildren})</strong>
-    <div className="people-grid">
-      {orgRegistrations.length === 0 ? (
-        <span className="empty-result">Cap inscripció encara</span>
-      ) : (
-        orgRegistrations.map((item) => {
-          const family = families.find((entry) => entry.id === item.family_id);
-          return (
-            <span className="person-card" key={item.id}>
-              {family?.student_name || "Família"} · {item.children_count || 0}
-              {item.under3_count ? ` (${item.under3_count} menors de 3)` : ""}
-            </span>
-          );
-        })
-      )}
-    </div>
-  </div>
-
-  <div className="result-column pending">
-    <strong>Pendents ({pendingFamilies.length})</strong>
-    <div className="people-grid">
-      {pendingFamilies.map((family) => (
-        <span className="person-card pending" key={family.id}>
-          {family.student_name}
-        </span>
-      ))}
-    </div>
-  </div>
-</div>
+          <div className="result-column adults">
+            <strong>{orgRegistrations.length} famílies inscrites</strong>
+            <span>{totalAdults + totalChildren} persones inscrites</span>
+          </div>
+        </div>
       </article>
     </div>
   );
