@@ -805,7 +805,7 @@ export default function PublicApp() {
       supabase
         .from("ch_events")
         .select("*")
-        .eq("class_id", classId)
+        .or(`class_id.eq.${classId},and(event_type.eq.escola,class_id.is.null)`)
         .order("start_date"),
       supabase.from("ch_checklist_items").select("*"),
       supabase

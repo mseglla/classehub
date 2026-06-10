@@ -25,7 +25,7 @@ export default function AdminPage() {
     const { data, error } = await supabase
       .from("ch_events")
       .select("*")
-      .eq("class_id", Number(classId))
+      .or(`class_id.eq.${Number(classId)},and(event_type.eq.escola,class_id.is.null)`)
       .order("start_date");
   
     if (error) {
@@ -85,15 +85,15 @@ export default function AdminPage() {
     event.preventDefault();
     setMessage("");
 
-    if (!selectedClassId || !title || !startDate) {
-      setMessage("Cal indicar com a mínim classe, títol i data.");
+    if (!title || !startDate || (eventType !== "escola" && !selectedClassId)) {
+      setMessage("Cal indicar com a mínim títol, data i classe si no és un esdeveniment d’escola.");
       return;
     }
 
     setSaving(true);
 
     const payload = {
-      class_id: Number(selectedClassId),
+      class_id: eventType === "escola" ? null : Number(selectedClassId),
       title,
       event_type: eventType,
       start_date: startDate,
