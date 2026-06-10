@@ -192,7 +192,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             </div>
           )}
 
-          <form className="registration-form" onSubmit={handleCreateEvent}>
+          <div className="admin-message">
             <label>
               Classe administrada
               <select
@@ -200,7 +200,8 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 onChange={(event) => {
                   setSelectedClassId(event.target.value);
                   loadAdminEvents(event.target.value);
-                }}              >
+                }}
+              >
                 {classes.map((classItem) => (
                   <option key={classItem.id} value={classItem.id}>
                     {classItem.emoji} {classItem.name}
@@ -208,7 +209,9 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 ))}
               </select>
             </label>
+          </div>
 
+          <form className="registration-form" onSubmit={handleCreateEvent}>
             <label>
               Tipus
               <select
