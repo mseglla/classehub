@@ -1074,7 +1074,7 @@ const visibleEvents = showFullCalendar
                 </small>
               </div>
   
-              <span className="info-link">+ Info</span>
+              <span className="info-link">Veure detalls</span>
             </button>
           ) : (
             <p>No hi ha cap esdeveniment proper.</p>
