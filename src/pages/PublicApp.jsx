@@ -818,6 +818,9 @@ export default function PublicApp() {
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [feedbackType, setFeedbackType] = useState("millora");
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [feedbackStatus, setFeedbackStatus] = useState("");
 
   async function loadData() {
     setLoading(true);
@@ -907,6 +910,30 @@ export default function PublicApp() {
     }
 
     setLoading(false);
+  }
+
+  async function submitFeedback(event) {
+    event.preventDefault();
+
+    if (!feedbackMessage.trim()) {
+      setFeedbackStatus("Escriu un missatge abans d'enviar.");
+      return;
+    }
+
+    const { error } = await supabase.from("ch_feedback").insert({
+      class_id: classInfo?.id || null,
+      feedback_type: feedbackType,
+      message: feedbackMessage.trim(),
+    });
+
+    if (error) {
+      setFeedbackStatus("No s'ha pogut enviar el missatge. Torna-ho a provar.");
+      return;
+    }
+
+    setFeedbackMessage("");
+    setFeedbackType("millora");
+    setFeedbackStatus("Gràcies! Hem rebut el teu missatge.");
   }
 
   useEffect(() => {
@@ -1217,6 +1244,43 @@ const visibleEvents = showFullCalendar
               ))
             )}
           </div>
+        </Card>
+
+        <Card className="span-2">
+          <SectionTitle
+            icon={<Home size={22} />}
+            title="Tens alguna millora o error a reportar?"
+            subtitle="Ajuda'ns a millorar ClasseHub amb qualsevol idea, dubte o problema."
+          />
+
+          <form className="registration-form" onSubmit={submitFeedback}>
+            <label>
+              Tipus de missatge
+              <select
+                value={feedbackType}
+                onChange={(event) => setFeedbackType(event.target.value)}
+              >
+                <option value="millora">Millora</option>
+                <option value="error">Error</option>
+                <option value="idea">Idea</option>
+              </select>
+            </label>
+
+            <label className="span-all">
+              Missatge
+              <textarea
+                value={feedbackMessage}
+                onChange={(event) => setFeedbackMessage(event.target.value)}
+                placeholder="Explica'ns què milloraries, quin error has trobat o quina idea tens..."
+              />
+            </label>
+
+            <button className="span-all" type="submit">
+              Enviar missatge
+            </button>
+          </form>
+
+          {feedbackStatus && <p className="admin-message">{feedbackStatus}</p>}
         </Card>
       </section>
   
