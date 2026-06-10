@@ -8,6 +8,7 @@ import { typeMeta } from "../utils/eventHelpers";
 export default function AdminPage() {
   const [classes, setClasses] = useState([]);
   const [adminEvents, setAdminEvents] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
@@ -42,6 +43,21 @@ export default function AdminPage() {
     setAdminEvents(data || []);
   }
 
+  async function loadFeedbacks() {
+    const { data, error } = await supabase
+      .from("ch_feedback")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      setMessage("No s'han pogut carregar els missatges de feedback.");
+      return;
+    }
+
+    setFeedbacks(data || []);
+  }
+
   useEffect(() => {
     async function loadClasses() {
       const { data, error } = await supabase
@@ -60,6 +76,7 @@ export default function AdminPage() {
       if (data?.length) {
         setSelectedClassId(String(data[0].id));
         loadAdminEvents(data[0].id);
+        loadFeedbacks();
       }
     }
 
@@ -365,6 +382,30 @@ console.log("Resultat guardar esdeveniment:", { data, error });
     ))
   )}
 </div>
+        </Card>
+
+        <Card className="span-2">
+          <SectionTitle
+            icon={<CalendarDays size={22} />}
+            title="Feedback rebut"
+            subtitle="Missatges enviats per les famílies des de la part pública."
+          />
+
+          <div className="admin-list">
+            {feedbacks.length === 0 ? (
+              <p>No hi ha cap missatge de feedback encara.</p>
+            ) : (
+              feedbacks.map((feedback) => (
+                <div className="admin-row" key={feedback.id}>
+                  <div>
+                    <strong>{feedback.feedback_type}</strong>
+                    <p>{feedback.message}</p>
+                    <small>Estat: {feedback.status}</small>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </Card>
       </section>
     </main>
