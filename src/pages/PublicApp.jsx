@@ -963,13 +963,10 @@ const visibleEvents = showFullCalendar
       <header className="hero">
         <div className="hero-main">
           <div>
-            <p className="eyebrow">Curs {classInfo.school_year}</p>
-            <h1>
-              {classInfo.emoji} {classInfo.name}
+            <h1 className="hero-title-compact">
+              Curs {classInfo.school_year?.replace("2025-2026", "25-26")} {classInfo.name}
             </h1>
           </div>
-  
-          <div className="hero-badge">✨ Sempre al dia</div>
         </div>
       </header>
     
