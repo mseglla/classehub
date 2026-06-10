@@ -182,7 +182,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             subtitle={
               editingEventId
                 ? "Modifica les dades de l’esdeveniment seleccionat."
-                : "Afegeix un nou esdeveniment al calendari de la classe."
+                : "Afegeix un nou esdeveniment al calendari."
             }
           />
 
