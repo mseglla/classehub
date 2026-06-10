@@ -987,7 +987,7 @@ const visibleEvents = showFullCalendar
   
               <div>
                 <h2>
-                  {typeMeta[nextEvent.event_type]?.icon} {nextEvent.title}
+                  {nextEvent.title}
                 </h2>
                 <small>
                   {nextEvent.start_time
@@ -1004,6 +1004,72 @@ const visibleEvents = showFullCalendar
           )}
         </Card>
   
+        <Card className="span-2">
+        <div className="section-title-row">
+  <SectionTitle
+    icon={<CalendarDays size={22} />}
+    title="Agenda d'Orenetes"
+    subtitle="Tot el que vols saber, quan ho vols saber."
+  />
+</div>
+
+<div className="timeline">
+  {visibleEvents.map((event) => {
+    const linkedOrganization = organizations.find(
+      (org) => org.event_id === event.id && org.organization_type === "attendance"
+    );
+
+    return (
+      <div
+  key={event.id}
+  className="timeline-row"
+  role="button"
+  tabIndex={0}
+  onClick={() => setSelectedItem(eventToDetail(event))}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      setSelectedItem(eventToDetail(event));
+    }
+  }}
+>
+        <span>
+          {shortDate(event.start_date)}
+          {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
+        </span>
+
+        <strong>
+          {typeMeta[event.event_type]?.icon} {event.title}
+        </strong>
+
+        <div className="timeline-actions">
+          {linkedOrganization && (
+            <button
+              className="confirm-button"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedOrganization(linkedOrganization);
+              }}
+            >
+              Confirmar assistència
+            </button>
+          )}
+
+          <span className="info-link">+ Info</span>
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+<button
+  className="secondary-action calendar-more-button"
+  onClick={() => setShowFullCalendar((value) => !value)}
+>
+  {showFullCalendar ? "Veure menys" : "Veure més"}
+</button>
+        </Card>
+
         {organizations.length > 0 && (
           <Card className="span-2">
             <SectionTitle
@@ -1053,53 +1119,6 @@ const visibleEvents = showFullCalendar
           </Card>
         )}
   
-        <Card className="span-2">
-        <div className="section-title-row">
-  <SectionTitle
-    icon={<CalendarDays size={22} />}
-    title="Agenda d'Orenetes"
-    subtitle="Tot el que vols saber, quan ho vols saber."
-  />
-</div>
-
-<div className="timeline">
-  {visibleEvents.map((event) => (
-      <div
-  key={event.id}
-  className="timeline-row"
-  role="button"
-  tabIndex={0}
-  onClick={() => setSelectedItem(eventToDetail(event))}
-  onKeyDown={(e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      setSelectedItem(eventToDetail(event));
-    }
-  }}
->
-        <span>
-          {shortDate(event.start_date)}
-          {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
-        </span>
-
-        <strong>
-          {typeMeta[event.event_type]?.icon} {event.title}
-        </strong>
-
-        <div className="timeline-actions">
-          <span className="info-link">+ Info</span>
-        </div>
-      </div>
-    )
-  )}
-</div>
-
-<button
-  className="secondary-action calendar-more-button"
-  onClick={() => setShowFullCalendar((value) => !value)}
->
-  {showFullCalendar ? "Veure menys" : "Veure més"}
-</button>
-        </Card>
   
         {polls.length > 0 && (
           <Card className="span-2">
