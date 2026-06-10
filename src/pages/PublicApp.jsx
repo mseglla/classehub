@@ -19,6 +19,49 @@ function getSlug() {
   return "orenetes";
 }
 
+function formatCalendarDate(date, time) {
+  if (!date) return "";
+  const cleanTime = time ? time.replace(":", "").slice(0, 4) : "0900";
+  return `${date.replaceAll("-", "")}T${cleanTime}00`;
+}
+
+function downloadCalendarEvent(item) {
+  if (!item?.date) return;
+
+  const startTime = item.time || "09:00";
+  const [hours, minutes] = startTime.split(":").map(Number);
+  const endTime = `${String(hours + 1).padStart(2, "0")}:${String(minutes || 0).padStart(2, "0")}`;
+
+  const startDate = formatCalendarDate(item.date, startTime);
+  const endDate = formatCalendarDate(item.date, endTime);
+
+  const calendarContent = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//ClasseHub//CA",
+    "BEGIN:VEVENT",
+    `SUMMARY:${item.title}`,
+    `DTSTART:${startDate}`,
+    `DTEND:${endDate}`,
+    item.location ? `LOCATION:${item.location}` : "",
+    item.description || item.details ? `DESCRIPTION:${item.description || item.details}` : "",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ]
+    .filter(Boolean)
+    .join("\r\n");
+
+  const blob = new Blob([calendarContent], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `${item.title || "classehub-event"}.ics`;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
 function DetailModal({ item, checklist, onClose }) {
   if (!item) return null;
 
@@ -51,6 +94,16 @@ function DetailModal({ item, checklist, onClose }) {
               </div>
             )}
           </div>
+        )}
+
+        {item.kind === "event" && item.date && (
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => downloadCalendarEvent(item)}
+          >
+            Afegir al calendari
+          </button>
         )}
 
         {item.description && <p className="detail-text">{item.description}</p>}
