@@ -3,6 +3,7 @@ import { CalendarDays } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { Card, SectionTitle } from "../components/LayoutComponents";
 import { shortDate } from "../utils/dateHelpers";
+import { typeMeta } from "../utils/eventHelpers";
 
 export default function AdminPage() {
   const [classes, setClasses] = useState([]);
@@ -301,7 +302,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         <div>
           <strong>{event.title}</strong>
           <p>
-            {shortDate(event.start_date)}
+            {typeMeta[event.event_type]?.label || "Esdeveniment"} · {shortDate(event.start_date)}
             {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
             {event.location ? ` · ${event.location}` : ""}
           </p>
