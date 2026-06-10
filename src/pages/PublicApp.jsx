@@ -329,20 +329,14 @@ function AttendanceOrganizationCard({
       </div>
 
       <div className="attendance-summary">
-  <div className="attendance-stat responses">
-    <strong>{yesFamilies.length + noFamilies.length}</strong>
-    <span>Respostes</span>
-  </div>
+        <p className="action-summary">
+          <strong>{yesFamilies.length + noFamilies.length}</strong> famílies han respost
+        </p>
 
-  <div className="attendance-stat pending">
-    <strong>{pendingFamilies.length}</strong>
-    <span>Pendents</span>
-  </div>
-
-  <button onClick={() => onOpen(organization)}>
-    Veure i respondre
-  </button>
-</div>
+        <button onClick={() => onOpen(organization)}>
+          Respondre
+        </button>
+      </div>
     </div>
   );
 }
@@ -552,22 +546,13 @@ function RegistrationOrganizationCard({
       </div>
 
       <div className="attendance-summary">
-        <div className="attendance-stat responses">
-          <strong>{orgRegistrations.length}</strong>
-          <span>Famílies</span>
-        </div>
+        <p className="action-summary">
+          <strong>{totalAdults + totalChildren}</strong> persones inscrites · {orgRegistrations.length} famílies
+        </p>
 
-        <div className="attendance-stat pending">
-          <strong>{pendingCount}</strong>
-          <span>Pendents</span>
-        </div>
-
-        <div className="attendance-stat">
-          <strong>{totalAdults + totalChildren}</strong>
-          <span>Persones</span>
-        </div>
-
-        <button onClick={() => onOpen(organization)}>Confirmació i resultats</button>
+        <button onClick={() => onOpen(organization)}>
+          Inscriure'm
+        </button>
       </div>
     </div>
   );

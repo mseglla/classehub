@@ -763,3 +763,14 @@ select {
   }
   
 }
+.action-summary {
+  margin: 0;
+  color: #374151;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.action-summary strong {
+  color: #111827;
+  font-size: 18px;
+}
