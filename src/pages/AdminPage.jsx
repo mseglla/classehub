@@ -19,6 +19,11 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
   const [eventToDelete, setEventToDelete] = useState(null);
   const [editingEventId, setEditingEventId] = useState(null);
+
+  const selectedClass = classes.find(
+    (classItem) => String(classItem.id) === selectedClassId
+  );
+
   async function loadAdminEvents(classId) {
     if (!classId) return;
   
@@ -162,7 +167,10 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             <h1>Administració</h1>
           </div>
 
-          <div className="hero-badge">🛠️ Mode delegat</div>
+          <div className="hero-badge">
+            🛠️ Admin general
+            {selectedClass ? ` · ${selectedClass.emoji} ${selectedClass.name}` : ""}
+          </div>
         </div>
       </header>
 
