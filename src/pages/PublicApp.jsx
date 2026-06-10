@@ -1081,18 +1081,16 @@ const visibleEvents = showFullCalendar
           )}
         </Card>
   
-        <Card className="span-2">
-          <SectionTitle
-            icon={<PartyPopper size={22} />}
-            title="Accions pendents"
-            subtitle="Confirma, inscriu-te o revisa el que cal fer."
-          />
-  
-          <div className="org-list">
-            {organizations.length === 0 ? (
-              <p>No hi ha organitzacions actives.</p>
-            ) : (
-              organizations.map((org) =>
+        {organizations.length > 0 && (
+          <Card className="span-2">
+            <SectionTitle
+              icon={<PartyPopper size={22} />}
+              title="Accions pendents"
+              subtitle="Confirma, inscriu-te o revisa el que cal fer."
+            />
+    
+            <div className="org-list">
+              {organizations.map((org) =>
                 org.organization_type === "attendance" ? (
                   <AttendanceOrganizationCard
                     key={org.id}
@@ -1123,14 +1121,14 @@ const visibleEvents = showFullCalendar
                       <strong>{org.title}</strong>
                       <p>{org.description}</p>
                     </div>
-  
+    
                     {org.external_url && <ExternalLink size={18} />}
                   </a>
                 )
-              )
-            )}
-          </div>
-        </Card>
+              )}
+            </div>
+          </Card>
+        )}
   
         <Card className="span-2">
         <div className="section-title-row">
@@ -1205,18 +1203,16 @@ const visibleEvents = showFullCalendar
 </button>
         </Card>
   
-        <Card className="span-2">
-          <SectionTitle
-            icon={<Vote size={22} />}
-            title="Votacions obertes"
-            subtitle="Decisions sense perdre's al WhatsApp."
-          />
-  
-          <div className="polls">
-            {polls.length === 0 ? (
-              <p>No hi ha votacions obertes.</p>
-            ) : (
-              polls.map((poll) => (
+        {polls.length > 0 && (
+          <Card className="span-2">
+            <SectionTitle
+              icon={<Vote size={22} />}
+              title="Votacions obertes"
+              subtitle="Decisions sense perdre's al WhatsApp."
+            />
+    
+            <div className="polls">
+              {polls.map((poll) => (
                 <PollCard
                   key={poll.id}
                   poll={poll}
@@ -1225,10 +1221,10 @@ const visibleEvents = showFullCalendar
                   onVote={handleVote}
                   onOpenResults={setSelectedPoll}
                 />
-              ))
-            )}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        )}
 
         <Card className="span-2">
           <SectionTitle
