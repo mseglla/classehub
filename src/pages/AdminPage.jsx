@@ -309,7 +309,9 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         </div>
 
         <div className="admin-row-actions">
-        {editingEventId !== event.id && (
+        {editingEventId === event.id ? (
+          <span className="admin-message">En edició</span>
+        ) : (
           <button
             type="button"
             className="secondary-action"
