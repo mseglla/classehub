@@ -194,7 +194,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
           <form className="registration-form" onSubmit={handleCreateEvent}>
             <label>
-              Classe
+              Classe administrada
               <select
                 value={selectedClassId}
                 onChange={(event) => {
