@@ -1140,12 +1140,7 @@ const visibleEvents = showFullCalendar
 </div>
 
 <div className="timeline">
-  {visibleEvents.map((event) => {
-    const linkedOrganization = organizations.find(
-      (org) => org.event_id === event.id
-    );
-
-    return (
+  {visibleEvents.map((event) => (
       <div
   key={event.id}
   className="timeline-row"
@@ -1168,31 +1163,11 @@ const visibleEvents = showFullCalendar
         </strong>
 
         <div className="timeline-actions">
-          {linkedOrganization && (
-            <button
-              type="button"
-              className="event-action"
-              onClick={(e) => {
-                e.stopPropagation();
-
-                if (linkedOrganization.organization_type === "attendance") {
-                  setSelectedOrganization(linkedOrganization);
-                }
-
-                if (linkedOrganization.organization_type === "registration") {
-                  setSelectedRegistration(linkedOrganization);
-                }
-              }}
-            >
-              Confirmar assistència
-            </button>
-          )}
-
           <span className="info-link">+ Info</span>
         </div>
       </div>
-    );
-  })}
+    )
+  )}
 </div>
 
 <button
