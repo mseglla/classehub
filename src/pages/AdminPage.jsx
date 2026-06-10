@@ -70,6 +70,16 @@ export default function AdminPage() {
     setMessage("Estàs editant aquest esdeveniment.");
   }
 
+  function resetForm() {
+    setTitle("");
+    setEventType("classe");
+    setStartDate("");
+    setStartTime("");
+    setLocation("");
+    setDescription("");
+    setEditingEventId(null);
+  }
+
   async function handleCreateEvent(event) {
     event.preventDefault();
     setMessage("");
@@ -117,19 +127,13 @@ console.log("Resultat guardar esdeveniment:", { data, error });
       return;
     }
 
-    setTitle("");
-setEventType("classe");
-setStartDate("");
-setStartTime("");
-setLocation("");
-setDescription("");
-setEditingEventId(null);
-setMessage(
-  editingEventId
-    ? "Esdeveniment actualitzat correctament."
-    : "Esdeveniment creat correctament."
-);
-await loadAdminEvents(selectedClassId);
+    resetForm();
+    setMessage(
+      editingEventId
+        ? "Esdeveniment actualitzat correctament."
+        : "Esdeveniment creat correctament."
+    );
+    await loadAdminEvents(selectedClassId);
   }
   async function handleDeleteEvent(eventId) {
     const { error } = await supabase
@@ -260,13 +264,7 @@ await loadAdminEvents(selectedClassId);
     type="button"
     className="secondary-action span-all"
     onClick={() => {
-      setEditingEventId(null);
-      setTitle("");
-      setEventType("classe");
-      setStartDate("");
-      setStartTime("");
-      setLocation("");
-      setDescription("");
+      resetForm();
       setMessage("");
     }}
   >
