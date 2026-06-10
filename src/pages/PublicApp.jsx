@@ -1066,7 +1066,6 @@ const visibleEvents = showFullCalendar
                 <h2>
                   {typeMeta[nextEvent.event_type]?.icon} {nextEvent.title}
                 </h2>
-                <p>{nextEvent.summary || nextEvent.details}</p>
                 <small>
                   {nextEvent.start_time
                     ? `${nextEvent.start_time.slice(0, 5)} · `
@@ -1080,6 +1079,57 @@ const visibleEvents = showFullCalendar
           ) : (
             <p>No hi ha cap esdeveniment proper.</p>
           )}
+        </Card>
+  
+        <Card className="span-2">
+          <SectionTitle
+            icon={<PartyPopper size={22} />}
+            title="Accions pendents"
+            subtitle="Confirma, inscriu-te o revisa el que cal fer."
+          />
+  
+          <div className="org-list">
+            {organizations.length === 0 ? (
+              <p>No hi ha organitzacions actives.</p>
+            ) : (
+              organizations.map((org) =>
+                org.organization_type === "attendance" ? (
+                  <AttendanceOrganizationCard
+                    key={org.id}
+                    organization={org}
+                    families={families}
+                    participants={organizationParticipants}
+                    responses={organizationResponses}
+                    onOpen={setSelectedOrganization}
+                  />
+                ) : org.organization_type === "registration" ? (
+                  <RegistrationOrganizationCard
+                    key={org.id}
+                    organization={org}
+                    families={families}
+                    participants={organizationParticipants}
+                    registrations={organizationRegistrations}
+                    onOpen={setSelectedRegistration}
+                  />
+                ) : (
+                  <a
+                    key={org.id}
+                    className="org-row"
+                    href={org.external_url || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div>
+                      <strong>{org.title}</strong>
+                      <p>{org.description}</p>
+                    </div>
+  
+                    {org.external_url && <ExternalLink size={18} />}
+                  </a>
+                )
+              )
+            )}
+          </div>
         </Card>
   
         <Card className="span-2">
@@ -1153,57 +1203,6 @@ const visibleEvents = showFullCalendar
 >
   {showFullCalendar ? "Veure menys" : "Veure més"}
 </button>
-        </Card>
-  
-        <Card className="span-2">
-          <SectionTitle
-            icon={<PartyPopper size={22} />}
-            title="Organitzacions actives"
-            subtitle="Confirmacions, assistències i gestions obertes."
-          />
-  
-          <div className="org-list">
-            {organizations.length === 0 ? (
-              <p>No hi ha organitzacions actives.</p>
-            ) : (
-              organizations.map((org) =>
-                org.organization_type === "attendance" ? (
-                  <AttendanceOrganizationCard
-                    key={org.id}
-                    organization={org}
-                    families={families}
-                    participants={organizationParticipants}
-                    responses={organizationResponses}
-                    onOpen={setSelectedOrganization}
-                  />
-                ) : org.organization_type === "registration" ? (
-                  <RegistrationOrganizationCard
-                    key={org.id}
-                    organization={org}
-                    families={families}
-                    participants={organizationParticipants}
-                    registrations={organizationRegistrations}
-                    onOpen={setSelectedRegistration}
-                  />
-                ) : (
-                  <a
-                    key={org.id}
-                    className="org-row"
-                    href={org.external_url || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <div>
-                      <strong>{org.title}</strong>
-                      <p>{org.description}</p>
-                    </div>
-  
-                    {org.external_url && <ExternalLink size={18} />}
-                  </a>
-                )
-              )
-            )}
-          </div>
         </Card>
   
         <Card className="span-2">
