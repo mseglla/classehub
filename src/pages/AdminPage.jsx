@@ -324,15 +324,17 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         className="secondary-action"
         onClick={() => setEventToDelete(null)}
       >
-        Cancel·lar
+        No
       </button>
+
+      <span className="danger-text">Eliminar definitivament?</span>
 
       <button
         type="button"
         className="secondary-action danger-text"
         onClick={() => handleDeleteEvent(event.id)}
       >
-        Confirmar
+        Sí, eliminar
       </button>
     </>
   ) : (
