@@ -1115,9 +1115,22 @@ const visibleEvents = showFullCalendar
 
 <div className="timeline">
   {visibleEvents.map((event) => {
-    const linkedOrganization = organizations.find(
+    const linkedAttendanceOrganization = organizations.find(
       (org) => org.event_id === event.id && org.organization_type === "attendance"
     );
+
+    const linkedRegistrationOrganization = organizations.find(
+      (org) => org.event_id === event.id && org.organization_type === "registration"
+    );
+
+    const linkedActionOrganization =
+      linkedAttendanceOrganization || linkedRegistrationOrganization;
+
+    const linkedActionLabel = linkedAttendanceOrganization
+      ? "Confirmar"
+      : linkedRegistrationOrganization?.title?.toLowerCase().includes("confirm")
+        ? "Confirmar"
+        : "Inscriure";
 
     return (
       <div
@@ -1142,16 +1155,21 @@ const visibleEvents = showFullCalendar
         </strong>
 
         <div className="timeline-actions">
-          {linkedOrganization && (
+          {linkedActionOrganization && (
             <button
               className="confirm-button"
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedOrganization(linkedOrganization);
+
+                if (linkedAttendanceOrganization) {
+                  setSelectedOrganization(linkedAttendanceOrganization);
+                } else {
+                  setSelectedRegistration(linkedRegistrationOrganization);
+                }
               }}
             >
-              Confirmar assistència
+              {linkedActionLabel}
             </button>
           )}
 
@@ -1163,10 +1181,19 @@ const visibleEvents = showFullCalendar
               downloadCalendarEvent(eventToDetail(event));
             }}
           >
-            Calendari
+            + calendari
           </button>
 
-          <span className="info-link">+ Info</span>
+          <button
+            className="timeline-info-button"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedItem(eventToDetail(event));
+            }}
+          >
+            + info
+          </button>
         </div>
       </div>
     );

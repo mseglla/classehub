@@ -1028,3 +1028,85 @@ select {
 .timeline-calendar-button:hover {
   color: #f97316;
 }
+
+/* Mobile-first agenda actions */
+.timeline-row {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 8px;
+  padding: 14px;
+}
+
+.timeline-row > span {
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.timeline-row > strong {
+  font-size: 0.96rem;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.timeline-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.confirm-button,
+.timeline-calendar-button,
+.timeline-info-button {
+  min-height: 36px;
+  padding: 8px 11px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.confirm-button {
+  border-color: #f97316;
+  background: #f97316;
+  color: #ffffff;
+}
+
+.timeline-calendar-button:hover,
+.timeline-info-button:hover {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+@media (min-width: 720px) {
+  .timeline-row {
+    grid-template-columns: 86px 1fr auto;
+    align-items: center;
+  }
+
+  .timeline-actions {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    margin-top: 0;
+  }
+}
+
+/* Green confirm actions */
+.confirm-button,
+.quick-action-primary {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.confirm-button:hover,
+.quick-action-primary:hover {
+  border-color: #15803d;
+  background: #15803d;
+  color: #ffffff;
+}
