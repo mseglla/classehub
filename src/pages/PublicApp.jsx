@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   ExternalLink,
   Home,
+  MessageCircle,
   PartyPopper,
   Vote,
 } from "lucide-react";
@@ -60,6 +61,59 @@ function downloadCalendarEvent(item) {
   link.click();
 
   URL.revokeObjectURL(url);
+}
+
+function FeedbackModal({
+  feedbackType,
+  setFeedbackType,
+  feedbackMessage,
+  setFeedbackMessage,
+  feedbackStatus,
+  onSubmit,
+  onClose,
+}) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <article className="modal feedback-modal" onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>Tancar</button>
+
+        <p className="eyebrow">Bústia de suggeriments</p>
+        <h2>Ajuda'ns a millorar ClasseHub</h2>
+        <p className="modal-intro">
+          Explica'ns qualsevol idea, dubte o error. Ho revisarem per seguir millorant l'espai de la classe.
+        </p>
+
+        <form className="registration-form" onSubmit={onSubmit}>
+          <label>
+            Tipus de missatge
+            <select
+              value={feedbackType}
+              onChange={(event) => setFeedbackType(event.target.value)}
+            >
+              <option value="millora">Millora</option>
+              <option value="error">Error</option>
+              <option value="idea">Idea</option>
+            </select>
+          </label>
+
+          <label className="span-all">
+            Missatge
+            <textarea
+              value={feedbackMessage}
+              onChange={(event) => setFeedbackMessage(event.target.value)}
+              placeholder="Explica'ns què milloraries, quin error has trobat o quina idea tens..."
+            />
+          </label>
+
+          <button className="span-all" type="submit">
+            Enviar missatge
+          </button>
+        </form>
+
+        {feedbackStatus && <p className="admin-message">{feedbackStatus}</p>}
+      </article>
+    </div>
+  );
 }
 
 function DetailModal({ item, checklist, onClose }) {
@@ -732,6 +786,7 @@ export default function PublicApp() {
   const [feedbackType, setFeedbackType] = useState("millora");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackStatus, setFeedbackStatus] = useState("");
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -865,6 +920,19 @@ export default function PublicApp() {
   }, [events]);
 
   const nextEvent = futureEvents[0];
+  const nextEventOrganization = nextEvent
+    ? organizations.find(
+        (org) =>
+          org.event_id === nextEvent.id &&
+          org.organization_type === "attendance"
+      )
+    : null;
+
+  const displayClassName = classInfo?.name
+    ? classInfo.name.charAt(0).toUpperCase() + classInfo.name.slice(1)
+    : "Orenetes";
+
+  const displaySchoolYear = classInfo?.school_year || "2025-2026";
 
 const visibleEvents = showFullCalendar
   ? futureEvents.slice(1)
@@ -960,45 +1028,77 @@ const visibleEvents = showFullCalendar
   
   return (
     <main className="page">
-      <header className="hero">
-        <div className="hero-main">
-          <div>
-            <h1 className="hero-title-compact">
-              Curs {classInfo.school_year?.replace("2025-2026", "25-26")} {classInfo.name}
-            </h1>
+      <header className="hero class-hero">
+        <div className="hero-main class-hero-main">
+          <div className="class-hero-copy">
+            <h1>{displayClassName}</h1>
+            <p>{displaySchoolYear}</p>
           </div>
+
+          <button
+            className="suggestion-button"
+            type="button"
+            onClick={() => setShowFeedbackModal(true)}
+          >
+            <MessageCircle size={17} />
+            <span>Bústia</span>
+          </button>
         </div>
       </header>
     
   
       <section className="layout">
-        <Card className="span-2 next-event-card">
-          <p className="eyebrow">Proper esdeveniment</p>
+        <Card className="span-2 next-event-card clean-next-event-card">
+          <div className="next-event-heading">
+            <p className="eyebrow">Proper esdeveniment</p>
+            {nextEvent && <span>{daysUntil(nextEvent.start_date)}</span>}
+          </div>
   
           {nextEvent ? (
-            <button
-              className="next-event"
-              onClick={() => setSelectedItem(eventToDetail(nextEvent))}
-            >
+            <article className="next-event clean-next-event">
               <div className="next-event-date">
                 <strong>{shortDate(nextEvent.start_date)}</strong>
-                <span>{daysUntil(nextEvent.start_date)}</span>
+                <span>
+                  {nextEvent.start_time
+                    ? nextEvent.start_time.slice(0, 5)
+                    : "Hora pendent"}
+                </span>
               </div>
   
-              <div>
-                <h2>
-                  {nextEvent.title}
-                </h2>
+              <div className="next-event-content">
+                <span className="event-type-pill">
+                  {typeMeta[nextEvent.event_type]?.icon}{" "}
+                  {typeMeta[nextEvent.event_type]?.label || "Esdeveniment"}
+                </span>
+
+                <h2>{nextEvent.title}</h2>
+
                 <small>
-                  {nextEvent.start_time
-                    ? `${nextEvent.start_time.slice(0, 5)} · `
-                    : ""}
-                  {nextEvent.location || typeMeta[nextEvent.event_type]?.label}
+                  {nextEvent.location || "Ubicació pendent"}
                 </small>
               </div>
   
-              <span className="info-link">Veure detalls</span>
-            </button>
+              <div className="quick-actions">
+                <button
+                  className="quick-action"
+                  type="button"
+                  onClick={() => setSelectedItem(eventToDetail(nextEvent))}
+                >
+                  + info
+                </button>
+
+                {nextEventOrganization && (
+                  <button
+                    className="quick-action quick-action-primary"
+                    type="button"
+                    onClick={() => setSelectedOrganization(nextEventOrganization)}
+                  >
+                    Confirmar
+                  </button>
+                )}
+
+              </div>
+            </article>
           ) : (
             <p>No hi ha cap esdeveniment proper.</p>
           )}
@@ -1054,6 +1154,17 @@ const visibleEvents = showFullCalendar
               Confirmar assistència
             </button>
           )}
+
+          <button
+            className="timeline-calendar-button"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              downloadCalendarEvent(eventToDetail(event));
+            }}
+          >
+            Calendari
+          </button>
 
           <span className="info-link">+ Info</span>
         </div>
@@ -1143,48 +1254,24 @@ const visibleEvents = showFullCalendar
           </Card>
         )}
 
-        <Card className="span-2">
-          <SectionTitle
-            icon={<Home size={22} />}
-            title="Tens alguna millora o error a reportar?"
-            subtitle="Ajuda'ns a millorar ClasseHub amb qualsevol idea, dubte o problema."
-          />
-
-          <form className="registration-form" onSubmit={submitFeedback}>
-            <label>
-              Tipus de missatge
-              <select
-                value={feedbackType}
-                onChange={(event) => setFeedbackType(event.target.value)}
-              >
-                <option value="millora">Millora</option>
-                <option value="error">Error</option>
-                <option value="idea">Idea</option>
-              </select>
-            </label>
-
-            <label className="span-all">
-              Missatge
-              <textarea
-                value={feedbackMessage}
-                onChange={(event) => setFeedbackMessage(event.target.value)}
-                placeholder="Explica'ns què milloraries, quin error has trobat o quina idea tens..."
-              />
-            </label>
-
-            <button className="span-all" type="submit">
-              Enviar missatge
-            </button>
-          </form>
-
-          {feedbackStatus && <p className="admin-message">{feedbackStatus}</p>}
-        </Card>
       </section>
   
       <footer className="footer">
         <Home size={16} /> Ara no hi ha excusa per no estar al dia de tot!
       </footer>
   
+      {showFeedbackModal && (
+        <FeedbackModal
+          feedbackType={feedbackType}
+          setFeedbackType={setFeedbackType}
+          feedbackMessage={feedbackMessage}
+          setFeedbackMessage={setFeedbackMessage}
+          feedbackStatus={feedbackStatus}
+          onSubmit={submitFeedback}
+          onClose={() => setShowFeedbackModal(false)}
+        />
+      )}
+
       <DetailModal
         item={selectedItem}
         checklist={selectedChecklist}

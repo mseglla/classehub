@@ -791,3 +791,240 @@ select {
   color: #111827;
   font-size: 18px;
 }
+
+/* Mobile-first public class redesign */
+.class-hero {
+  padding: 18px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.72), transparent 38%),
+    linear-gradient(135deg, #fff7ed 0%, #fef3c7 42%, #fde68a 100%);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  box-shadow: 0 18px 45px rgba(120, 53, 15, 0.10);
+}
+
+.class-hero-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.class-hero-copy {
+  min-width: 0;
+}
+
+.class-hero-kicker {
+  display: inline-flex;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b45309;
+}
+
+.class-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 13vw, 3.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+  color: #1f2937;
+}
+
+.class-hero p {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.suggestion-button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid rgba(146, 64, 14, 0.18);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.74);
+  color: #78350f;
+  font-size: 0.84rem;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(120, 53, 15, 0.08);
+}
+
+.clean-next-event-card {
+  padding: 16px;
+}
+
+.next-event-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.next-event-heading .eyebrow {
+  margin: 0;
+}
+
+.next-event-heading > span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #92400e;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+
+.clean-next-event {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 13px;
+  align-items: start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.clean-next-event .next-event-date {
+  width: 62px;
+  min-height: 62px;
+  border-radius: 20px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #7c2d12;
+}
+
+.clean-next-event .next-event-date strong {
+  font-size: 0.9rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.clean-next-event .next-event-date span {
+  margin-top: 5px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #9a3412;
+}
+
+.next-event-content {
+  min-width: 0;
+}
+
+.event-type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.clean-next-event h2 {
+  margin: 0;
+  font-size: 1.22rem;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 760;
+  color: #111827;
+}
+
+.clean-next-event small {
+  display: block;
+  margin-top: 7px;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: #6b7280;
+}
+
+.quick-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-top: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quick-action {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.84rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.quick-action-primary {
+  border-color: #f97316;
+  background: #f97316;
+  color: #ffffff;
+}
+
+.feedback-modal .modal-intro {
+  margin: -4px 0 18px;
+  color: #6b7280;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.feedback-modal textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+@media (min-width: 720px) {
+  .class-hero {
+    padding: 24px;
+  }
+
+  .class-hero h1 {
+    font-size: 3.5rem;
+  }
+
+  .clean-next-event-card {
+    padding: 20px;
+  }
+
+  .clean-next-event {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+  }
+
+  .quick-actions {
+    grid-column: auto;
+    justify-content: flex-end;
+    overflow: visible;
+  }
+}
+
+.timeline-calendar-button {
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.timeline-calendar-button:hover {
+  color: #f97316;
+}
