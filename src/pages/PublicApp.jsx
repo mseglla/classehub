@@ -892,27 +892,6 @@ function RegistrationOrganizationModal({
 </form>
         </div>
 
-        <div className="organization-results">
-          <div className="result-column adults">
-            <strong>{orgRegistrations.length}</strong>
-            <span>famílies</span>
-          </div>
-
-          <div className="result-column adults">
-            <strong>{totalAdults}</strong>
-            <span>adults</span>
-          </div>
-
-          <div className="result-column children">
-            <strong>{totalChildren}</strong>
-            <span>infants</span>
-          </div>
-
-          <div className="result-column children">
-            <strong>{totalUnder3}</strong>
-            <span>menors de 3</span>
-          </div>
-        </div>
       </article>
     </div>
   );
