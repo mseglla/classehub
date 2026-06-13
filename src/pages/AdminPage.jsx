@@ -27,6 +27,7 @@ export default function AdminPage() {
   const [eventToDelete, setEventToDelete] = useState(null);
   const [editingEventId, setEditingEventId] = useState(null);
   const [showPastEvents, setShowPastEvents] = useState(false);
+  const [detailEventId, setDetailEventId] = useState(null);
 
   const selectedClass = classes.find(
     (classItem) => String(classItem.id) === selectedClassId
@@ -43,6 +44,43 @@ export default function AdminPage() {
   const pastEventsCount = adminEvents.filter(
     (eventItem) => eventItem.start_date && eventItem.start_date < todayIso
   ).length;
+
+  const detailEvent = detailEventId
+    ? adminEvents.find((eventItem) => eventItem.id === detailEventId)
+    : null;
+
+  const detailOrganization = detailEvent
+    ? adminOrganizations.find(
+        (organization) => organization.event_id === detailEvent.id
+      )
+    : null;
+
+  const detailResponses = detailOrganization
+    ? organizationResponses.filter(
+        (response) => response.organization_id === detailOrganization.id
+      )
+    : [];
+
+  const detailRegistrations = detailOrganization
+    ? organizationRegistrations.filter(
+        (registration) =>
+          registration.organization_id === detailOrganization.id
+      )
+    : [];
+
+  function getFamilyName(familyId) {
+    return (
+      families.find((family) => family.id === familyId)?.student_name ||
+      "Família no trobada"
+    );
+  }
+
+  function formatResponse(response) {
+    if (response === "yes") return "Sí";
+    if (response === "no") return "No";
+    if (response === "maybe") return "Potser";
+    return response || "Sense resposta";
+  }
 
   async function loadAdminEvents(classId) {
     if (!classId) return;
@@ -606,6 +644,16 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         </div>
 
         <div className="admin-row-actions">
+        {linkedOrganization && (
+          <button
+            type="button"
+            className="secondary-action"
+            onClick={() => setDetailEventId(event.id)}
+          >
+            Veure detall
+          </button>
+        )}
+
         {editingEventId === event.id ? (
           <span className="admin-message">En edició</span>
         ) : (
@@ -678,6 +726,128 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           </div>
         </Card>
       </section>
+
+      {detailEvent && detailOrganization && (
+        <div className="modal-backdrop" onClick={() => setDetailEventId(null)}>
+          <article
+            className="modal action-detail-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => setDetailEventId(null)}
+            >
+              Tancar
+            </button>
+
+            <p className="eyebrow">
+              {detailOrganization.organization_type === "registration"
+                ? "Inscripció familiar"
+                : "Confirmació sí/no"}
+            </p>
+
+            <h2>{detailEvent.title}</h2>
+
+            <p className="modal-intro">
+              {detailOrganization.organization_type === "registration"
+                ? "Consulta quines famílies s'han inscrit i el recompte d'assistents."
+                : "Consulta les respostes rebudes de les famílies."}
+            </p>
+
+            <div className="detail-grid">
+              <div>
+                <span>Tipus</span>
+                <strong>
+                  {detailOrganization.organization_type === "registration"
+                    ? "Inscripció"
+                    : "Confirmació"}
+                </strong>
+              </div>
+
+              <div>
+                <span>Total</span>
+                <strong>
+                  {detailOrganization.organization_type === "registration"
+                    ? `${detailRegistrations.length} famílies`
+                    : `${detailResponses.length} respostes`}
+                </strong>
+              </div>
+
+              <div>
+                <span>Data límit</span>
+                <strong>
+                  {detailOrganization.close_date
+                    ? shortDate(detailOrganization.close_date)
+                    : "Sense límit"}
+                </strong>
+              </div>
+            </div>
+
+            {detailOrganization.organization_type === "registration" && (
+              <div className="action-detail-list">
+                <div className="action-detail-summary">
+                  {detailRegistrations.length} famílies inscrites
+                </div>
+
+                {detailRegistrations.length === 0 ? (
+                  <p className="action-detail-empty">
+                    Encara no hi ha cap família inscrita.
+                  </p>
+                ) : (
+                  detailRegistrations.map((registration) => (
+                    <div className="action-detail-row" key={registration.id}>
+                      <div className="action-detail-main">
+                        <strong>{getFamilyName(registration.family_id)}</strong>
+                        <span>
+                          {registration.adults_count || 0} adults ·{" "}
+                          {registration.children_count || 0} infants ·{" "}
+                          {registration.under3_count || 0} menors de 3
+                        </span>
+                      </div>
+
+                      {registration.comment && (
+                        <p className="action-detail-comment">
+                          {registration.comment}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {detailOrganization.organization_type === "attendance" && (
+              <div className="action-detail-list">
+                <div className="action-detail-summary">
+                  {detailResponses.length} respostes
+                </div>
+
+                {detailResponses.length === 0 ? (
+                  <p className="action-detail-empty">
+                    Encara no hi ha cap resposta.
+                  </p>
+                ) : (
+                  detailResponses.map((response) => (
+                    <div className="action-detail-row" key={response.id}>
+                      <div className="action-detail-main">
+                        <strong>{getFamilyName(response.family_id)}</strong>
+                        <span>Resposta: {formatResponse(response.response)}</span>
+                      </div>
+
+                      {response.comment && (
+                        <p className="action-detail-comment">
+                          {response.comment}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </article>
+        </div>
+      )}
     </main>
   );
 }
