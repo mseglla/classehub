@@ -1193,3 +1193,92 @@ select {
   background: #fff7ed;
   color: #ea580c;
 }
+
+/* Admin auth */
+.admin-login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+}
+
+.admin-login-card {
+  width: min(100%, 420px);
+  padding: 24px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
+}
+
+.admin-login-card h1 {
+  margin: 6px 0 8px;
+  font-size: 2rem;
+  letter-spacing: -0.05em;
+  color: #111827;
+}
+
+.admin-login-card p {
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.admin-login-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.admin-login-form label {
+  display: grid;
+  gap: 7px;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.admin-login-form input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.admin-login-form button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 14px;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.admin-login-form button:disabled {
+  opacity: 0.65;
+}
+
+.admin-session-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(17, 24, 39, 0.94);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.admin-session-bar button {
+  border: 1px solid rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.08);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-weight: 800;
+}
