@@ -9,6 +9,9 @@ export default function AdminPage() {
   const [classes, setClasses] = useState([]);
   const [families, setFamilies] = useState([]);
   const [adminEvents, setAdminEvents] = useState([]);
+  const [adminOrganizations, setAdminOrganizations] = useState([]);
+  const [organizationResponses, setOrganizationResponses] = useState([]);
+  const [organizationRegistrations, setOrganizationRegistrations] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
@@ -23,10 +26,23 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
   const [eventToDelete, setEventToDelete] = useState(null);
   const [editingEventId, setEditingEventId] = useState(null);
+  const [showPastEvents, setShowPastEvents] = useState(false);
 
   const selectedClass = classes.find(
     (classItem) => String(classItem.id) === selectedClassId
   );
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+
+  const visibleAdminEvents = showPastEvents
+    ? adminEvents
+    : adminEvents.filter(
+        (eventItem) => !eventItem.start_date || eventItem.start_date >= todayIso
+      );
+
+  const pastEventsCount = adminEvents.filter(
+    (eventItem) => eventItem.start_date && eventItem.start_date < todayIso
+  ).length;
 
   async function loadAdminEvents(classId) {
     if (!classId) return;
@@ -44,6 +60,59 @@ export default function AdminPage() {
     }
   
     setAdminEvents(data || []);
+  }
+
+  async function loadAdminActionData(classId) {
+    if (!classId) return;
+
+    const { data: organizationsData, error: organizationsError } = await supabase
+      .from("ch_organizations")
+      .select("*")
+      .eq("class_id", Number(classId))
+      .order("created_at", { ascending: false });
+
+    if (organizationsError) {
+      console.error(organizationsError);
+      setMessage("No s'han pogut carregar les accions vinculades.");
+      return;
+    }
+
+    const organizations = organizationsData || [];
+    setAdminOrganizations(organizations);
+
+    const organizationIds = organizations.map((organization) => organization.id);
+
+    if (organizationIds.length === 0) {
+      setOrganizationResponses([]);
+      setOrganizationRegistrations([]);
+      return;
+    }
+
+    const [responsesResult, registrationsResult] = await Promise.all([
+      supabase
+        .from("ch_organization_responses")
+        .select("*")
+        .in("organization_id", organizationIds),
+      supabase
+        .from("ch_organization_registrations")
+        .select("*")
+        .in("organization_id", organizationIds),
+    ]);
+
+    if (responsesResult.error) {
+      console.error(responsesResult.error);
+      setMessage("No s'han pogut carregar les respostes.");
+      return;
+    }
+
+    if (registrationsResult.error) {
+      console.error(registrationsResult.error);
+      setMessage("No s'han pogut carregar les inscripcions.");
+      return;
+    }
+
+    setOrganizationResponses(responsesResult.data || []);
+    setOrganizationRegistrations(registrationsResult.data || []);
   }
 
   async function loadFamilies(classId) {
@@ -97,6 +166,7 @@ export default function AdminPage() {
       if (data?.length) {
         setSelectedClassId(String(data[0].id));
         loadAdminEvents(data[0].id);
+        loadAdminActionData(data[0].id);
         loadFamilies(data[0].id);
         loadFeedbacks();
       }
@@ -228,6 +298,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           `S'ha creat l'esdeveniment, però no s'ha pogut crear l'acció vinculada: ${organizationError.message}`
         );
         await loadAdminEvents(selectedClassId);
+    await loadAdminActionData(selectedClassId);
         return;
       }
 
@@ -247,6 +318,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           `S'ha creat l'esdeveniment i l'acció, però no s'han pogut afegir les famílies: ${participantsError.message}`
         );
         await loadAdminEvents(selectedClassId);
+    await loadAdminActionData(selectedClassId);
         return;
       }
     }
@@ -261,6 +333,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           : "Esdeveniment i acció vinculada creats correctament."
     );
     await loadAdminEvents(selectedClassId);
+    await loadAdminActionData(selectedClassId);
   }
   async function handleDeleteEvent(eventId) {
     const { error } = await supabase
@@ -277,6 +350,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
     setEventToDelete(null);
     setMessage("Esdeveniment eliminat correctament.");
     await loadAdminEvents(selectedClassId);
+    await loadAdminActionData(selectedClassId);
   }
    
   return (
@@ -321,6 +395,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 onChange={(event) => {
                   setSelectedClassId(event.target.value);
                   loadAdminEvents(event.target.value);
+                  loadAdminActionData(event.target.value);
                   loadFamilies(event.target.value);
                 }}
               >
@@ -468,10 +543,45 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           <div className="admin-list">
   <h3>Esdeveniments creats</h3>
 
-  {adminEvents.length === 0 ? (
-    <p>No hi ha esdeveniments per aquesta classe.</p>
+  <div className="admin-row-actions">
+    {pastEventsCount > 0 && (
+      <button
+        type="button"
+        className="secondary-action"
+        onClick={() => setShowPastEvents((currentValue) => !currentValue)}
+      >
+        {showPastEvents
+          ? "Amagar esdeveniments passats"
+          : `Mostrar esdeveniments passats (${pastEventsCount})`}
+      </button>
+    )}
+  </div>
+
+  {visibleAdminEvents.length === 0 ? (
+    <p>
+      {adminEvents.length === 0
+        ? "No hi ha esdeveniments per aquesta classe."
+        : "No hi ha esdeveniments futurs per aquesta classe."}
+    </p>
   ) : (
-    adminEvents.map((event) => (
+    visibleAdminEvents.map((event) => {
+      const linkedOrganization = adminOrganizations.find(
+        (organization) => organization.event_id === event.id
+      );
+
+      const responseCount = linkedOrganization
+        ? organizationResponses.filter(
+            (response) => response.organization_id === linkedOrganization.id
+          ).length
+        : 0;
+
+      const registrationCount = linkedOrganization
+        ? organizationRegistrations.filter(
+            (registration) => registration.organization_id === linkedOrganization.id
+          ).length
+        : 0;
+
+      return (
       <div className="admin-row" key={event.id}>
         <div>
           <strong>{event.title}</strong>
@@ -480,6 +590,19 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
             {event.location ? ` · ${event.location}` : ""}
           </p>
+
+          {linkedOrganization ? (
+            <p>
+              {linkedOrganization.organization_type === "registration"
+                ? `🟢 Inscripció familiar · ${registrationCount} famílies inscrites`
+                : `🟠 Confirmació sí/no · ${responseCount} respostes`}
+              {linkedOrganization.close_date
+                ? ` · límit ${shortDate(linkedOrganization.close_date)}`
+                : ""}
+            </p>
+          ) : (
+            <p>ℹ️ Només informatiu</p>
+          )}
         </div>
 
         <div className="admin-row-actions">
@@ -525,7 +648,8 @@ console.log("Resultat guardar esdeveniment:", { data, error });
   )}
 </div>
       </div>
-    ))
+      );
+    })
   )}
 </div>
         </Card>
