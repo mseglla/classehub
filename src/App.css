@@ -1110,3 +1110,86 @@ select {
   background: #15803d;
   color: #ffffff;
 }
+
+/* Registration confirmed families */
+.confirmed-families-box {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #f9fafb;
+}
+
+.confirmed-families-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.confirmed-families-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.confirmed-families-header span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.confirmed-families-list {
+  display: grid;
+  gap: 8px;
+}
+
+.confirmed-family-row {
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.confirmed-family-row strong {
+  color: #111827;
+  font-size: 0.94rem;
+}
+
+.confirmed-family-row span {
+  color: #4b5563;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.confirmed-family-row small {
+  color: #6b7280;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.pending-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pending-action-buttons button {
+  min-height: 36px;
+}
+
+.secondary-pending-button {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+}
+
+.secondary-pending-button:hover {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #ea580c;
+}

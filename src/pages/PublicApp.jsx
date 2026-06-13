@@ -518,6 +518,7 @@ function RegistrationOrganizationCard({
   participants,
   registrations,
   onOpen,
+  onOpenResults,
 }) {
   const participantFamilyIds = new Set(
     participants
@@ -568,13 +569,156 @@ function RegistrationOrganizationCard({
           <strong>{totalAdults + totalChildren}</strong> persones inscrites · {orgRegistrations.length} famílies
         </p>
 
-        <button onClick={() => onOpen(organization)}>
-          Inscriure'm
-        </button>
+        <div className="pending-action-buttons">
+          <button onClick={() => onOpen(organization)}>
+            Inscriure'm
+          </button>
+
+          <button
+            className="secondary-pending-button"
+            onClick={() => onOpenResults(organization)}
+          >
+            Confirmats
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+function RegistrationResultsModal({
+  organization,
+  families,
+  participants,
+  registrations,
+  onClose,
+}) {
+  if (!organization) return null;
+
+  const participantFamilyIds = new Set(
+    participants
+      .filter((item) => item.organization_id === organization.id)
+      .map((item) => item.family_id)
+  );
+
+  const availableFamilies = families.filter((family) =>
+    participantFamilyIds.has(family.id)
+  );
+
+  const orgRegistrations = registrations.filter(
+    (item) => item.organization_id === organization.id
+  );
+
+  const registrationByFamily = new Map(
+    orgRegistrations.map((item) => [item.family_id, item])
+  );
+
+  const confirmedRegistrations = orgRegistrations
+    .map((registration) => ({
+      ...registration,
+      family: families.find((family) => family.id === registration.family_id),
+    }))
+    .filter((registration) => registration.family);
+
+  const pendingFamilies = availableFamilies.filter(
+    (family) => !registrationByFamily.has(family.id)
+  );
+
+  const totalAdults = orgRegistrations.reduce(
+    (sum, item) => sum + (item.adults_count || 0),
+    0
+  );
+
+  const totalChildren = orgRegistrations.reduce(
+    (sum, item) => sum + (item.children_count || 0),
+    0
+  );
+
+  const totalUnder3 = orgRegistrations.reduce(
+    (sum, item) => sum + (item.under3_count || 0),
+    0
+  );
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <article className="modal" onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>Tancar</button>
+
+        <p className="eyebrow">Confirmats</p>
+        <h2>🎉 {organization.title}</h2>
+
+        <div className="organization-results">
+          <div className="result-column adults">
+            <strong>{orgRegistrations.length}</strong>
+            <span>famílies</span>
+          </div>
+
+          <div className="result-column adults">
+            <strong>{totalAdults}</strong>
+            <span>adults</span>
+          </div>
+
+          <div className="result-column children">
+            <strong>{totalChildren}</strong>
+            <span>infants</span>
+          </div>
+
+          <div className="result-column children">
+            <strong>{totalUnder3}</strong>
+            <span>menors de 3</span>
+          </div>
+        </div>
+
+        {confirmedRegistrations.length > 0 ? (
+          <div className="confirmed-families-box">
+            <div className="confirmed-families-header">
+              <h3>Famílies confirmades</h3>
+              <span>{confirmedRegistrations.length} respostes</span>
+            </div>
+
+            <div className="confirmed-families-list">
+              {confirmedRegistrations.map((registration) => (
+                <div className="confirmed-family-row" key={registration.id}>
+                  <strong>{registration.family.student_name}</strong>
+
+                  <span>
+                    {registration.adults_count || 0} adults ·{" "}
+                    {registration.children_count || 0} infants ·{" "}
+                    {registration.under3_count || 0} menors de 3
+                  </span>
+
+                  {registration.comment && (
+                    <small>{registration.comment}</small>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="detail-text">Encara no hi ha cap família confirmada.</p>
+        )}
+
+        {pendingFamilies.length > 0 && (
+          <div className="confirmed-families-box">
+            <div className="confirmed-families-header">
+              <h3>Pendents</h3>
+              <span>{pendingFamilies.length} famílies</span>
+            </div>
+
+            <div className="confirmed-families-list">
+              {pendingFamilies.map((family) => (
+                <div className="confirmed-family-row" key={family.id}>
+                  <strong>{family.student_name}</strong>
+                  <span>Pendent de resposta</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </article>
+    </div>
+  );
+}
+
 function RegistrationOrganizationModal({
   organization,
   families,
@@ -754,9 +898,19 @@ function RegistrationOrganizationModal({
             <span>famílies</span>
           </div>
 
+          <div className="result-column adults">
+            <strong>{totalAdults}</strong>
+            <span>adults</span>
+          </div>
+
           <div className="result-column children">
-            <strong>{totalAdults + totalChildren}</strong>
-            <span>persones</span>
+            <strong>{totalChildren}</strong>
+            <span>infants</span>
+          </div>
+
+          <div className="result-column children">
+            <strong>{totalUnder3}</strong>
+            <span>menors de 3</span>
           </div>
         </div>
       </article>
@@ -779,6 +933,7 @@ export default function PublicApp() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedOrganization, setSelectedOrganization] = useState(null);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
+  const [selectedRegistrationResults, setSelectedRegistrationResults] = useState(null);
   const [selectedPoll, setSelectedPoll] = useState(null);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -920,13 +1075,29 @@ export default function PublicApp() {
   }, [events]);
 
   const nextEvent = futureEvents[0];
-  const nextEventOrganization = nextEvent
+
+  const nextEventAttendanceOrganization = nextEvent
     ? organizations.find(
         (org) =>
           org.event_id === nextEvent.id &&
           org.organization_type === "attendance"
       )
     : null;
+
+  const nextEventRegistrationOrganization = nextEvent
+    ? organizations.find(
+        (org) =>
+          org.event_id === nextEvent.id &&
+          org.organization_type === "registration"
+      )
+    : null;
+
+  const nextEventActionOrganization =
+    nextEventAttendanceOrganization || nextEventRegistrationOrganization;
+
+  const nextEventActionLabel = nextEventAttendanceOrganization
+    ? "Confirmar"
+    : "Inscriure'm";
 
   const displayClassName = classInfo?.name
     ? classInfo.name.charAt(0).toUpperCase() + classInfo.name.slice(1)
@@ -1087,13 +1258,29 @@ const visibleEvents = showFullCalendar
                   + info
                 </button>
 
-                {nextEventOrganization && (
+                {nextEventActionOrganization && (
                   <button
                     className="quick-action quick-action-primary"
                     type="button"
-                    onClick={() => setSelectedOrganization(nextEventOrganization)}
+                    onClick={() => {
+                      if (nextEventAttendanceOrganization) {
+                        setSelectedOrganization(nextEventAttendanceOrganization);
+                      } else {
+                        setSelectedRegistration(nextEventRegistrationOrganization);
+                      }
+                    }}
                   >
-                    Confirmar
+                    {nextEventActionLabel}
+                  </button>
+                )}
+
+                {nextEventRegistrationOrganization && (
+                  <button
+                    className="quick-action"
+                    type="button"
+                    onClick={() => setSelectedRegistrationResults(nextEventRegistrationOrganization)}
+                  >
+                    Confirmats
                   </button>
                 )}
 
@@ -1128,9 +1315,7 @@ const visibleEvents = showFullCalendar
 
     const linkedActionLabel = linkedAttendanceOrganization
       ? "Confirmar"
-      : linkedRegistrationOrganization?.title?.toLowerCase().includes("confirm")
-        ? "Confirmar"
-        : "Inscriure";
+      : "Inscriure'm";
 
     return (
       <div
@@ -1170,6 +1355,19 @@ const visibleEvents = showFullCalendar
               }}
             >
               {linkedActionLabel}
+            </button>
+          )}
+
+          {linkedRegistrationOrganization && (
+            <button
+              className="timeline-info-button"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedRegistrationResults(linkedRegistrationOrganization);
+              }}
+            >
+              Confirmats
             </button>
           )}
 
@@ -1235,6 +1433,7 @@ const visibleEvents = showFullCalendar
                     participants={organizationParticipants}
                     registrations={organizationRegistrations}
                     onOpen={setSelectedRegistration}
+                    onOpenResults={setSelectedRegistrationResults}
                   />
                 ) : (
                   <a
@@ -1321,6 +1520,14 @@ const visibleEvents = showFullCalendar
         registrations={organizationRegistrations}
         onRegister={handleOrganizationRegistration}
         onClose={() => setSelectedRegistration(null)}
+      />
+
+      <RegistrationResultsModal
+        organization={selectedRegistrationResults}
+        families={families}
+        participants={organizationParticipants}
+        registrations={organizationRegistrations}
+        onClose={() => setSelectedRegistrationResults(null)}
       />
   
       <PollResultsModal
