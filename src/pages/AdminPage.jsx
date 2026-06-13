@@ -384,7 +384,6 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               >
                 <option value="classe">Classe</option>
                 <option value="escola">Escola</option>
-                <option value="comunitat">Comunitat</option>
               </select>
             </label>
 

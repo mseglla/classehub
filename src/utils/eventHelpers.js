@@ -1,7 +1,6 @@
 export const typeMeta = {
   escola: { label: "Escola", icon: "🏫" },
   classe: { label: "Classe", icon: "👨‍👩‍👧‍👦" },
-  comunitat: { label: "Comunitat", icon: "🎉" },
 };
 
 export function eventToDetail(event) {
