@@ -7,15 +7,18 @@ import { typeMeta } from "../utils/eventHelpers";
 
 export default function AdminPage() {
   const [classes, setClasses] = useState([]);
+  const [families, setFamilies] = useState([]);
   const [adminEvents, setAdminEvents] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
+  const [publicationType, setPublicationType] = useState("info");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [closeDate, setCloseDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [eventToDelete, setEventToDelete] = useState(null);
@@ -41,6 +44,24 @@ export default function AdminPage() {
     }
   
     setAdminEvents(data || []);
+  }
+
+  async function loadFamilies(classId) {
+    if (!classId) return;
+
+    const { data, error } = await supabase
+      .from("ch_families")
+      .select("*")
+      .eq("class_id", Number(classId))
+      .order("student_name");
+
+    if (error) {
+      console.error(error);
+      setMessage("No s'han pogut carregar les famílies.");
+      return;
+    }
+
+    setFamilies(data || []);
   }
 
   async function loadFeedbacks() {
@@ -76,6 +97,7 @@ export default function AdminPage() {
       if (data?.length) {
         setSelectedClassId(String(data[0].id));
         loadAdminEvents(data[0].id);
+        loadFamilies(data[0].id);
         loadFeedbacks();
       }
     }
@@ -90,6 +112,8 @@ export default function AdminPage() {
     setStartTime(eventItem.start_time ? eventItem.start_time.slice(0, 5) : "");
     setLocation(eventItem.location || "");
     setDescription(eventItem.summary || eventItem.details || "");
+    setPublicationType("info");
+    setCloseDate("");
     setMessage("Estàs editant aquest esdeveniment.");
   }
 
@@ -100,6 +124,8 @@ export default function AdminPage() {
     setStartTime("");
     setLocation("");
     setDescription("");
+    setPublicationType("info");
+    setCloseDate("");
     setEditingEventId(null);
   }
 
@@ -109,6 +135,16 @@ export default function AdminPage() {
 
     if (!title || !startDate || (eventType !== "escola" && !selectedClassId)) {
       setMessage("Cal indicar com a mínim títol, data i classe si no és un esdeveniment d’escola.");
+      return;
+    }
+
+    if (publicationType !== "info" && !selectedClassId) {
+      setMessage("Cal seleccionar una classe per crear una confirmació o inscripció.");
+      return;
+    }
+
+    if (publicationType !== "info" && families.length === 0) {
+      setMessage("No hi ha famílies carregades per aquesta classe.");
       return;
     }
 
@@ -142,19 +178,87 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
     if (error) {
       console.error(error);
-    
+      setSaving(false);
+
       setMessage(
         `Error: ${error.message} (${error.code || "No s'ha pogut crear d'esdeveniment"})`
       );
-    
+
       return;
     }
 
+    const savedEvent = data?.[0];
+
+    if (!editingEventId && publicationType !== "info" && savedEvent) {
+      const organizationType =
+        publicationType === "registration" ? "registration" : "attendance";
+
+      const organizationTitle =
+        publicationType === "registration"
+          ? `${title} - Inscripció`
+          : `${title} - Confirmació`;
+
+      const question =
+        publicationType === "registration"
+          ? "Qui s'hi apunta?"
+          : "Confirmes assistència?";
+
+      const { data: organizationData, error: organizationError } = await supabase
+        .from("ch_organizations")
+        .insert({
+          class_id: Number(selectedClassId),
+          title: organizationTitle,
+          description: description || null,
+          event_date: startDate,
+          location: location || null,
+          is_active: true,
+          is_important: false,
+          organization_type: organizationType,
+          question,
+          close_date: closeDate || null,
+          event_id: savedEvent.id,
+        })
+        .select()
+        .single();
+
+      if (organizationError) {
+        console.error(organizationError);
+        setSaving(false);
+        setMessage(
+          `S'ha creat l'esdeveniment, però no s'ha pogut crear l'acció vinculada: ${organizationError.message}`
+        );
+        await loadAdminEvents(selectedClassId);
+        return;
+      }
+
+      const participantsPayload = families.map((family) => ({
+        organization_id: organizationData.id,
+        family_id: family.id,
+      }));
+
+      const { error: participantsError } = await supabase
+        .from("ch_organization_participants")
+        .insert(participantsPayload);
+
+      if (participantsError) {
+        console.error(participantsError);
+        setSaving(false);
+        setMessage(
+          `S'ha creat l'esdeveniment i l'acció, però no s'han pogut afegir les famílies: ${participantsError.message}`
+        );
+        await loadAdminEvents(selectedClassId);
+        return;
+      }
+    }
+
+    setSaving(false);
     resetForm();
     setMessage(
       editingEventId
         ? "Esdeveniment actualitzat correctament."
-        : "Esdeveniment creat correctament."
+        : publicationType === "info"
+          ? "Esdeveniment creat correctament."
+          : "Esdeveniment i acció vinculada creats correctament."
     );
     await loadAdminEvents(selectedClassId);
   }
@@ -217,6 +321,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 onChange={(event) => {
                   setSelectedClassId(event.target.value);
                   loadAdminEvents(event.target.value);
+                  loadFamilies(event.target.value);
                 }}
               >
                 {classes.map((classItem) => (
@@ -229,6 +334,48 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           </div>
 
           <form className="registration-form" onSubmit={handleCreateEvent}>
+            <label className="span-all">
+              Què vols crear?
+              <select
+                value={publicationType}
+                onChange={(event) => setPublicationType(event.target.value)}
+                disabled={Boolean(editingEventId)}
+              >
+                <option value="info">Només informar</option>
+                <option value="attendance">Demanar confirmació sí/no</option>
+                <option value="registration">Obrir inscripció familiar</option>
+              </select>
+            </label>
+
+            <div className="admin-message span-all">
+              <strong>{families.length}</strong> famílies carregades per aquesta classe.
+            </div>
+
+            <div className="admin-message span-all">
+              {publicationType === "info" && (
+                <span>Es crearà només un esdeveniment informatiu a l’agenda.</span>
+              )}
+
+              {publicationType === "attendance" && (
+                <span>Les famílies podran confirmar si vindran o no.</span>
+              )}
+
+              {publicationType === "registration" && (
+                <span>Les famílies podran inscriure adults, infants i comentaris.</span>
+              )}
+            </div>
+
+            {publicationType !== "info" && (
+              <label className="span-all">
+                Data límit de resposta
+                <input
+                  type="date"
+                  value={closeDate}
+                  onChange={(event) => setCloseDate(event.target.value)}
+                />
+              </label>
+            )}
+
             <label>
               Tipus
               <select
@@ -256,7 +403,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 type="text"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Ex: Aniversari Oliver"
+                placeholder="Ex: Aniversari Nil"
               />
             </label>
 
