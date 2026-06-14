@@ -17,6 +17,8 @@ export default function AdminPage() {
   const [newFamilyName, setNewFamilyName] = useState("");
   const [familySaving, setFamilySaving] = useState(false);
   const [editingFamilyId, setEditingFamilyId] = useState(null);
+  const [familyDeleteInfo, setFamilyDeleteInfo] = useState(null);
+  const [familyDeleting, setFamilyDeleting] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
@@ -245,6 +247,103 @@ export default function AdminPage() {
         : "Família afegida correctament."
     );
     await loadFamilies(selectedClassId);
+  }
+
+  async function countFamilyRows(tableName, familyId) {
+    const { count, error } = await supabase
+      .from(tableName)
+      .select("id", { count: "exact", head: true })
+      .eq("family_id", familyId);
+
+    if (error) {
+      throw error;
+    }
+
+    return count || 0;
+  }
+
+  async function handleRequestDeleteFamily(family) {
+    setMessage("");
+
+    try {
+      const [
+        responsesCount,
+        registrationsCount,
+        votesCount,
+        feedbackCount,
+      ] = await Promise.all([
+        countFamilyRows("ch_organization_responses", family.id),
+        countFamilyRows("ch_organization_registrations", family.id),
+        countFamilyRows("ch_poll_votes", family.id),
+        countFamilyRows("ch_feedback", family.id),
+      ]);
+
+      const totalActivity =
+        responsesCount + registrationsCount + votesCount + feedbackCount;
+
+      setFamilyDeleteInfo({
+        family,
+        hasActivity: totalActivity > 0,
+        counts: {
+          responses: responsesCount,
+          registrations: registrationsCount,
+          votes: votesCount,
+          feedback: feedbackCount,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      setMessage("No s'ha pogut comprovar si la família té activitat associada.");
+    }
+  }
+
+  async function handleConfirmDeleteFamily() {
+    if (!familyDeleteInfo?.family) return;
+
+    setFamilyDeleting(true);
+    setMessage("");
+
+    const family = familyDeleteInfo.family;
+
+    try {
+      if (familyDeleteInfo.hasActivity) {
+        const { error } = await supabase
+          .from("ch_families")
+          .update({
+            is_active: false,
+            deactivated_at: new Date().toISOString(),
+          })
+          .eq("id", family.id);
+
+        if (error) throw error;
+
+        setMessage("Família desactivada correctament.");
+      } else {
+        const { error: participantsError } = await supabase
+          .from("ch_organization_participants")
+          .delete()
+          .eq("family_id", family.id);
+
+        if (participantsError) throw participantsError;
+
+        const { error: familyError } = await supabase
+          .from("ch_families")
+          .delete()
+          .eq("id", family.id);
+
+        if (familyError) throw familyError;
+
+        setMessage("Família eliminada correctament.");
+      }
+
+      setFamilyDeleteInfo(null);
+      await loadFamilies(selectedClassId);
+    } catch (error) {
+      console.error(error);
+      setMessage(`No s'ha pogut completar l'acció: ${error.message}`);
+    } finally {
+      setFamilyDeleting(false);
+    }
   }
 
   async function loadFeedbacks() {
@@ -681,13 +780,27 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                   </div>
 
                   <div className="admin-row-actions">
-                    <button
-                      type="button"
-                      className="secondary-action"
-                      onClick={() => handleStartEditFamily(family)}
-                    >
-                      Editar
-                    </button>
+                    {family.is_active === false ? (
+                      <span className="admin-message">Desactivada</span>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="secondary-action"
+                          onClick={() => handleStartEditFamily(family)}
+                        >
+                          Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          className="secondary-action danger-text"
+                          onClick={() => handleRequestDeleteFamily(family)}
+                        >
+                          Eliminar
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))
@@ -901,6 +1014,89 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
           {message && <p className="admin-message">{message}</p>}
         </Card>
+          </article>
+        </div>
+      )}
+
+      {familyDeleteInfo && (
+        <div
+          className="modal-backdrop"
+          onClick={() => {
+            if (!familyDeleting) setFamilyDeleteInfo(null);
+          }}
+        >
+          <article
+            className="modal delete-confirmation-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              disabled={familyDeleting}
+              onClick={() => setFamilyDeleteInfo(null)}
+            >
+              Tancar
+            </button>
+
+            <p className="eyebrow">
+              {familyDeleteInfo.hasActivity ? "Desactivar família" : "Eliminar família"}
+            </p>
+
+            <h2>
+              {familyDeleteInfo.hasActivity
+                ? "Aquesta família ja té activitat"
+                : "Vols eliminar aquesta família?"}
+            </h2>
+
+            <p className="modal-intro">
+              <strong>{familyDeleteInfo.family.student_name}</strong>
+              {familyDeleteInfo.hasActivity
+                ? " té respostes, inscripcions, vots o feedback associats. Per conservar l'historial, no s'eliminarà: quedarà desactivada i no s'afegirà a noves accions."
+                : " no té activitat real associada. S'eliminarà definitivament de la classe."}
+            </p>
+
+            {familyDeleteInfo.hasActivity && (
+              <div className="detail-grid">
+                <div>
+                  <span>Confirmacions</span>
+                  <strong>{familyDeleteInfo.counts.responses}</strong>
+                </div>
+
+                <div>
+                  <span>Inscripcions</span>
+                  <strong>{familyDeleteInfo.counts.registrations}</strong>
+                </div>
+
+                <div>
+                  <span>Vots</span>
+                  <strong>{familyDeleteInfo.counts.votes}</strong>
+                </div>
+              </div>
+            )}
+
+            <div className="delete-confirmation-actions">
+              <button
+                type="button"
+                className="secondary-action"
+                disabled={familyDeleting}
+                onClick={() => setFamilyDeleteInfo(null)}
+              >
+                Cancel·lar
+              </button>
+
+              <button
+                type="button"
+                className="danger-action"
+                disabled={familyDeleting}
+                onClick={handleConfirmDeleteFamily}
+              >
+                {familyDeleting
+                  ? "Processant..."
+                  : familyDeleteInfo.hasActivity
+                    ? "Desactivar família"
+                    : "Eliminar definitivament"}
+              </button>
+            </div>
           </article>
         </div>
       )}
