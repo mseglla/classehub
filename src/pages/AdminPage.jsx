@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [showFamilyFormModal, setShowFamilyFormModal] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState("");
   const [familySaving, setFamilySaving] = useState(false);
+  const [editingFamilyId, setEditingFamilyId] = useState(null);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
@@ -175,6 +176,13 @@ export default function AdminPage() {
     setFamilies(data || []);
   }
 
+  function handleStartEditFamily(family) {
+    setEditingFamilyId(family.id);
+    setNewFamilyName(family.student_name || "");
+    setMessage("");
+    setShowFamilyFormModal(true);
+  }
+
   async function handleCreateFamily(event) {
     event.preventDefault();
     setMessage("");
@@ -193,12 +201,19 @@ export default function AdminPage() {
 
     setFamilySaving(true);
 
-    const { error } = await supabase
-      .from("ch_families")
-      .insert({
-        class_id: Number(selectedClassId),
-        student_name: cleanName,
-      });
+    const { error } = editingFamilyId
+      ? await supabase
+          .from("ch_families")
+          .update({
+            student_name: cleanName,
+          })
+          .eq("id", editingFamilyId)
+      : await supabase
+          .from("ch_families")
+          .insert({
+            class_id: Number(selectedClassId),
+            student_name: cleanName,
+          });
 
     setFamilySaving(false);
 
@@ -206,7 +221,7 @@ export default function AdminPage() {
       console.error(error);
 
       if (error.code === "23505") {
-        setMessage("Aquesta família ja existeix en aquesta classe.");
+        setMessage("Ja existeix una família amb aquest nom en aquesta classe.");
       } else {
         setMessage(`No s'ha pogut crear la família: ${error.message}`);
       }
@@ -215,8 +230,13 @@ export default function AdminPage() {
     }
 
     setNewFamilyName("");
+    setEditingFamilyId(null);
     setShowFamilyFormModal(false);
-    setMessage("Família afegida correctament.");
+    setMessage(
+      editingFamilyId
+        ? "Família actualitzada correctament."
+        : "Família afegida correctament."
+    );
     await loadFamilies(selectedClassId);
   }
 
@@ -643,7 +663,9 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             <button
               type="button"
               onClick={() => {
+                setEditingFamilyId(null);
                 setNewFamilyName("");
+                setMessage("");
                 setShowFamilyFormModal(true);
               }}
             >
@@ -660,6 +682,16 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                   <div>
                     <strong>{family.student_name}</strong>
                     <p>Família vinculada a la classe seleccionada.</p>
+                  </div>
+
+                  <div className="admin-row-actions">
+                    <button
+                      type="button"
+                      className="secondary-action"
+                      onClick={() => handleStartEditFamily(family)}
+                    >
+                      Editar
+                    </button>
                   </div>
                 </div>
               ))
@@ -883,6 +915,8 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           onClick={() => {
             setShowFamilyFormModal(false);
             setNewFamilyName("");
+            setEditingFamilyId(null);
+            setMessage("");
           }}
         >
           <article
@@ -901,10 +935,11 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             </button>
 
             <p className="eyebrow">Famílies</p>
-            <h2>Afegir família</h2>
+            <h2>{editingFamilyId ? "Editar família" : "Afegir família"}</h2>
             <p className="modal-intro">
-              Afegeix una nova família a la classe seleccionada. Després apareixerà a les inscripcions,
-              confirmacions i votacions.
+              {editingFamilyId
+                ? "Modifica el nom de la família o infant seleccionat."
+                : "Afegeix una nova família a la classe seleccionada. Després apareixerà a les inscripcions, confirmacions i votacions."}
             </p>
 
             <form className="registration-form" onSubmit={handleCreateFamily}>
@@ -920,7 +955,11 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               </label>
 
               <button className="span-all" disabled={familySaving}>
-                {familySaving ? "Guardant..." : "Crear família"}
+                {familySaving
+                  ? "Guardant..."
+                  : editingFamilyId
+                    ? "Guardar canvis"
+                    : "Crear família"}
               </button>
 
               {message && <p className="admin-message span-all">{message}</p>}
