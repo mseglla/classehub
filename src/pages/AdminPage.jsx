@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [editingFamilyId, setEditingFamilyId] = useState(null);
   const [familyDeleteInfo, setFamilyDeleteInfo] = useState(null);
   const [familyDeleting, setFamilyDeleting] = useState(false);
+  const [pinUpdatingFamilyId, setPinUpdatingFamilyId] = useState(null);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
@@ -260,6 +261,41 @@ export default function AdminPage() {
     }
 
     return count || 0;
+  }
+
+  function generateFamilyPin() {
+    if (typeof window !== "undefined" && window.crypto) {
+      const values = new Uint32Array(1);
+      window.crypto.getRandomValues(values);
+      return String(1000 + (values[0] % 9000));
+    }
+
+    return String(Math.floor(1000 + Math.random() * 9000));
+  }
+
+  async function handleGenerateFamilyPin(family) {
+    setMessage("");
+    setPinUpdatingFamilyId(family.id);
+
+    const newPin = generateFamilyPin();
+
+    const { error } = await supabase
+      .from("ch_families")
+      .update({
+        access_pin: newPin,
+      })
+      .eq("id", family.id);
+
+    if (error) {
+      console.error(error);
+      setMessage(`No s'ha pogut actualitzar el PIN: ${error.message}`);
+      setPinUpdatingFamilyId(null);
+      return;
+    }
+
+    setMessage(`PIN actualitzat per a ${family.student_name}.`);
+    await loadFamilies(selectedClassId);
+    setPinUpdatingFamilyId(null);
   }
 
   async function handleReactivateFamily(family) {
@@ -798,6 +834,11 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                         ? "Família desactivada. Es manté l'historial, però no s'afegirà a noves accions."
                         : "Família activa vinculada a la classe seleccionada."}
                     </p>
+
+                    <p className="family-pin">
+                      PIN familiar:{" "}
+                      <strong>{family.access_pin || "pendent de generar"}</strong>
+                    </p>
                   </div>
 
                   <div className="admin-row-actions">
@@ -821,6 +862,19 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                           onClick={() => handleStartEditFamily(family)}
                         >
                           Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          className="secondary-action"
+                          disabled={pinUpdatingFamilyId === family.id}
+                          onClick={() => handleGenerateFamilyPin(family)}
+                        >
+                          {pinUpdatingFamilyId === family.id
+                            ? "Actualitzant..."
+                            : family.access_pin
+                              ? "Regenerar PIN"
+                              : "Generar PIN"}
                         </button>
 
                         <button

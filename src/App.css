@@ -1491,3 +1491,14 @@ select {
   background: #b91c1c;
 }
 
+.family-pin {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.family-pin strong {
+  color: #0f172a;
+  letter-spacing: 0.08em;
+}
+
