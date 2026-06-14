@@ -116,6 +116,57 @@ function FeedbackModal({
   );
 }
 
+
+function PrivacyModal({ onClose }) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <article className="modal privacy-modal" onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>Tancar</button>
+
+        <p className="eyebrow">Privacitat</p>
+        <h2>Com fem servir les dades a ClasseHub?</h2>
+
+        <p className="modal-intro">
+          ClasseHub és una eina per ajudar les famílies i delegats a organitzar millor les activitats de la classe.
+        </p>
+
+        <div className="privacy-content">
+          <section>
+            <h3>Quines dades es poden utilitzar?</h3>
+            <p>
+              Podem fer servir el nom de l'infant o família, la classe, les confirmacions d'assistència,
+              les inscripcions a activitats, les votacions i els missatges enviats a la bústia.
+            </p>
+          </section>
+
+          <section>
+            <h3>Per a què es fan servir?</h3>
+            <p>
+              Només per coordinar activitats de la classe: agenda, assistència, inscripcions,
+              votacions i comunicacions relacionades amb l'organització.
+            </p>
+          </section>
+
+          <section>
+            <h3>Qui pot veure la informació?</h3>
+            <p>
+              La informació necessària per coordinar una activitat pot ser visible dins l'espai de la classe.
+              Els missatges de la bústia i els detalls de gestió es reserven per als delegats o administradors.
+            </p>
+          </section>
+
+          <section>
+            <h3>Com demanar canvis?</h3>
+            <p>
+              Si alguna família vol corregir o eliminar alguna dada, pot contactar amb els delegats de la classe.
+            </p>
+          </section>
+        </div>
+      </article>
+    </div>
+  );
+}
+
 function DetailModal({ item, checklist, onClose }) {
   if (!item) return null;
 
@@ -920,6 +971,7 @@ export default function PublicApp() {
   const [feedbackType, setFeedbackType] = useState("millora");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackStatus, setFeedbackStatus] = useState("");
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   async function loadData() {
@@ -1462,7 +1514,17 @@ const visibleEvents = showFullCalendar
       </section>
   
       <footer className="footer">
-        <Home size={16} /> Ara no hi ha excusa per no estar al dia de tot!
+        <span>
+          <Home size={16} /> Ara no hi ha excusa per no estar al dia de tot!
+        </span>
+
+        <button
+          type="button"
+          className="footer-link"
+          onClick={() => setShowPrivacyModal(true)}
+        >
+          Privacitat
+        </button>
       </footer>
   
       {showFeedbackModal && (
@@ -1475,6 +1537,10 @@ const visibleEvents = showFullCalendar
           onSubmit={submitFeedback}
           onClose={() => setShowFeedbackModal(false)}
         />
+      )}
+
+      {showPrivacyModal && (
+        <PrivacyModal onClose={() => setShowPrivacyModal(false)} />
       )}
 
       <DetailModal
