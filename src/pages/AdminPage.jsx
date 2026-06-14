@@ -13,6 +13,9 @@ export default function AdminPage() {
   const [organizationResponses, setOrganizationResponses] = useState([]);
   const [organizationRegistrations, setOrganizationRegistrations] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [showFamilyFormModal, setShowFamilyFormModal] = useState(false);
+  const [newFamilyName, setNewFamilyName] = useState("");
+  const [familySaving, setFamilySaving] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
@@ -170,6 +173,51 @@ export default function AdminPage() {
     }
 
     setFamilies(data || []);
+  }
+
+  async function handleCreateFamily(event) {
+    event.preventDefault();
+    setMessage("");
+
+    const cleanName = newFamilyName.trim();
+
+    if (!selectedClassId) {
+      setMessage("Cal seleccionar una classe abans d'afegir una família.");
+      return;
+    }
+
+    if (!cleanName) {
+      setMessage("Cal escriure el nom de l'infant o família.");
+      return;
+    }
+
+    setFamilySaving(true);
+
+    const { error } = await supabase
+      .from("ch_families")
+      .insert({
+        class_id: Number(selectedClassId),
+        student_name: cleanName,
+      });
+
+    setFamilySaving(false);
+
+    if (error) {
+      console.error(error);
+
+      if (error.code === "23505") {
+        setMessage("Aquesta família ja existeix en aquesta classe.");
+      } else {
+        setMessage(`No s'ha pogut crear la família: ${error.message}`);
+      }
+
+      return;
+    }
+
+    setNewFamilyName("");
+    setShowFamilyFormModal(false);
+    setMessage("Família afegida correctament.");
+    await loadFamilies(selectedClassId);
   }
 
   async function loadFeedbacks() {
@@ -591,6 +639,18 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             subtitle="Llistat de famílies carregades per a la classe seleccionada."
           />
 
+          <div className="admin-row-actions">
+            <button
+              type="button"
+              onClick={() => {
+                setNewFamilyName("");
+                setShowFamilyFormModal(true);
+              }}
+            >
+              + Afegir família
+            </button>
+          </div>
+
           <div className="admin-list">
             {families.length === 0 ? (
               <p>No hi ha famílies carregades per aquesta classe.</p>
@@ -813,6 +873,58 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
           {message && <p className="admin-message">{message}</p>}
         </Card>
+          </article>
+        </div>
+      )}
+
+      {showFamilyFormModal && (
+        <div
+          className="modal-backdrop"
+          onClick={() => {
+            setShowFamilyFormModal(false);
+            setNewFamilyName("");
+          }}
+        >
+          <article
+            className="modal family-form-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => {
+                setShowFamilyFormModal(false);
+                setNewFamilyName("");
+              }}
+            >
+              Tancar
+            </button>
+
+            <p className="eyebrow">Famílies</p>
+            <h2>Afegir família</h2>
+            <p className="modal-intro">
+              Afegeix una nova família a la classe seleccionada. Després apareixerà a les inscripcions,
+              confirmacions i votacions.
+            </p>
+
+            <form className="registration-form" onSubmit={handleCreateFamily}>
+              <label className="span-all">
+                Nom de l'infant o família
+                <input
+                  type="text"
+                  value={newFamilyName}
+                  onChange={(event) => setNewFamilyName(event.target.value)}
+                  placeholder="Ex: Nil Segura"
+                  autoFocus
+                />
+              </label>
+
+              <button className="span-all" disabled={familySaving}>
+                {familySaving ? "Guardant..." : "Crear família"}
+              </button>
+
+              {message && <p className="admin-message span-all">{message}</p>}
+            </form>
           </article>
         </div>
       )}

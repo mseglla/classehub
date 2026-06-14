@@ -1465,3 +1465,7 @@ select {
   border: 0;
 }
 
+.family-form-modal {
+  width: min(620px, 100%);
+}
+
