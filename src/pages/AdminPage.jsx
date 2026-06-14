@@ -50,6 +50,9 @@ export default function AdminPage() {
     (eventItem) => eventItem.start_date && eventItem.start_date < todayIso
   ).length;
 
+  const activeFamilies = families.filter((family) => family.is_active !== false);
+  const inactiveFamiliesCount = families.length - activeFamilies.length;
+
   const detailEvent = detailEventId
     ? adminEvents.find((eventItem) => eventItem.id === detailEventId)
     : null;
@@ -326,8 +329,8 @@ export default function AdminPage() {
       return;
     }
 
-    if (publicationType !== "info" && families.length === 0) {
-      setMessage("No hi ha famílies carregades per aquesta classe.");
+    if (publicationType !== "info" && activeFamilies.length === 0) {
+      setMessage("No hi ha famílies actives carregades per aquesta classe.");
       return;
     }
 
@@ -415,7 +418,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         return;
       }
 
-      const participantsPayload = families.map((family) => ({
+      const participantsPayload = activeFamilies.map((family) => ({
         organization_id: organizationData.id,
         family_id: family.id,
       }));
@@ -655,6 +658,13 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             </button>
           </div>
 
+          <p className="admin-message">
+            {activeFamilies.length} famílies actives
+            {inactiveFamiliesCount > 0
+              ? ` · ${inactiveFamiliesCount} desactivades`
+              : ""}
+          </p>
+
           <div className="admin-list">
             {families.length === 0 ? (
               <p>No hi ha famílies carregades per aquesta classe.</p>
@@ -663,7 +673,11 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 <div className="admin-row" key={family.id}>
                   <div>
                     <strong>{family.student_name}</strong>
-                    <p>Família vinculada a la classe seleccionada.</p>
+                    <p>
+                      {family.is_active === false
+                        ? "Família desactivada. Es manté l'historial, però no s'afegirà a noves accions."
+                        : "Família activa vinculada a la classe seleccionada."}
+                    </p>
                   </div>
 
                   <div className="admin-row-actions">
