@@ -923,14 +923,26 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               <p>No hi ha famílies carregades per aquesta classe.</p>
             ) : (
               families.map((family) => (
-                <div className="admin-row" key={family.id}>
+                <div className="admin-row family-admin-row" key={family.id}>
                   <div>
                     <strong>{family.student_name}</strong>
-                    <p>
-                      {family.is_active === false
-                        ? "Família desactivada. Es manté l'historial, però no s'afegirà a noves accions."
-                        : "Família activa vinculada a la classe seleccionada."}
-                    </p>
+                    <div className="family-status-row">
+                      <span
+                        className={
+                          family.is_active === false
+                            ? "status-pill danger-pill"
+                            : "status-pill success-pill"
+                        }
+                      >
+                        {family.is_active === false ? "Desactivada" : "Activa"}
+                      </span>
+
+                      {family.is_active === false && (
+                        <span className="family-status-note">
+                          Es manté l'historial, però no s'afegirà a noves accions.
+                        </span>
+                      )}
+                    </div>
 
                     <div className="family-pin-row">
                       <p className="family-pin">

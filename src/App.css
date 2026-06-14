@@ -1562,3 +1562,60 @@ select {
   cursor: not-allowed;
 }
 
+.family-admin-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.family-admin-row .admin-row-actions {
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-width: 360px;
+}
+
+.family-pin-row {
+  align-items: baseline;
+}
+
+.inline-link-action {
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .family-admin-row {
+    grid-template-columns: 1fr;
+  }
+
+  .family-admin-row .admin-row-actions {
+    justify-content: flex-start;
+    max-width: none;
+  }
+
+  .family-pin-row {
+    align-items: center;
+  }
+}
+
+.family-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.family-status-note {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.danger-pill {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
