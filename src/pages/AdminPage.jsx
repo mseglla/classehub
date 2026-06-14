@@ -262,6 +262,27 @@ export default function AdminPage() {
     return count || 0;
   }
 
+  async function handleReactivateFamily(family) {
+    setMessage("");
+
+    const { error } = await supabase
+      .from("ch_families")
+      .update({
+        is_active: true,
+        deactivated_at: null,
+      })
+      .eq("id", family.id);
+
+    if (error) {
+      console.error(error);
+      setMessage(`No s'ha pogut reactivar la família: ${error.message}`);
+      return;
+    }
+
+    setMessage("Família reactivada correctament.");
+    await loadFamilies(selectedClassId);
+  }
+
   async function handleRequestDeleteFamily(family) {
     setMessage("");
 
@@ -781,7 +802,17 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
                   <div className="admin-row-actions">
                     {family.is_active === false ? (
-                      <span className="admin-message">Desactivada</span>
+                      <>
+                        <span className="admin-message">Desactivada</span>
+
+                        <button
+                          type="button"
+                          className="secondary-action"
+                          onClick={() => handleReactivateFamily(family)}
+                        >
+                          Reactivar
+                        </button>
+                      </>
                     ) : (
                       <>
                         <button
