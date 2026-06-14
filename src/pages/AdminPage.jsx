@@ -20,6 +20,7 @@ export default function AdminPage() {
   const [familyDeleteInfo, setFamilyDeleteInfo] = useState(null);
   const [familyDeleting, setFamilyDeleting] = useState(false);
   const [pinUpdatingFamilyId, setPinUpdatingFamilyId] = useState(null);
+  const [bulkPinGenerating, setBulkPinGenerating] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
@@ -55,6 +56,7 @@ export default function AdminPage() {
 
   const activeFamilies = families.filter((family) => family.is_active !== false);
   const inactiveFamiliesCount = families.length - activeFamilies.length;
+  const missingPinsCount = activeFamilies.filter((family) => !family.access_pin).length;
 
   const detailEvent = detailEventId
     ? adminEvents.find((eventItem) => eventItem.id === detailEventId)
@@ -296,6 +298,58 @@ export default function AdminPage() {
     setMessage(`PIN actualitzat per a ${family.student_name}.`);
     await loadFamilies(selectedClassId);
     setPinUpdatingFamilyId(null);
+  }
+
+  async function handleGenerateMissingFamilyPins() {
+    const familiesWithoutPin = activeFamilies.filter((family) => !family.access_pin);
+
+    if (familiesWithoutPin.length === 0) {
+      setMessage("Totes les famílies actives ja tenen PIN.");
+      return;
+    }
+
+    setMessage("");
+    setBulkPinGenerating(true);
+
+    const usedPins = new Set(
+      families
+        .map((family) => family.access_pin)
+        .filter(Boolean)
+    );
+
+    function generateUniquePin() {
+      let pin = generateFamilyPin();
+      let attempts = 0;
+
+      while (usedPins.has(pin) && attempts < 100) {
+        pin = generateFamilyPin();
+        attempts += 1;
+      }
+
+      usedPins.add(pin);
+      return pin;
+    }
+
+    try {
+      for (const family of familiesWithoutPin) {
+        const { error } = await supabase
+          .from("ch_families")
+          .update({
+            access_pin: generateUniquePin(),
+          })
+          .eq("id", family.id);
+
+        if (error) throw error;
+      }
+
+      setMessage(`S'han generat ${familiesWithoutPin.length} PINs pendents.`);
+      await loadFamilies(selectedClassId);
+    } catch (error) {
+      console.error(error);
+      setMessage(`No s'han pogut generar tots els PINs: ${error.message}`);
+    } finally {
+      setBulkPinGenerating(false);
+    }
   }
 
   async function handleReactivateFamily(family) {
@@ -800,7 +854,22 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             subtitle="Llistat de famílies carregades per a la classe seleccionada."
           />
 
-          <div className="admin-row-actions">
+          <div className="admin-row-actions family-toolbar-actions">
+            {missingPinsCount > 0 ? (
+              <button
+                type="button"
+                className="secondary-action subtle-action"
+                disabled={bulkPinGenerating}
+                onClick={handleGenerateMissingFamilyPins}
+              >
+                {bulkPinGenerating
+                  ? "Generant PINs..."
+                  : `Generar ${missingPinsCount} PINs pendents`}
+              </button>
+            ) : (
+              <span className="status-pill success-pill">PINs generats</span>
+            )}
+
             <button
               type="button"
               onClick={() => {

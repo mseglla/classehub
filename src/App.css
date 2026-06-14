@@ -1502,3 +1502,29 @@ select {
   letter-spacing: 0.08em;
 }
 
+.family-toolbar-actions {
+  align-items: center;
+}
+
+.subtle-action {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.success-pill {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
