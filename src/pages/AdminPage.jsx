@@ -28,6 +28,7 @@ export default function AdminPage() {
   const [editingEventId, setEditingEventId] = useState(null);
   const [showPastEvents, setShowPastEvents] = useState(false);
   const [detailEventId, setDetailEventId] = useState(null);
+  const [showEventFormModal, setShowEventFormModal] = useState(false);
 
   const selectedClass = classes.find(
     (classItem) => String(classItem.id) === selectedClassId
@@ -222,6 +223,7 @@ export default function AdminPage() {
     setDescription(eventItem.summary || eventItem.details || "");
     setPublicationType("info");
     setCloseDate("");
+    setShowEventFormModal(true);
     setMessage("Estàs editant aquest esdeveniment.");
   }
 
@@ -235,6 +237,7 @@ export default function AdminPage() {
     setPublicationType("info");
     setCloseDate("");
     setEditingEventId(null);
+    setShowEventFormModal(false);
   }
 
   async function handleCreateEvent(event) {
@@ -411,21 +414,11 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         <Card className="span-2">
           <SectionTitle
             icon={<CalendarDays size={22} />}
-            title={editingEventId ? "Editar esdeveniment" : "Crear esdeveniment"}
-            subtitle={
-              editingEventId
-                ? "Modifica les dades de l’esdeveniment seleccionat."
-                : "Afegeix un nou esdeveniment al calendari."
-            }
+            title="Panell d'administració"
+            subtitle="Gestiona la classe, crea esdeveniments i revisa l'activitat recent."
           />
 
-          {editingEventId && (
-            <div className="admin-message">
-              ✏️ Mode edició actiu: <strong>{title || "Esdeveniment seleccionat"}</strong>
-            </div>
-          )}
-
-          <div className="admin-message">
+          <div className="admin-toolbar">
             <label>
               Classe administrada
               <select
@@ -444,129 +437,18 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 ))}
               </select>
             </label>
+
+            <button
+              type="button"
+              onClick={() => {
+                resetForm();
+                setMessage("");
+                setShowEventFormModal(true);
+              }}
+            >
+              + Nou esdeveniment
+            </button>
           </div>
-
-          <form className="registration-form" onSubmit={handleCreateEvent}>
-            <label className="span-all">
-              Què vols crear?
-              <select
-                value={publicationType}
-                onChange={(event) => setPublicationType(event.target.value)}
-                disabled={Boolean(editingEventId)}
-              >
-                <option value="info">Només informar</option>
-                <option value="attendance">Demanar confirmació sí/no</option>
-                <option value="registration">Obrir inscripció familiar</option>
-              </select>
-            </label>
-
-            <div className="admin-message span-all">
-              <strong>{families.length}</strong> famílies carregades per aquesta classe.
-            </div>
-
-            <div className="admin-message span-all">
-              {publicationType === "info" && (
-                <span>Es crearà només un esdeveniment informatiu a l’agenda.</span>
-              )}
-
-              {publicationType === "attendance" && (
-                <span>Les famílies podran confirmar si vindran o no.</span>
-              )}
-
-              {publicationType === "registration" && (
-                <span>Les famílies podran inscriure adults, infants i comentaris.</span>
-              )}
-            </div>
-
-            {publicationType !== "info" && (
-              <label className="span-all">
-                Data límit de resposta
-                <input
-                  type="date"
-                  value={closeDate}
-                  onChange={(event) => setCloseDate(event.target.value)}
-                />
-              </label>
-            )}
-
-            <label>
-              Tipus
-              <select
-                value={eventType}
-                onChange={(event) => setEventType(event.target.value)}
-              >
-                <option value="classe">Classe</option>
-                <option value="escola">Escola</option>
-              </select>
-            </label>
-
-            <label>
-              Data
-              <input
-                type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-              />
-            </label>
-
-            <label className="span-all">
-              Títol
-              <input
-                type="text"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Ex: Aniversari Nil"
-              />
-            </label>
-
-            <label>
-              Hora
-              <input
-                type="time"
-                value={startTime}
-                onChange={(event) => setStartTime(event.target.value)}
-              />
-            </label>
-
-            <label className="span-all">
-              Lloc
-              <input
-                type="text"
-                value={location}
-                onChange={(event) => setLocation(event.target.value)}
-                placeholder="Ex: Parc, escola, platja..."
-              />
-            </label>
-
-            <label className="span-all">
-              Descripció
-              <input
-                type="text"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Informació breu per a les famílies"
-              />
-            </label>
-            {editingEventId && (
-  <button
-    type="button"
-    className="secondary-action span-all"
-    onClick={() => {
-      resetForm();
-      setMessage("");
-    }}
-  >
-    Cancel·lar edició
-  </button>
-)}
-            <button className="span-all" disabled={saving}>
-  {saving
-    ? "Guardant..."
-    : editingEventId
-      ? "Guardar canvis"
-      : "Crear esdeveniment"}
-</button>
-          </form>
 
           {message && <p className="admin-message">{message}</p>}
         </Card>
@@ -749,6 +631,191 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           </div>
         </Card>
       </section>
+
+      {showEventFormModal && (
+        <div
+          className="modal-backdrop"
+          onClick={() => {
+            resetForm();
+            setMessage("");
+          }}
+        >
+          <article
+            className="modal admin-event-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => {
+                resetForm();
+                setMessage("");
+              }}
+            >
+              Tancar
+            </button>
+
+        <Card className="span-2">
+          <SectionTitle
+            icon={<CalendarDays size={22} />}
+            title={editingEventId ? "Editar esdeveniment" : "Crear esdeveniment"}
+            subtitle={
+              editingEventId
+                ? "Modifica les dades de l’esdeveniment seleccionat."
+                : "Afegeix un nou esdeveniment al calendari."
+            }
+          />
+
+          {editingEventId && (
+            <div className="admin-message">
+              ✏️ Mode edició actiu: <strong>{title || "Esdeveniment seleccionat"}</strong>
+            </div>
+          )}
+
+          <div className="admin-message">
+            <label>
+              Classe administrada
+              <select
+                value={selectedClassId}
+                onChange={(event) => {
+                  setSelectedClassId(event.target.value);
+                  loadAdminEvents(event.target.value);
+                  loadAdminActionData(event.target.value);
+                  loadFamilies(event.target.value);
+                }}
+              >
+                {classes.map((classItem) => (
+                  <option key={classItem.id} value={classItem.id}>
+                    {classItem.emoji} {classItem.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <form className="registration-form" onSubmit={handleCreateEvent}>
+            <label className="span-all">
+              Què vols crear?
+              <select
+                value={publicationType}
+                onChange={(event) => setPublicationType(event.target.value)}
+                disabled={Boolean(editingEventId)}
+              >
+                <option value="info">Només informar</option>
+                <option value="attendance">Demanar confirmació sí/no</option>
+                <option value="registration">Obrir inscripció familiar</option>
+              </select>
+            </label>
+
+            <div className="admin-message span-all">
+              {publicationType === "info" && (
+                <span>Es crearà només un esdeveniment informatiu a l’agenda.</span>
+              )}
+
+              {publicationType === "attendance" && (
+                <span>Les famílies podran confirmar si vindran o no.</span>
+              )}
+
+              {publicationType === "registration" && (
+                <span>Les famílies podran inscriure adults, infants i comentaris.</span>
+              )}
+            </div>
+
+            {publicationType !== "info" && (
+              <label className="span-all">
+                Data límit de resposta
+                <input
+                  type="date"
+                  value={closeDate}
+                  onChange={(event) => setCloseDate(event.target.value)}
+                />
+              </label>
+            )}
+
+            <label>
+              Tipus
+              <select
+                value={eventType}
+                onChange={(event) => setEventType(event.target.value)}
+              >
+                <option value="classe">Classe</option>
+                <option value="escola">Escola</option>
+              </select>
+            </label>
+
+            <label>
+              Data
+              <input
+                type="date"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+              />
+            </label>
+
+            <label className="span-all">
+              Títol
+              <input
+                type="text"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="Ex: Aniversari Nil"
+              />
+            </label>
+
+            <label>
+              Hora
+              <input
+                type="time"
+                value={startTime}
+                onChange={(event) => setStartTime(event.target.value)}
+              />
+            </label>
+
+            <label className="span-all">
+              Lloc
+              <input
+                type="text"
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+                placeholder="Ex: Parc, escola, platja..."
+              />
+            </label>
+
+            <label className="span-all">
+              Descripció
+              <input
+                type="text"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Informació breu per a les famílies"
+              />
+            </label>
+            {editingEventId && (
+  <button
+    type="button"
+    className="secondary-action span-all"
+    onClick={() => {
+      resetForm();
+      setMessage("");
+    }}
+  >
+    Cancel·lar edició
+  </button>
+)}
+            <button className="span-all" disabled={saving}>
+  {saving
+    ? "Guardant..."
+    : editingEventId
+      ? "Guardar canvis"
+      : "Crear esdeveniment"}
+</button>
+          </form>
+
+          {message && <p className="admin-message">{message}</p>}
+        </Card>
+          </article>
+        </div>
+      )}
 
       {detailEvent && detailOrganization && (
         <div className="modal-backdrop" onClick={() => setDetailEventId(null)}>

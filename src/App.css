@@ -1442,3 +1442,26 @@ select {
   line-height: 1.45;
 }
 
+.admin-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-toolbar label {
+  flex: 1;
+  min-width: 220px;
+}
+
+.admin-event-modal {
+  width: min(820px, 100%);
+}
+
+.admin-event-modal .card {
+  box-shadow: none;
+  padding: 0;
+  border: 0;
+}
+
