@@ -21,6 +21,7 @@ export default function AdminPage() {
   const [familyDeleting, setFamilyDeleting] = useState(false);
   const [pinUpdatingFamilyId, setPinUpdatingFamilyId] = useState(null);
   const [bulkPinGenerating, setBulkPinGenerating] = useState(false);
+  const [copiedAccessFamilyId, setCopiedAccessFamilyId] = useState(null);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState("classe");
@@ -273,6 +274,33 @@ export default function AdminPage() {
     }
 
     return String(Math.floor(1000 + Math.random() * 9000));
+  }
+
+  async function handleCopyFamilyAccess(family) {
+    if (!family.access_pin) {
+      setMessage("Aquesta família encara no té PIN generat.");
+      return;
+    }
+
+    const accessMessage = `Hola! Per accedir a ClasseHub:
+
+https://classehub-psi.vercel.app/classe/orenetes
+
+Família: ${family.student_name}
+PIN: ${family.access_pin}`;
+
+    try {
+      await navigator.clipboard.writeText(accessMessage);
+      setCopiedAccessFamilyId(family.id);
+      setMessage(`Missatge d'accés copiat per a ${family.student_name}.`);
+
+      window.setTimeout(() => {
+        setCopiedAccessFamilyId(null);
+      }, 1800);
+    } catch (error) {
+      console.error(error);
+      setMessage("No s'ha pogut copiar el missatge d'accés.");
+    }
   }
 
   async function handleGenerateFamilyPin(family) {
@@ -904,10 +932,25 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                         : "Família activa vinculada a la classe seleccionada."}
                     </p>
 
-                    <p className="family-pin">
-                      PIN familiar:{" "}
-                      <strong>{family.access_pin || "pendent de generar"}</strong>
-                    </p>
+                    <div className="family-pin-row">
+                      <p className="family-pin">
+                        PIN familiar:{" "}
+                        <strong>{family.access_pin || "pendent de generar"}</strong>
+                      </p>
+
+                      {family.is_active !== false && (
+                        <button
+                          type="button"
+                          className="inline-link-action"
+                          disabled={!family.access_pin}
+                          onClick={() => handleCopyFamilyAccess(family)}
+                        >
+                          {copiedAccessFamilyId === family.id
+                            ? "Copiat!"
+                            : "Copiar accés"}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="admin-row-actions">
