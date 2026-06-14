@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Users } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { Card, SectionTitle } from "../components/LayoutComponents";
 import { shortDate } from "../utils/dateHelpers";
@@ -700,6 +700,29 @@ console.log("Resultat guardar esdeveniment:", { data, error });
     })
   )}
 </div>
+        </Card>
+
+        <Card className="span-2">
+          <SectionTitle
+            icon={<Users size={22} />}
+            title="Famílies de la classe"
+            subtitle="Llistat de famílies carregades per a la classe seleccionada."
+          />
+
+          <div className="admin-list">
+            {families.length === 0 ? (
+              <p>No hi ha famílies carregades per aquesta classe.</p>
+            ) : (
+              families.map((family) => (
+                <div className="admin-row" key={family.id}>
+                  <div>
+                    <strong>{family.student_name}</strong>
+                    <p>Família vinculada a la classe seleccionada.</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </Card>
 
         <Card className="span-2">
