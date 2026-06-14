@@ -1469,3 +1469,25 @@ select {
   width: min(620px, 100%);
 }
 
+.delete-confirmation-modal {
+  width: min(560px, 100%);
+}
+
+.delete-confirmation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.danger-action {
+  background: #dc2626;
+  color: white;
+  border: 0;
+}
+
+.danger-action:hover {
+  background: #b91c1c;
+}
+

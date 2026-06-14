@@ -73,6 +73,10 @@ export default function AdminPage() {
       )
     : [];
 
+  const eventPendingDelete = eventToDelete
+    ? adminEvents.find((eventItem) => eventItem.id === eventToDelete)
+    : null;
+
   function getFamilyName(familyId) {
     return (
       families.find((family) => family.id === familyId)?.student_name ||
@@ -615,35 +619,13 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             Editar
           </button>
         )}
-  {eventToDelete === event.id ? (
-    <>
-      <button
-        type="button"
-        className="secondary-action"
-        onClick={() => setEventToDelete(null)}
-      >
-        No
-      </button>
-
-      <span className="danger-text">Eliminar definitivament?</span>
-
-      <button
-        type="button"
-        className="secondary-action danger-text"
-        onClick={() => handleDeleteEvent(event.id)}
-      >
-        Sí, eliminar
-      </button>
-    </>
-  ) : (
-    <button
-      type="button"
-      className="secondary-action danger-text"
-      onClick={() => setEventToDelete(event.id)}
-    >
-      Eliminar
-    </button>
-  )}
+  <button
+    type="button"
+    className="secondary-action danger-text"
+    onClick={() => setEventToDelete(event.id)}
+  >
+    Eliminar
+  </button>
 </div>
       </div>
       );
@@ -964,6 +946,48 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
               {message && <p className="admin-message span-all">{message}</p>}
             </form>
+          </article>
+        </div>
+      )}
+
+      {eventPendingDelete && (
+        <div className="modal-backdrop" onClick={() => setEventToDelete(null)}>
+          <article
+            className="modal delete-confirmation-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => setEventToDelete(null)}
+            >
+              Tancar
+            </button>
+
+            <p className="eyebrow">Eliminar esdeveniment</p>
+            <h2>Vols eliminar aquest esdeveniment?</h2>
+
+            <p className="modal-intro">
+              S'eliminarà <strong>{eventPendingDelete.title}</strong>. Aquesta acció no es podrà desfer.
+            </p>
+
+            <div className="delete-confirmation-actions">
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() => setEventToDelete(null)}
+              >
+                Cancel·lar
+              </button>
+
+              <button
+                type="button"
+                className="danger-action"
+                onClick={() => handleDeleteEvent(eventPendingDelete.id)}
+              >
+                Sí, eliminar
+              </button>
+            </div>
           </article>
         </div>
       )}
