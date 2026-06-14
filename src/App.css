@@ -1619,3 +1619,251 @@ select {
   border: 1px solid #fecaca;
 }
 
+
+/* Admin mobile viewport safety */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.page {
+  max-width: 1180px;
+  overflow-x: hidden;
+}
+
+.admin-session-bar {
+  width: 100%;
+  max-width: 100%;
+}
+
+.admin-row,
+.admin-row > div,
+.card,
+.hero {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .page {
+    width: 100%;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .hero,
+  .card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero-main {
+    display: grid;
+    gap: 14px;
+  }
+
+  .hero-badge {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Admin event cards mobile layout */
+.admin-event-row {
+  align-items: stretch;
+}
+
+.admin-event-main {
+  min-width: 0;
+}
+
+.admin-event-main strong {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.admin-event-main p {
+  line-height: 1.35;
+}
+
+.admin-event-row .admin-row-actions {
+  align-self: center;
+}
+
+@media (max-width: 720px) {
+  .admin-event-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .admin-event-main strong {
+    font-size: 1.05rem;
+  }
+
+  .admin-event-main p {
+    font-size: 0.9rem;
+  }
+
+  .admin-event-row .admin-row-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .admin-event-row .admin-row-actions button,
+  .admin-event-row .admin-row-actions .secondary-action {
+    width: 100%;
+    justify-content: center;
+    min-height: 42px;
+  }
+}
+
+/* Admin family cards mobile layout */
+.family-admin-row {
+  align-items: stretch;
+}
+
+.family-admin-row > div:first-child {
+  min-width: 0;
+}
+
+.family-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.family-pin-row {
+  margin-top: 10px;
+}
+
+.family-pin {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.family-pin strong {
+  color: #0f172a;
+  letter-spacing: 0.06em;
+}
+
+.inline-link-action {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: none;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-size: 0.84rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.inline-link-action:hover:not(:disabled) {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+.inline-link-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .family-toolbar-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .family-toolbar-actions button,
+  .family-toolbar-actions .status-pill {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .family-admin-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .family-admin-row > div:first-child {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 10px;
+  }
+
+  .family-admin-row > div:first-child > strong {
+    min-width: 0;
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+
+  .family-status-row {
+    justify-content: flex-end;
+  }
+
+  .family-status-row .status-pill {
+    flex: 0 0 auto;
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+  }
+
+  .family-status-note {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .family-pin-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .family-pin {
+    font-size: 0.94rem;
+  }
+
+  .inline-link-action {
+    width: 100%;
+    min-height: 40px;
+    justify-content: center;
+  }
+
+  .family-admin-row .admin-row-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .family-admin-row .admin-row-actions button,
+  .family-admin-row .admin-row-actions .secondary-action {
+    width: 100%;
+    min-height: 42px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .family-admin-row .admin-row-actions button:nth-child(2),
+  .family-admin-row .admin-row-actions button:nth-child(3) {
+    grid-column: span 2;
+  }
+}

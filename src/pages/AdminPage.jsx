@@ -815,8 +815,8 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         : 0;
 
       return (
-      <div className="admin-row" key={event.id}>
-        <div>
+      <div className="admin-row admin-event-row" key={event.id}>
+        <div className="admin-event-main">
           <strong>{event.title}</strong>
           <p>
             {typeMeta[event.event_type]?.label || "Esdeveniment"} · {shortDate(event.start_date)}
