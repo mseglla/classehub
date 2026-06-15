@@ -1286,16 +1286,24 @@ const visibleEvents = showFullCalendar
       await loadData();
     }
   async function handleOrganizationResponse(organizationId, familyId, response) {
-    const { error: responseError } = await supabase
-      .from("ch_organization_responses")
-      .upsert(
-        {
-          organization_id: organizationId,
-          family_id: familyId,
-          response,
-        },
-        { onConflict: "organization_id,family_id" }
-      );
+    const responseRequest = familyAccessPin
+      ? supabase.rpc("respond_organization_with_pin", {
+          p_organization_id: organizationId,
+          p_access_pin: familyAccessPin,
+          p_response: response,
+        })
+      : supabase
+          .from("ch_organization_responses")
+          .upsert(
+            {
+              organization_id: organizationId,
+              family_id: familyId,
+              response,
+            },
+            { onConflict: "organization_id,family_id" }
+          );
+
+    const { error: responseError } = await responseRequest;
 
     if (responseError) {
       alert("No s'ha pogut guardar la resposta.");
