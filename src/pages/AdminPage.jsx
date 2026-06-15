@@ -946,26 +946,40 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
                     <div className="family-pin-row">
                       <p className="family-pin">
-                        PIN familiar:{" "}
-                        <strong>{family.access_pin || "pendent de generar"}</strong>
+                        PIN familiar: <strong>{family.access_pin || "pendent de generar"}</strong>
                       </p>
 
                       {family.is_active !== false && (
-                        <button
-                          type="button"
-                          className="inline-link-action"
-                          disabled={!family.access_pin}
-                          onClick={() => handleCopyFamilyAccess(family)}
-                        >
-                          {copiedAccessFamilyId === family.id
-                            ? "Copiat!"
-                            : "Copiar accés"}
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="secondary-action family-copy-action"
+                            disabled={!family.access_pin}
+                            onClick={() => handleCopyFamilyAccess(family)}
+                          >
+                            {copiedAccessFamilyId === family.id
+                              ? "Copiat!"
+                              : "Copiar accés"}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="secondary-action family-pin-action"
+                            disabled={pinUpdatingFamilyId === family.id}
+                            onClick={() => handleGenerateFamilyPin(family)}
+                          >
+                            {pinUpdatingFamilyId === family.id
+                              ? "Actualitzant..."
+                              : family.access_pin
+                                ? "Regenerar PIN"
+                                : "Generar PIN"}
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
 
-                  <div className="admin-row-actions">
+                  <div className="admin-row-actions family-general-actions">
                     {family.is_active === false ? (
                       <>
                         <span className="admin-message">Desactivada</span>
@@ -986,19 +1000,6 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                           onClick={() => handleStartEditFamily(family)}
                         >
                           Editar
-                        </button>
-
-                        <button
-                          type="button"
-                          className="secondary-action"
-                          disabled={pinUpdatingFamilyId === family.id}
-                          onClick={() => handleGenerateFamilyPin(family)}
-                        >
-                          {pinUpdatingFamilyId === family.id
-                            ? "Actualitzant..."
-                            : family.access_pin
-                              ? "Regenerar PIN"
-                              : "Generar PIN"}
                         </button>
 
                         <button

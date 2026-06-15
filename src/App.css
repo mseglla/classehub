@@ -1925,3 +1925,44 @@ body,
     padding-right: 7px;
   }
 }
+
+/* Family card action grouping */
+.family-copy-action,
+.family-pin-action {
+  justify-content: center;
+}
+
+@media (max-width: 720px) {
+  .family-pin-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .family-pin-row .family-pin {
+    grid-column: 1 / -1;
+  }
+
+  .family-copy-action,
+  .family-pin-action {
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 8px;
+    font-size: 0.8rem;
+  }
+
+  .family-general-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .family-general-actions button,
+  .family-general-actions .secondary-action {
+    width: 100%;
+    min-height: 40px;
+  }
+}
