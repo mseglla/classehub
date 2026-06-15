@@ -86,6 +86,34 @@ export default function AdminPage() {
     ? adminEvents.find((eventItem) => eventItem.id === eventToDelete)
     : null;
 
+  const registrationSummary = detailRegistrations.reduce(
+    (summary, registration) => ({
+      adults: summary.adults + (registration.adults_count || 0),
+      children: summary.children + (registration.children_count || 0),
+      under3: summary.under3 + (registration.under3_count || 0),
+    }),
+    { adults: 0, children: 0, under3: 0 }
+  );
+
+  const attendanceSummary = detailResponses.reduce(
+    (summary, response) => {
+      if (response.response === "yes") return { ...summary, yes: summary.yes + 1 };
+      if (response.response === "no") return { ...summary, no: summary.no + 1 };
+      if (response.response === "maybe") return { ...summary, maybe: summary.maybe + 1 };
+      return { ...summary, other: summary.other + 1 };
+    },
+    { yes: 0, no: 0, maybe: 0, other: 0 }
+  );
+
+  const detailAnsweredCount =
+    detailOrganization?.organization_type === "registration"
+      ? detailRegistrations.length
+      : detailResponses.length;
+
+  const detailPendingCount = detailOrganization
+    ? Math.max(activeFamilies.length - detailAnsweredCount, 0)
+    : 0;
+
   function getFamilyName(familyId) {
     return (
       families.find((family) => family.id === familyId)?.student_name ||
@@ -1440,33 +1468,80 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 : "Consulta les respostes rebudes de les famílies."}
             </p>
 
-            <div className="detail-grid">
-              <div>
-                <span>Tipus</span>
-                <strong>
-                  {detailOrganization.organization_type === "registration"
-                    ? "Inscripció"
-                    : "Confirmació"}
-                </strong>
-              </div>
+            <div className="detail-grid action-stats-grid">
+              {detailOrganization.organization_type === "registration" ? (
+                <>
+                  <div>
+                    <span>Famílies</span>
+                    <strong>{detailRegistrations.length}</strong>
+                  </div>
 
-              <div>
-                <span>Total</span>
-                <strong>
-                  {detailOrganization.organization_type === "registration"
-                    ? `${detailRegistrations.length} famílies`
-                    : `${detailResponses.length} respostes`}
-                </strong>
-              </div>
+                  <div>
+                    <span>Adults</span>
+                    <strong>{registrationSummary.adults}</strong>
+                  </div>
 
-              <div>
-                <span>Data límit</span>
-                <strong>
-                  {detailOrganization.close_date
-                    ? shortDate(detailOrganization.close_date)
-                    : "Sense límit"}
-                </strong>
-              </div>
+                  <div>
+                    <span>Infants</span>
+                    <strong>{registrationSummary.children}</strong>
+                  </div>
+
+                  <div>
+                    <span>Menors de 3</span>
+                    <strong>{registrationSummary.under3}</strong>
+                  </div>
+
+                  <div>
+                    <span>Pendents</span>
+                    <strong>{detailPendingCount}</strong>
+                  </div>
+
+                  <div>
+                    <span>Data límit</span>
+                    <strong>
+                      {detailOrganization.close_date
+                        ? shortDate(detailOrganization.close_date)
+                        : "Sense límit"}
+                    </strong>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <span>Sí</span>
+                    <strong>{attendanceSummary.yes}</strong>
+                  </div>
+
+                  <div>
+                    <span>No</span>
+                    <strong>{attendanceSummary.no}</strong>
+                  </div>
+
+                  <div>
+                    <span>Potser</span>
+                    <strong>{attendanceSummary.maybe}</strong>
+                  </div>
+
+                  <div>
+                    <span>Altres</span>
+                    <strong>{attendanceSummary.other}</strong>
+                  </div>
+
+                  <div>
+                    <span>Pendents</span>
+                    <strong>{detailPendingCount}</strong>
+                  </div>
+
+                  <div>
+                    <span>Data límit</span>
+                    <strong>
+                      {detailOrganization.close_date
+                        ? shortDate(detailOrganization.close_date)
+                        : "Sense límit"}
+                    </strong>
+                  </div>
+                </>
+              )}
             </div>
 
             {detailOrganization.organization_type === "registration" && (

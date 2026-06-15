@@ -2109,3 +2109,41 @@ body,
     gap: 8px;
   }
 }
+
+/* Action detail modal stats */
+.action-stats-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.action-stats-grid div {
+  text-align: center;
+}
+
+.action-stats-grid strong {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .action-detail-modal {
+    padding: 20px;
+  }
+
+  .action-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .action-stats-grid div {
+    padding: 12px 10px;
+    border-radius: 16px;
+  }
+
+  .action-stats-grid span {
+    font-size: 0.68rem;
+  }
+
+  .action-stats-grid strong {
+    font-size: 1.3rem;
+  }
+}
