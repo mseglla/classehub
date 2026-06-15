@@ -244,7 +244,7 @@ function DetailModal({ item, checklist, onClose }) {
   );
 }
 
-function PollCard({ poll, families, votes, onVote, onOpenResults }) {
+function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }) {
   const [familyId, setFamilyId] = useState("");
   const [optionId, setOptionId] = useState("");
 
@@ -253,10 +253,17 @@ function PollCard({ poll, families, votes, onVote, onOpenResults }) {
 
   async function submitVote(e) {
     e.preventDefault();
-    if (!familyId || !optionId) return;
 
-    await onVote(poll.id, Number(optionId), Number(familyId));
-    setFamilyId("");
+    const selectedFamilyId = activeFamily?.id || Number(familyId);
+
+    if (!selectedFamilyId || !optionId) return;
+
+    await onVote(poll.id, Number(optionId), selectedFamilyId);
+
+    if (!activeFamily) {
+      setFamilyId("");
+    }
+
     setOptionId("");
   }
 
@@ -272,18 +279,25 @@ function PollCard({ poll, families, votes, onVote, onOpenResults }) {
       </div>
 
       <form className="registration-form" onSubmit={submitVote}>
-        <label className="span-all">
-          Família
-          <select value={familyId} onChange={(e) => setFamilyId(e.target.value)}>
-            <option value="">Selecciona família</option>
-            {families.map((family) => (
-              <option key={family.id} value={family.id}>
-                {votedFamilies.has(family.id) ? "✓ " : ""}
-                {family.student_name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {activeFamily ? (
+          <div className="span-all linked-family-box">
+            <span>Família identificada</span>
+            <strong>{activeFamily.student_name}</strong>
+          </div>
+        ) : (
+          <label className="span-all">
+            Família
+            <select value={familyId} onChange={(e) => setFamilyId(e.target.value)}>
+              <option value="">Selecciona família</option>
+              {families.map((family) => (
+                <option key={family.id} value={family.id}>
+                  {votedFamilies.has(family.id) ? "✓ " : ""}
+                  {family.student_name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label className="span-all">
           Resposta
@@ -1238,19 +1252,30 @@ const visibleEvents = showFullCalendar
       under3Count,
       comment
     ) {
-      const { error: registrationError } = await supabase
-        .from("ch_organization_registrations")
-        .upsert(
-          {
-            organization_id: organizationId,
-            family_id: familyId,
-            adults_count: adultsCount,
-            children_count: childrenCount,
-            under3_count: under3Count,
-            comment,
-          },
-          { onConflict: "organization_id,family_id" }
-        );
+      const registrationRequest = familyAccessPin
+        ? supabase.rpc("register_organization_with_pin", {
+            p_organization_id: organizationId,
+            p_access_pin: familyAccessPin,
+            p_adults_count: adultsCount,
+            p_children_count: childrenCount,
+            p_under3_count: under3Count,
+            p_comment: comment || "",
+          })
+        : supabase
+            .from("ch_organization_registrations")
+            .upsert(
+              {
+                organization_id: organizationId,
+                family_id: familyId,
+                adults_count: adultsCount,
+                children_count: childrenCount,
+                under3_count: under3Count,
+                comment,
+              },
+              { onConflict: "organization_id,family_id" }
+            );
+
+      const { error: registrationError } = await registrationRequest;
     
       if (registrationError) {
         alert("No s'ha pogut guardar la inscripció.");
@@ -1601,6 +1626,7 @@ const visibleEvents = showFullCalendar
                   poll={poll}
                   families={families}
                   votes={votes}
+                  activeFamily={activeFamily}
                   onVote={handleVote}
                   onOpenResults={setSelectedPoll}
                 />
