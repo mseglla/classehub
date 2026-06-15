@@ -312,7 +312,7 @@ export default function AdminPage() {
 
     const accessMessage = `Hola! Per accedir a ClasseHub:
 
-https://classehub-psi.vercel.app/classe/orenetes
+https://classehub-psi.vercel.app/classe/orenetes?pin=${family.access_pin}
 
 Família: ${family.student_name}
 PIN: ${family.access_pin}`;

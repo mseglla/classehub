@@ -2220,3 +2220,57 @@ body,
     grid-template-columns: 1fr;
   }
 }
+
+/* Identified family session */
+.linked-family-box {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid #bbf7d0;
+  background: #ecfdf5;
+}
+
+.linked-family-box span {
+  display: block;
+  color: #047857;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.linked-family-box strong {
+  display: block;
+  margin-top: 4px;
+  color: #064e3b;
+  font-size: 1rem;
+}
+
+/* Family session banner */
+.family-session-banner {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid #bbf7d0;
+  background: #ecfdf5;
+  color: #064e3b;
+}
+
+.family-session-banner span {
+  font-weight: 900;
+  font-size: 0.9rem;
+}
+
+.family-session-banner small {
+  color: #047857;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+@media (max-width: 520px) {
+  .family-session-banner {
+    width: 100%;
+  }
+}

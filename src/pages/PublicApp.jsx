@@ -20,6 +20,19 @@ function getSlug() {
   return "orenetes";
 }
 
+function getFamilyAccessPin(slug) {
+  const storageKey = `classehub-family-pin-${slug}`;
+  const params = new URLSearchParams(window.location.search);
+  const urlPin = params.get("pin")?.trim();
+
+  if (urlPin) {
+    window.localStorage.setItem(storageKey, urlPin);
+    return urlPin;
+  }
+
+  return window.localStorage.getItem(storageKey) || "";
+}
+
 function formatCalendarDate(date, time) {
   if (!date) return "";
   const cleanTime = time ? time.replace(":", "").slice(0, 4) : "0900";
@@ -451,6 +464,7 @@ function AttendanceOrganizationModal({
   families,
   participants,
   responses,
+  activeFamily,
   onRespond,
   onClose,
 }) {
@@ -467,13 +481,25 @@ function AttendanceOrganizationModal({
     pendingFamilies,
   } = getAttendanceData(organization, families, participants, responses);
 
+  const activeAvailableFamily =
+    activeFamily &&
+    availableFamilies.some((family) => family.id === activeFamily.id)
+      ? activeFamily
+      : null;
+
   async function submitResponse(event) {
     event.preventDefault();
 
-    if (!familyId || !response) return;
+    const selectedFamilyId = activeAvailableFamily?.id || Number(familyId);
 
-    await onRespond(organization.id, Number(familyId), response);
-    setFamilyId("");
+    if (!selectedFamilyId || !response) return;
+
+    await onRespond(organization.id, Number(selectedFamilyId), response);
+
+    if (!activeAvailableFamily) {
+      setFamilyId("");
+    }
+
     setResponse("");
   }
 
@@ -517,22 +543,29 @@ function AttendanceOrganizationModal({
             <h3>{organization.question}</h3>
 
             <form className="registration-form" onSubmit={submitResponse}>
-  <label className="span-all">
-    Alumne
-    <select
-      value={familyId}
-      onChange={(event) => setFamilyId(event.target.value)}
-    >
-      <option value="">Selecciona alumne</option>
+  {activeAvailableFamily ? (
+    <div className="span-all linked-family-box">
+      <span>Família identificada</span>
+      <strong>{activeAvailableFamily.student_name}</strong>
+    </div>
+  ) : (
+    <label className="span-all">
+      Alumne
+      <select
+        value={familyId}
+        onChange={(event) => setFamilyId(event.target.value)}
+      >
+        <option value="">Selecciona alumne</option>
 
-      {availableFamilies.map((family) => (
-        <option key={family.id} value={family.id}>
-          {responseByFamily.has(family.id) ? "✓ " : ""}
-          {family.student_name}
-        </option>
-      ))}
-    </select>
-  </label>
+        {availableFamilies.map((family) => (
+          <option key={family.id} value={family.id}>
+            {responseByFamily.has(family.id) ? "✓ " : ""}
+            {family.student_name}
+          </option>
+        ))}
+      </select>
+    </label>
+  )}
 
   <label className="span-all">
     Resposta
@@ -781,6 +814,7 @@ function RegistrationOrganizationModal({
   families,
   participants,
   registrations,
+  activeFamily,
   onRegister,
   onClose,
 }) {
@@ -789,6 +823,28 @@ function RegistrationOrganizationModal({
   const [childrenCount, setChildrenCount] = useState(0);
   const [under3Count, setUnder3Count] = useState(0);
   const [comment, setComment] = useState("");
+
+  useEffect(() => {
+    if (!organization || !activeFamily) return;
+
+    const existingRegistration = registrations.find(
+      (registration) =>
+        registration.organization_id === organization.id &&
+        registration.family_id === activeFamily.id
+    );
+
+    if (existingRegistration) {
+      setAdultsCount(existingRegistration.adults_count || 0);
+      setChildrenCount(existingRegistration.children_count || 0);
+      setUnder3Count(existingRegistration.under3_count || 0);
+      setComment(existingRegistration.comment || "");
+    } else {
+      setAdultsCount(0);
+      setChildrenCount(0);
+      setUnder3Count(0);
+      setComment("");
+    }
+  }, [organization?.id, activeFamily?.id, registrations]);
 
   if (!organization) return null;
 
@@ -829,6 +885,12 @@ function RegistrationOrganizationModal({
     (family) => !registrationByFamily.has(family.id)
   );
 
+  const activeAvailableFamily =
+    activeFamily &&
+    availableFamilies.some((family) => family.id === activeFamily.id)
+      ? activeFamily
+      : null;
+
   function handleFamilyChange(value) {
     setFamilyId(value);
 
@@ -850,22 +912,26 @@ function RegistrationOrganizationModal({
   async function submitRegistration(event) {
     event.preventDefault();
 
-    if (!familyId) return;
+    const selectedFamilyId = activeAvailableFamily?.id || Number(familyId);
+
+    if (!selectedFamilyId) return;
 
     await onRegister(
       organization.id,
-      Number(familyId),
+      selectedFamilyId,
       Number(adultsCount),
       Number(childrenCount),
       Number(under3Count),
       comment
     );
 
-    setFamilyId("");
-    setAdultsCount(0);
-    setChildrenCount(0);
-    setUnder3Count(0);
-    setComment("");
+    if (!activeAvailableFamily) {
+      setFamilyId("");
+      setAdultsCount(0);
+      setChildrenCount(0);
+      setUnder3Count(0);
+      setComment("");
+    }
   }
 
   return (
@@ -907,18 +973,25 @@ function RegistrationOrganizationModal({
           <h3>Inscripció familiar</h3>
 
           <form className="registration-form" onSubmit={submitRegistration}>
-  <label className="span-all">
-    Família
-    <select value={familyId} onChange={(event) => handleFamilyChange(event.target.value)}>
-      <option value="">Selecciona alumne</option>
-      {availableFamilies.map((family) => (
-        <option key={family.id} value={family.id}>
-          {registrationByFamily.has(family.id) ? "✓ " : ""}
-          {family.student_name}
-        </option>
-      ))}
-    </select>
-  </label>
+  {activeAvailableFamily ? (
+    <div className="span-all linked-family-box">
+      <span>Família identificada</span>
+      <strong>{activeAvailableFamily.student_name}</strong>
+    </div>
+  ) : (
+    <label className="span-all">
+      Família
+      <select value={familyId} onChange={(event) => handleFamilyChange(event.target.value)}>
+        <option value="">Selecciona alumne</option>
+        {availableFamilies.map((family) => (
+          <option key={family.id} value={family.id}>
+            {registrationByFamily.has(family.id) ? "✓ " : ""}
+            {family.student_name}
+          </option>
+        ))}
+      </select>
+    </label>
+  )}
 
   <label>
     Adults
@@ -979,6 +1052,7 @@ export default function PublicApp() {
   const [feedbackStatus, setFeedbackStatus] = useState("");
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [familyAccessPin] = useState(() => getFamilyAccessPin(slug));
 
   async function loadData() {
     setLoading(true);
@@ -1097,6 +1171,17 @@ export default function PublicApp() {
   useEffect(() => {
     loadData();
   }, [slug]);
+
+  const activeFamily = useMemo(() => {
+    if (!familyAccessPin) return null;
+
+    return (
+      families.find(
+        (family) =>
+          String(family.access_pin || "").trim() === String(familyAccessPin).trim()
+      ) || null
+    );
+  }, [families, familyAccessPin]);
 
   const futureEvents = useMemo(() => {
     const today = new Date();
@@ -1241,6 +1326,13 @@ const visibleEvents = showFullCalendar
           <div className="class-hero-copy">
             <h1>{displayClassName}</h1>
             <p>{displaySchoolYear}</p>
+
+            {activeFamily && (
+              <div className="family-session-banner">
+                <span>👋 Benvinguda, família de {activeFamily.student_name}</span>
+                <small>Esteu accedint amb el vostre PIN familiar.</small>
+              </div>
+            )}
           </div>
 
           <button
@@ -1560,6 +1652,7 @@ const visibleEvents = showFullCalendar
         families={families}
         participants={organizationParticipants}
         responses={organizationResponses}
+        activeFamily={activeFamily}
         onRespond={handleOrganizationResponse}
         onClose={() => setSelectedOrganization(null)}
       />
@@ -1569,6 +1662,7 @@ const visibleEvents = showFullCalendar
         families={families}
         participants={organizationParticipants}
         registrations={organizationRegistrations}
+        activeFamily={activeFamily}
         onRegister={handleOrganizationRegistration}
         onClose={() => setSelectedRegistration(null)}
       />
