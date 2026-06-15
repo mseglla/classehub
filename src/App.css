@@ -1905,3 +1905,23 @@ body,
     grid-column: 1 / -1;
   }
 }
+
+/* Wider mobile admin action layout */
+@media (min-width: 390px) and (max-width: 720px) {
+  .admin-event-row .admin-row-actions,
+  .family-admin-row .admin-row-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-event-row .admin-row-actions button:nth-child(3),
+  .family-admin-row .admin-row-actions button:nth-child(3) {
+    grid-column: auto;
+  }
+
+  .admin-event-row .admin-row-actions button,
+  .family-admin-row .admin-row-actions button {
+    font-size: 0.78rem;
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+}
