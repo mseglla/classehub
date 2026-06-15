@@ -33,6 +33,11 @@ function getFamilyAccessPin(slug) {
   return window.localStorage.getItem(storageKey) || "";
 }
 
+function saveFamilyAccessPin(slug, pin) {
+  const storageKey = `classehub-family-pin-${slug}`;
+  window.localStorage.setItem(storageKey, pin);
+}
+
 function formatCalendarDate(date, time) {
   if (!date) return "";
   const cleanTime = time ? time.replace(":", "").slice(0, 4) : "0900";
@@ -74,6 +79,56 @@ function downloadCalendarEvent(item) {
   link.click();
 
   URL.revokeObjectURL(url);
+}
+
+function FamilyPinAccessScreen({
+  displayClassName,
+  displaySchoolYear,
+  pinInput,
+  setPinInput,
+  pinError,
+  onSubmit,
+}) {
+  return (
+    <main className="family-access-page">
+      <section className="family-access-card">
+        <div className="family-access-badge">ClasseHub</div>
+
+        <div className="family-access-icon">🎒</div>
+
+        <h1>{displayClassName}</h1>
+        <p className="family-access-year">{displaySchoolYear}</p>
+
+        <p className="family-access-intro">
+          Introdueix el teu PIN familiar per veure l'agenda, confirmar assistència
+          i gestionar les inscripcions de la família.
+        </p>
+
+        <form className="family-pin-form" onSubmit={onSubmit}>
+          <label>
+            PIN familiar
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={pinInput}
+              onChange={(event) => setPinInput(event.target.value)}
+              placeholder="Ex. 1638"
+              maxLength={8}
+            />
+          </label>
+
+          {pinError && <p className="family-pin-error">{pinError}</p>}
+
+          <button type="submit">Entrar a ClasseHub</button>
+        </form>
+
+        <p className="family-access-help">
+          No saps el PIN? Demana'l al delegat o delegada de la classe.
+        </p>
+      </section>
+    </main>
+  );
 }
 
 function FeedbackModal({
@@ -1066,7 +1121,9 @@ export default function PublicApp() {
   const [feedbackStatus, setFeedbackStatus] = useState("");
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [familyAccessPin] = useState(() => getFamilyAccessPin(slug));
+  const [familyAccessPin, setFamilyAccessPin] = useState(() => getFamilyAccessPin(slug));
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState("");
 
   async function loadData() {
     setLoading(true);
@@ -1196,6 +1253,31 @@ export default function PublicApp() {
       ) || null
     );
   }, [families, familyAccessPin]);
+
+  function submitFamilyPin(event) {
+    event.preventDefault();
+
+    const cleanPin = pinInput.trim();
+
+    if (!cleanPin) {
+      setPinError("Escriu el teu PIN familiar.");
+      return;
+    }
+
+    const matchedFamily = families.find(
+      (family) => String(family.access_pin || "").trim() === cleanPin
+    );
+
+    if (!matchedFamily) {
+      setPinError("Aquest PIN no coincideix amb cap família de la classe.");
+      return;
+    }
+
+    saveFamilyAccessPin(slug, cleanPin);
+    setFamilyAccessPin(cleanPin);
+    setPinInput("");
+    setPinError("");
+  }
 
   const futureEvents = useMemo(() => {
     const today = new Date();
@@ -1349,6 +1431,23 @@ const visibleEvents = showFullCalendar
       <main className="page">
         <div className="loading">{error}</div>
       </main>
+    );
+  }
+
+  if (!activeFamily) {
+    return (
+      <FamilyPinAccessScreen
+        displayClassName={displayClassName}
+        displaySchoolYear={displaySchoolYear}
+        pinInput={pinInput}
+        setPinInput={setPinInput}
+        pinError={
+          familyAccessPin && families.length > 0
+            ? "El PIN guardat no és vàlid per aquesta classe. Torna'l a introduir."
+            : pinError
+        }
+        onSubmit={submitFamilyPin}
+      />
     );
   }
   

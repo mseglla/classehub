@@ -2274,3 +2274,125 @@ body,
     width: 100%;
   }
 }
+
+/* Family PIN access screen */
+.family-access-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.18), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.14), transparent 30%),
+    #f8fafc;
+}
+
+.family-access-card {
+  width: min(100%, 430px);
+  padding: 28px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
+  text-align: center;
+}
+
+.family-access-badge {
+  display: inline-flex;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.family-access-icon {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  margin: 20px auto 14px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #dcfce7, #eff6ff);
+  font-size: 2rem;
+}
+
+.family-access-card h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(2rem, 9vw, 3rem);
+  line-height: 1;
+  font-weight: 950;
+}
+
+.family-access-year {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-weight: 850;
+}
+
+.family-access-intro {
+  margin: 18px 0 22px;
+  color: #475569;
+  line-height: 1.5;
+  font-weight: 650;
+}
+
+.family-pin-form {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.family-pin-form label {
+  display: grid;
+  gap: 8px;
+  color: #334155;
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.family-pin-form input {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: 18px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.family-pin-form input:focus {
+  outline: 3px solid rgba(34, 197, 94, 0.18);
+  border-color: #22c55e;
+}
+
+.family-pin-form button {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 18px;
+  font-weight: 950;
+}
+
+.family-pin-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.family-access-help {
+  margin: 16px 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
