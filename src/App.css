@@ -1966,3 +1966,146 @@ body,
     min-height: 40px;
   }
 }
+
+/* Family admin card final polish */
+.family-admin-row {
+  align-items: stretch;
+}
+
+.family-admin-row > div:first-child {
+  width: 100%;
+  min-width: 0;
+}
+
+.family-admin-row > div:first-child > strong {
+  display: block;
+  min-width: 0;
+}
+
+.family-status-row {
+  margin-top: 0;
+}
+
+.family-pin-row {
+  margin-top: 10px;
+}
+
+.family-pin {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.family-pin strong {
+  display: inline;
+  color: #0f172a;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.family-copy-action,
+.family-pin-action {
+  justify-content: center;
+  box-shadow: none;
+}
+
+.family-copy-action {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.family-copy-action:hover:not(:disabled) {
+  border-color: #93c5fd;
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.family-pin-action {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.family-pin-action:hover:not(:disabled) {
+  border-color: #fdba74;
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+@media (max-width: 720px) {
+  .family-admin-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .family-admin-row > div:first-child {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 10px;
+  }
+
+  .family-admin-row > div:first-child > strong {
+    font-size: 1.05rem;
+    line-height: 1.2;
+    padding-top: 3px;
+  }
+
+  .family-status-row {
+    justify-self: end;
+    margin: 0;
+  }
+
+  .family-status-row .status-pill {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .family-status-note {
+    grid-column: 1 / -1;
+    display: block;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .family-pin-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .family-pin-row .family-pin {
+    grid-column: 1 / -1;
+  }
+
+  .family-copy-action,
+  .family-pin-action,
+  .family-general-actions button,
+  .family-general-actions .secondary-action {
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 8px;
+    border-radius: 14px;
+    font-size: 0.8rem;
+    line-height: 1.1;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .family-general-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 8px;
+  }
+}
