@@ -2147,3 +2147,76 @@ body,
     font-size: 1.3rem;
   }
 }
+
+/* Public registration card polish */
+.registration-public-card {
+  gap: 14px;
+}
+
+.registration-card-summary {
+  display: grid;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.registration-main-stat {
+  padding: 14px;
+  border-radius: 18px;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  text-align: center;
+}
+
+.registration-main-stat strong {
+  display: block;
+  color: #065f46;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.registration-main-stat span {
+  display: block;
+  margin-top: 5px;
+  color: #047857;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.registration-meta-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: #4b5563;
+  font-size: 0.88rem;
+  font-weight: 850;
+}
+
+.registration-meta-row span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+}
+
+.registration-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.registration-card-actions button {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  font-size: 0.84rem;
+  line-height: 1.1;
+  box-shadow: none;
+}
+
+@media (max-width: 360px) {
+  .registration-card-actions {
+    grid-template-columns: 1fr;
+  }
+}

@@ -600,27 +600,33 @@ function RegistrationOrganizationCard({
     0
   );
 
-  const pendingCount = availableFamilies.length - orgRegistrations.length;
+  const pendingCount = Math.max(availableFamilies.length - orgRegistrations.length, 0);
 
   return (
-    <div className="attendance-card">
+    <div className="attendance-card registration-public-card">
       <div className="attendance-header">
         <p className="tag">Inscripció</p>
         <h3>{organization.title}</h3>
         {organization.description && <p>{organization.description}</p>}
         {organization.event_date && (
-  <small className="org-date">
-    {shortDate(organization.event_date)} · {daysUntil(organization.event_date)}
-  </small>
-)}
+          <small className="org-date">
+            {shortDate(organization.event_date)} · {daysUntil(organization.event_date)}
+          </small>
+        )}
       </div>
 
-      <div className="attendance-summary">
-        <p className="action-summary">
-          <strong>{totalAdults + totalChildren}</strong> persones inscrites · {orgRegistrations.length} famílies
-        </p>
+      <div className="attendance-summary registration-card-summary">
+        <div className="registration-main-stat">
+          <strong>{totalAdults + totalChildren}</strong>
+          <span>persones inscrites</span>
+        </div>
 
-        <div className="pending-action-buttons">
+        <div className="registration-meta-row">
+          <span>{orgRegistrations.length} famílies</span>
+          <span>{pendingCount} pendents</span>
+        </div>
+
+        <div className="pending-action-buttons registration-card-actions">
           <button onClick={() => onOpen(organization)}>
             Inscriure'm
           </button>
@@ -629,7 +635,7 @@ function RegistrationOrganizationCard({
             className="secondary-pending-button"
             onClick={() => onOpenResults(organization)}
           >
-            Confirmats
+            Veure confirmats
           </button>
         </div>
       </div>
