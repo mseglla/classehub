@@ -39,6 +39,7 @@ export default function AdminPage() {
   const [detailEventId, setDetailEventId] = useState(null);
   const [showEventFormModal, setShowEventFormModal] = useState(false);
   const [reminderSendingOrganizationId, setReminderSendingOrganizationId] = useState(null);
+  const [reminderStatusMessage, setReminderStatusMessage] = useState("");
 
   const selectedClass = classes.find(
     (classItem) => String(classItem.id) === selectedClassId
@@ -133,6 +134,7 @@ export default function AdminPage() {
     if (!detailOrganization) return;
 
     setMessage("");
+    setReminderStatusMessage("");
     setReminderSendingOrganizationId(detailOrganization.id);
 
     try {
@@ -160,24 +162,29 @@ export default function AdminPage() {
 
       if (!response.ok) {
         console.error(result);
-        setMessage(
-          `No s'han pogut enviar els recordatoris: ${
-            result.message || result.error || "error desconegut"
-          }`
-        );
+        const errorMessage = `No s'han pogut enviar els recordatoris: ${
+          result.message || result.error || "error desconegut"
+        }`;
+
+        setMessage(errorMessage);
+        setReminderStatusMessage(errorMessage);
         return;
       }
 
-      setMessage(
-        `Recordatoris processats. Enviats: ${result.sent || 0}. Contactes trobats: ${
-          result.contacts || 0
-        }. Famílies pendents: ${result.pendingFamilies || 0}.`
-      );
+      const successMessage = `Recordatoris processats. Acceptats per Resend: ${
+        result.sent || 0
+      }. Ja enviats abans: ${result.skippedAlreadySent || 0}. Contactes trobats: ${
+        result.contacts || 0
+      }. Famílies pendents: ${result.pendingFamilies || 0}.`;
+
+      setMessage(successMessage);
+      setReminderStatusMessage(successMessage);
 
       await loadAdminActionData(selectedClassId);
     } catch (error) {
       console.error(error);
       setMessage("No s'han pogut enviar els recordatoris.");
+      setReminderStatusMessage("No s'han pogut enviar els recordatoris.");
     } finally {
       setReminderSendingOrganizationId(null);
     }
@@ -1545,6 +1552,12 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                   ? "Enviant..."
                   : "Enviar recordatori per email"}
               </button>
+
+              {reminderStatusMessage && (
+                <p className="pending-reminder-status">
+                  {reminderStatusMessage}
+                </p>
+              )}
             </div>
 
             <div className="detail-grid action-stats-grid">

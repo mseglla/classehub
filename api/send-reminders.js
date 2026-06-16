@@ -187,10 +187,35 @@ module.exports = async function handler(req, res) {
   }
 
   const familyById = new Map((families || []).map((family) => [family.id, family]));
+  const contactIds = (contacts || []).map((contact) => contact.id);
+
+  let alreadySentContactIds = new Set();
+
+  if (contactIds.length > 0) {
+    const { data: existingSentLogs, error: existingSentLogsError } = await supabase
+      .from("ch_reminder_logs")
+      .select("contact_id")
+      .eq("organization_id", organization.id)
+      .eq("channel", "email")
+      .eq("status", "sent")
+      .in("contact_id", contactIds);
+
+    if (existingSentLogsError) {
+      console.error(existingSentLogsError);
+      return res.status(500).json({ error: "REMINDER_LOGS_LOAD_FAILED" });
+    }
+
+    alreadySentContactIds = new Set(
+      (existingSentLogs || []).map((log) => log.contact_id)
+    );
+  }
+
   const resend = new Resend(resendApiKey);
 
   let sent = 0;
   let skipped = 0;
+  let skippedAlreadySent = 0;
+  const providerMessageIds = [];
   const errors = [];
 
   for (const contact of contacts || []) {
@@ -198,6 +223,12 @@ module.exports = async function handler(req, res) {
 
     if (!family?.access_pin || !contact.email) {
       skipped += 1;
+      continue;
+    }
+
+    if (alreadySentContactIds.has(contact.id)) {
+      skipped += 1;
+      skippedAlreadySent += 1;
       continue;
     }
 
@@ -209,12 +240,23 @@ module.exports = async function handler(req, res) {
     });
 
     try {
-      await resend.emails.send({
+      const emailResult = await resend.emails.send({
         from: fromEmail,
         to: contact.email,
         subject,
         text,
         html,
+      });
+
+      if (emailResult?.error) {
+        throw new Error(
+          emailResult.error.message || JSON.stringify(emailResult.error)
+        );
+      }
+
+      providerMessageIds.push({
+        email: contact.email,
+        id: emailResult?.data?.id || null,
       });
 
       await supabase.from("ch_reminder_logs").insert({
@@ -251,8 +293,10 @@ module.exports = async function handler(req, res) {
   return res.status(200).json({
     sent,
     skipped,
+    skippedAlreadySent,
     pendingFamilies: pendingFamilyIds.length,
     contacts: contacts?.length || 0,
+    providerMessageIds,
     errors,
   });
 };
