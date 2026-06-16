@@ -8,6 +8,7 @@ import { typeMeta } from "../utils/eventHelpers";
 export default function AdminPage() {
   const [classes, setClasses] = useState([]);
   const [families, setFamilies] = useState([]);
+  const [familyContacts, setFamilyContacts] = useState([]);
   const [adminEvents, setAdminEvents] = useState([]);
   const [adminOrganizations, setAdminOrganizations] = useState([]);
   const [organizationResponses, setOrganizationResponses] = useState([]);
@@ -17,6 +18,12 @@ export default function AdminPage() {
   const [newFamilyName, setNewFamilyName] = useState("");
   const [familySaving, setFamilySaving] = useState(false);
   const [editingFamilyId, setEditingFamilyId] = useState(null);
+  const [contactFormInfo, setContactFormInfo] = useState(null);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactWantsReminders, setContactWantsReminders] = useState(true);
+  const [contactIsPrimary, setContactIsPrimary] = useState(false);
+  const [contactSaving, setContactSaving] = useState(false);
   const [familyDeleteInfo, setFamilyDeleteInfo] = useState(null);
   const [familyDeleting, setFamilyDeleting] = useState(false);
   const [pinUpdatingFamilyId, setPinUpdatingFamilyId] = useState(null);
@@ -121,6 +128,10 @@ export default function AdminPage() {
       families.find((family) => family.id === familyId)?.student_name ||
       "Família no trobada"
     );
+  }
+
+  function getFamilyContacts(familyId) {
+    return familyContacts.filter((contact) => contact.family_id === familyId);
   }
 
   function formatResponse(response) {
@@ -280,7 +291,30 @@ export default function AdminPage() {
       return;
     }
 
-    setFamilies(data || []);
+    const loadedFamilies = data || [];
+    setFamilies(loadedFamilies);
+
+    const familyIds = loadedFamilies.map((family) => family.id);
+
+    if (familyIds.length === 0) {
+      setFamilyContacts([]);
+      return;
+    }
+
+    const { data: contactsData, error: contactsError } = await supabase
+      .from("ch_family_contacts")
+      .select("*")
+      .in("family_id", familyIds)
+      .order("is_primary", { ascending: false })
+      .order("contact_name");
+
+    if (contactsError) {
+      console.error(contactsError);
+      setMessage("No s'han pogut carregar els contactes email.");
+      return;
+    }
+
+    setFamilyContacts(contactsData || []);
   }
 
   function handleStartEditFamily(family) {
@@ -472,6 +506,127 @@ PIN: ${family.access_pin}`;
     } finally {
       setBulkPinGenerating(false);
     }
+  }
+
+  function resetContactForm() {
+    setContactFormInfo(null);
+    setContactName("");
+    setContactEmail("");
+    setContactWantsReminders(true);
+    setContactIsPrimary(false);
+  }
+
+  function handleStartCreateContact(family) {
+    setContactFormInfo({
+      familyId: family.id,
+      familyName: family.student_name,
+      contactId: null,
+    });
+    setContactName("");
+    setContactEmail("");
+    setContactWantsReminders(true);
+    setContactIsPrimary(getFamilyContacts(family.id).length === 0);
+    setMessage("");
+  }
+
+  function handleStartEditContact(family, contact) {
+    setContactFormInfo({
+      familyId: family.id,
+      familyName: family.student_name,
+      contactId: contact.id,
+    });
+    setContactName(contact.contact_name || "");
+    setContactEmail(contact.email || "");
+    setContactWantsReminders(contact.wants_email_reminders !== false);
+    setContactIsPrimary(contact.is_primary === true);
+    setMessage("");
+  }
+
+  async function handleSaveContact(event) {
+    event.preventDefault();
+
+    if (!contactFormInfo?.familyId) return;
+
+    const cleanEmail = contactEmail.trim().toLowerCase();
+    const cleanName = contactName.trim();
+
+    if (!cleanEmail) {
+      setMessage("Cal indicar un email.");
+      return;
+    }
+
+    setContactSaving(true);
+    setMessage("");
+
+    try {
+      if (contactIsPrimary) {
+        const { error: resetPrimaryError } = await supabase
+          .from("ch_family_contacts")
+          .update({ is_primary: false })
+          .eq("family_id", contactFormInfo.familyId);
+
+        if (resetPrimaryError) throw resetPrimaryError;
+      }
+
+      const payload = {
+        family_id: contactFormInfo.familyId,
+        contact_name: cleanName || null,
+        email: cleanEmail,
+        wants_email_reminders: contactWantsReminders,
+        is_primary: contactIsPrimary,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = contactFormInfo.contactId
+        ? await supabase
+            .from("ch_family_contacts")
+            .update(payload)
+            .eq("id", contactFormInfo.contactId)
+        : await supabase.from("ch_family_contacts").insert(payload);
+
+      if (error) throw error;
+
+      setMessage(
+        contactFormInfo.contactId
+          ? "Contacte actualitzat correctament."
+          : "Contacte afegit correctament."
+      );
+
+      resetContactForm();
+      await loadFamilies(selectedClassId);
+    } catch (error) {
+      console.error(error);
+
+      if (error.code === "23505") {
+        setMessage("Aquest email ja existeix per aquesta família.");
+      } else {
+        setMessage(`No s'ha pogut guardar el contacte: ${error.message}`);
+      }
+    } finally {
+      setContactSaving(false);
+    }
+  }
+
+  async function handleDeleteContact(contact) {
+    const confirmed = window.confirm(
+      `Vols eliminar l'email ${contact.email}?`
+    );
+
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from("ch_family_contacts")
+      .delete()
+      .eq("id", contact.id);
+
+    if (error) {
+      console.error(error);
+      setMessage(`No s'ha pogut eliminar el contacte: ${error.message}`);
+      return;
+    }
+
+    setMessage("Contacte eliminat correctament.");
+    await loadFamilies(selectedClassId);
   }
 
   async function handleReactivateFamily(family) {
@@ -1071,6 +1226,71 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                         </>
                       )}
                     </div>
+
+                    <div className="family-contacts-box">
+                      <div className="family-contacts-header">
+                        <strong>Contactes email</strong>
+
+                        {family.is_active !== false && (
+                          <button
+                            type="button"
+                            className="secondary-action"
+                            onClick={() => handleStartCreateContact(family)}
+                          >
+                            + Afegir email
+                          </button>
+                        )}
+                      </div>
+
+                      {getFamilyContacts(family.id).length === 0 ? (
+                        <p className="family-contact-empty">
+                          Cap email configurat.
+                        </p>
+                      ) : (
+                        <div className="family-contact-list">
+                          {getFamilyContacts(family.id).map((contact) => (
+                            <div className="family-contact-row" key={contact.id}>
+                              <div>
+                                <strong>{contact.contact_name || "Contacte"}</strong>
+                                <span>{contact.email}</span>
+
+                                <div className="family-contact-badges">
+                                  {contact.is_primary && (
+                                    <small>Principal</small>
+                                  )}
+
+                                  <small>
+                                    {contact.wants_email_reminders
+                                      ? "Rep recordatoris"
+                                      : "Sense recordatoris"}
+                                  </small>
+                                </div>
+                              </div>
+
+                              {family.is_active !== false && (
+                                <div className="family-contact-actions">
+                                  <button
+                                    type="button"
+                                    className="secondary-action"
+                                    onClick={() => handleStartEditContact(family, contact)}
+                                  >
+                                    Editar
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="secondary-action danger-text"
+                                    onClick={() => handleDeleteContact(contact)}
+                                  >
+                                    Eliminar
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="admin-row-actions family-general-actions">
@@ -1459,6 +1679,83 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               </button>
 
               {message && <p className="admin-message span-all">{message}</p>}
+            </form>
+          </article>
+        </div>
+      )}
+
+      {contactFormInfo && (
+        <div
+          className="modal-backdrop"
+          onClick={() => {
+            if (!contactSaving) resetContactForm();
+          }}
+        >
+          <article
+            className="modal family-form-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              disabled={contactSaving}
+              onClick={resetContactForm}
+            >
+              Tancar
+            </button>
+
+            <p className="eyebrow">Contactes email</p>
+            <h2>
+              {contactFormInfo.contactId ? "Editar contacte" : "Afegir contacte"}
+            </h2>
+
+            <p className="modal-intro">
+              Família: <strong>{contactFormInfo.familyName}</strong>
+            </p>
+
+            <form className="registration-form" onSubmit={handleSaveContact}>
+              <label className="span-all">
+                Nom del contacte
+                <input
+                  type="text"
+                  value={contactName}
+                  onChange={(event) => setContactName(event.target.value)}
+                  placeholder="Ex: Marc, mare, pare..."
+                  autoFocus
+                />
+              </label>
+
+              <label className="span-all">
+                Email
+                <input
+                  type="email"
+                  value={contactEmail}
+                  onChange={(event) => setContactEmail(event.target.value)}
+                  placeholder="exemple@email.com"
+                />
+              </label>
+
+              <label className="span-all checkbox-row">
+                <input
+                  type="checkbox"
+                  checked={contactWantsReminders}
+                  onChange={(event) => setContactWantsReminders(event.target.checked)}
+                />
+                Rep recordatoris per email
+              </label>
+
+              <label className="span-all checkbox-row">
+                <input
+                  type="checkbox"
+                  checked={contactIsPrimary}
+                  onChange={(event) => setContactIsPrimary(event.target.checked)}
+                />
+                Contacte principal
+              </label>
+
+              <button className="span-all" disabled={contactSaving}>
+                {contactSaving ? "Guardant..." : "Guardar contacte"}
+              </button>
             </form>
           </article>
         </div>
