@@ -171,11 +171,11 @@ export default function AdminPage() {
         return;
       }
 
-      const successMessage = `Recordatoris processats. Acceptats per Resend: ${
-        result.sent || 0
-      }. Ja enviats abans: ${result.skippedAlreadySent || 0}. Contactes trobats: ${
-        result.contacts || 0
-      }. Famílies pendents: ${result.pendingFamilies || 0}.`;
+      const remindedFamiliesCount = result.sentFamilies ?? result.sent ?? 0;
+      const successMessage =
+        remindedFamiliesCount === 1
+          ? "Recordatori enviat a 1 família pendent."
+          : `Recordatori enviat a ${remindedFamiliesCount} famílies pendents.`;
 
       setMessage(successMessage);
       setReminderStatusMessage(successMessage);

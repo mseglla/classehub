@@ -216,6 +216,7 @@ module.exports = async function handler(req, res) {
   let skipped = 0;
   let skippedAlreadySent = 0;
   const providerMessageIds = [];
+  const sentFamilyIds = new Set();
   const errors = [];
 
   for (const contact of contacts || []) {
@@ -270,6 +271,7 @@ module.exports = async function handler(req, res) {
       });
 
       sent += 1;
+      sentFamilyIds.add(family.id);
     } catch (error) {
       console.error(error);
 
@@ -296,6 +298,7 @@ module.exports = async function handler(req, res) {
     skippedAlreadySent,
     pendingFamilies: pendingFamilyIds.length,
     contacts: contacts?.length || 0,
+    sentFamilies: sentFamilyIds.size,
     providerMessageIds,
     errors,
   });
