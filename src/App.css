@@ -2448,3 +2448,13 @@ body,
 .pending-reminder-box button {
   width: 100%;
 }
+
+.pending-reminder-status {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #7c2d12;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
