@@ -10,3 +10,11 @@ createRoot(document.getElementById("root")).render(
       <Analytics />
     </>
   );
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+      console.error("No s'ha pogut registrar el service worker:", error);
+    });
+  });
+}
