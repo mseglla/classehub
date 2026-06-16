@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="42" fill="#2563eb"/>
+  <circle cx="96" cy="72" r="30" fill="#ffffff"/>
+  <path d="M48 148c8-28 28-44 48-44s40 16 48 44" fill="#ffffff"/>
+  <text x="96" y="176" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">CH</text>
+</svg>
