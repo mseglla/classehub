@@ -1128,6 +1128,9 @@ export default function PublicApp() {
   const [familyAccessPin, setFamilyAccessPin] = useState(() => getFamilyAccessPin(slug));
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -1247,6 +1250,34 @@ export default function PublicApp() {
   useEffect(() => {
     loadData();
   }, [slug]);
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    const dismissedInstallBanner =
+      window.localStorage.getItem("classehub-install-banner-dismissed") === "true";
+
+    if (!isStandalone && !dismissedInstallBanner) {
+      setShowInstallBanner(true);
+    }
+
+    function handleBeforeInstallPrompt(event) {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+
+      if (!dismissedInstallBanner) {
+        setShowInstallBanner(true);
+      }
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
 
   const activeFamily = useMemo(() => {
     if (!familyAccessPin) return null;
@@ -1401,6 +1432,29 @@ const visibleEvents = showFullCalendar
     await loadData();
   }
 
+  async function handleInstallApp() {
+    if (installPromptEvent) {
+      installPromptEvent.prompt();
+
+      const result = await installPromptEvent.userChoice;
+
+      if (result.outcome === "accepted") {
+        setShowInstallBanner(false);
+        window.localStorage.setItem("classehub-install-banner-dismissed", "true");
+      }
+
+      setInstallPromptEvent(null);
+      return;
+    }
+
+    setShowIosInstallHelp(true);
+  }
+
+  function dismissInstallBanner() {
+    setShowInstallBanner(false);
+    window.localStorage.setItem("classehub-install-banner-dismissed", "true");
+  }
+
   async function handleVote(pollId, optionId, familyId) {
     const { error: voteError } = await supabase
       .from("ch_poll_votes")
@@ -1458,6 +1512,25 @@ const visibleEvents = showFullCalendar
   
   return (
     <main className="page">
+      {showInstallBanner && (
+        <section className="install-app-banner">
+          <div>
+            <strong>📲 Porta ClasseHub al mòbil</strong>
+            <p>Afegeix-la a la pantalla d'inici i tindràs l'agenda sempre a mà.</p>
+          </div>
+
+          <div className="install-app-actions">
+            <button type="button" onClick={handleInstallApp}>
+              Instal·lar
+            </button>
+
+            <button type="button" className="ghost-install-button" onClick={dismissInstallBanner}>
+              Ara no
+            </button>
+          </div>
+        </section>
+      )}
+
       <header className="hero class-hero">
         <div className="hero-main class-hero-main">
           <div className="class-hero-copy">
@@ -1777,6 +1850,34 @@ const visibleEvents = showFullCalendar
 
       {showPrivacyModal && (
         <PrivacyModal onClose={() => setShowPrivacyModal(false)} />
+      )}
+
+      {showIosInstallHelp && (
+        <div className="modal-backdrop" onClick={() => setShowIosInstallHelp(false)}>
+          <article className="modal install-help-modal" onClick={(event) => event.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowIosInstallHelp(false)}>
+              Tancar
+            </button>
+
+            <p className="eyebrow">Instal·lar ClasseHub</p>
+            <h2>📲 Afegeix ClasseHub a la pantalla d'inici</h2>
+
+            <div className="install-help-steps">
+              <p><strong>iPhone / Safari</strong></p>
+              <ol>
+                <li>Prem el botó de compartir.</li>
+                <li>Tria “Afegir a pantalla d'inici”.</li>
+                <li>Confirma amb “Afegir”.</li>
+              </ol>
+
+              <p><strong>Android / Chrome</strong></p>
+              <ol>
+                <li>Obre el menú del navegador.</li>
+                <li>Tria “Instal·lar app” o “Afegir a pantalla d'inici”.</li>
+              </ol>
+            </div>
+          </article>
+        </div>
       )}
 
       <DetailModal
