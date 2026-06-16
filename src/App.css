@@ -2450,11 +2450,12 @@ body,
 }
 
 .pending-reminder-status {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #ffffff;
-  color: #7c2d12;
-  font-size: 0.84rem;
-  font-weight: 800;
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 0.9rem;
+  font-weight: 900;
 }

@@ -1524,6 +1524,12 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
             <h2>{detailEvent.title}</h2>
 
+            {reminderStatusMessage && (
+              <div className="pending-reminder-status">
+                {reminderStatusMessage}
+              </div>
+            )}
+
             <p className="modal-intro">
               {detailOrganization.organization_type === "registration"
                 ? "Consulta quines famílies s'han inscrit i el recompte d'assistents."
@@ -1553,11 +1559,6 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                   : "Enviar recordatori per email"}
               </button>
 
-              {reminderStatusMessage && (
-                <p className="pending-reminder-status">
-                  {reminderStatusMessage}
-                </p>
-              )}
             </div>
 
             <div className="detail-grid action-stats-grid">
