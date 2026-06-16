@@ -126,6 +126,10 @@ function FamilyPinAccessScreen({
         <p className="family-access-help">
           No saps el PIN? Demana'l al delegat o delegada de la classe.
         </p>
+
+        <a className="delegate-access-link" href="/admin">
+          Accés delegats
+        </a>
       </section>
     </main>
   );

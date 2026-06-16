@@ -2396,3 +2396,25 @@ body,
   font-size: 0.82rem;
   font-weight: 700;
 }
+
+.delegate-access-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.delegate-access-link:hover {
+  background: #dbeafe;
+  color: #1e40af;
+}
