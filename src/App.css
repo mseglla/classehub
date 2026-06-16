@@ -2593,3 +2593,100 @@ body,
     min-width: 220px;
   }
 }
+
+/* Family email contacts */
+.family-contacts-box {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.family-contacts-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.family-contacts-header strong {
+  color: #111827;
+  font-size: 0.88rem;
+}
+
+.family-contact-empty {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.family-contact-list {
+  display: grid;
+  gap: 8px;
+}
+
+.family-contact-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.family-contact-row strong {
+  display: block;
+  color: #111827;
+  font-size: 0.86rem;
+}
+
+.family-contact-row span {
+  display: block;
+  margin-top: 2px;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.family-contact-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.family-contact-badges small {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.family-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-row {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 10px;
+  align-items: center;
+  font-weight: 800;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+@media (min-width: 720px) {
+  .family-contact-row {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}
