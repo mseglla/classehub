@@ -2418,3 +2418,33 @@ body,
   background: #dbeafe;
   color: #1e40af;
 }
+
+/* Admin pending reminder */
+.pending-reminder-box {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+}
+
+.pending-reminder-box strong {
+  display: block;
+  color: #9a3412;
+  font-size: 0.98rem;
+  font-weight: 950;
+}
+
+.pending-reminder-box span {
+  display: block;
+  margin-top: 4px;
+  color: #c2410c;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.pending-reminder-box button {
+  width: 100%;
+}

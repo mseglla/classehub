@@ -38,6 +38,7 @@ export default function AdminPage() {
   const [showPastEvents, setShowPastEvents] = useState(false);
   const [detailEventId, setDetailEventId] = useState(null);
   const [showEventFormModal, setShowEventFormModal] = useState(false);
+  const [reminderSendingOrganizationId, setReminderSendingOrganizationId] = useState(null);
 
   const selectedClass = classes.find(
     (classItem) => String(classItem.id) === selectedClassId
@@ -126,6 +127,60 @@ export default function AdminPage() {
     if (response === "no") return "No";
     if (response === "maybe") return "Potser";
     return response || "Sense resposta";
+  }
+
+  async function handleSendPendingReminders() {
+    if (!detailOrganization) return;
+
+    setMessage("");
+    setReminderSendingOrganizationId(detailOrganization.id);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        setMessage("Cal iniciar sessió com a admin per enviar recordatoris.");
+        return;
+      }
+
+      const response = await fetch("/api/send-reminders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          organizationId: detailOrganization.id,
+        }),
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        console.error(result);
+        setMessage(
+          `No s'han pogut enviar els recordatoris: ${
+            result.message || result.error || "error desconegut"
+          }`
+        );
+        return;
+      }
+
+      setMessage(
+        `Recordatoris processats. Enviats: ${result.sent || 0}. Contactes trobats: ${
+          result.contacts || 0
+        }. Famílies pendents: ${result.pendingFamilies || 0}.`
+      );
+
+      await loadAdminActionData(selectedClassId);
+    } catch (error) {
+      console.error(error);
+      setMessage("No s'han pogut enviar els recordatoris.");
+    } finally {
+      setReminderSendingOrganizationId(null);
+    }
   }
 
   async function loadAdminEvents(classId) {
@@ -1467,6 +1522,30 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 ? "Consulta quines famílies s'han inscrit i el recompte d'assistents."
                 : "Consulta les respostes rebudes de les famílies."}
             </p>
+
+            <div className="pending-reminder-box">
+              <div>
+                <strong>{detailPendingCount} famílies pendents</strong>
+                <span>
+                  El recordatori s'enviarà automàticament només als contactes email
+                  de les famílies pendents.
+                </span>
+              </div>
+
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={handleSendPendingReminders}
+                disabled={
+                  detailPendingCount === 0 ||
+                  reminderSendingOrganizationId === detailOrganization.id
+                }
+              >
+                {reminderSendingOrganizationId === detailOrganization.id
+                  ? "Enviant..."
+                  : "Enviar recordatori per email"}
+              </button>
+            </div>
 
             <div className="detail-grid action-stats-grid">
               {detailOrganization.organization_type === "registration" ? (
