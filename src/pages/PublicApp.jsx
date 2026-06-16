@@ -81,6 +81,27 @@ function downloadCalendarEvent(item) {
   URL.revokeObjectURL(url);
 }
 
+function InstallAppBanner({ onInstall, onDismiss }) {
+  return (
+    <section className="install-app-banner">
+      <div>
+        <strong>📲 Porta ClasseHub al mòbil</strong>
+        <p>Afegeix-la a la pantalla d'inici i tindràs l'agenda sempre a mà.</p>
+      </div>
+
+      <div className="install-app-actions">
+        <button type="button" onClick={onInstall}>
+          Instal·lar
+        </button>
+
+        <button type="button" className="ghost-install-button" onClick={onDismiss}>
+          Ara no
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function FamilyPinAccessScreen({
   displayClassName,
   displaySchoolYear,
@@ -88,9 +109,19 @@ function FamilyPinAccessScreen({
   setPinInput,
   pinError,
   onSubmit,
+  showInstallBanner,
+  onInstallApp,
+  onDismissInstallBanner,
 }) {
   return (
     <main className="family-access-page">
+      {showInstallBanner && (
+        <InstallAppBanner
+          onInstall={onInstallApp}
+          onDismiss={onDismissInstallBanner}
+        />
+      )}
+
       <section className="family-access-card">
         <div className="family-access-badge">ClasseHub</div>
 
@@ -1506,6 +1537,9 @@ const visibleEvents = showFullCalendar
             : pinError
         }
         onSubmit={submitFamilyPin}
+        showInstallBanner={showInstallBanner}
+        onInstallApp={handleInstallApp}
+        onDismissInstallBanner={dismissInstallBanner}
       />
     );
   }
@@ -1513,22 +1547,10 @@ const visibleEvents = showFullCalendar
   return (
     <main className="page">
       {showInstallBanner && (
-        <section className="install-app-banner">
-          <div>
-            <strong>📲 Porta ClasseHub al mòbil</strong>
-            <p>Afegeix-la a la pantalla d'inici i tindràs l'agenda sempre a mà.</p>
-          </div>
-
-          <div className="install-app-actions">
-            <button type="button" onClick={handleInstallApp}>
-              Instal·lar
-            </button>
-
-            <button type="button" className="ghost-install-button" onClick={dismissInstallBanner}>
-              Ara no
-            </button>
-          </div>
-        </section>
+        <InstallAppBanner
+          onInstall={handleInstallApp}
+          onDismiss={dismissInstallBanner}
+        />
       )}
 
       <header className="hero class-hero">
