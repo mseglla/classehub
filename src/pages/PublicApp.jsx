@@ -1137,6 +1137,7 @@ export default function PublicApp() {
       .from("ch_classes")
       .select("*")
       .eq("slug", slug)
+      .eq("is_active", true)
       .single();
 
     if (classError || !classData) {
