@@ -172,8 +172,12 @@ export default function AdminPage() {
       }
 
       const remindedFamiliesCount = result.sentFamilies ?? result.sent ?? 0;
+      const alreadySentCount = result.skippedAlreadySent || 0;
+
       const successMessage =
-        remindedFamiliesCount === 1
+        remindedFamiliesCount === 0 && alreadySentCount > 0
+          ? "No s'ha enviat cap recordatori nou. Ja s'havia enviat anteriorment."
+          : remindedFamiliesCount === 1
           ? "Recordatori enviat a 1 família pendent."
           : `Recordatori enviat a ${remindedFamiliesCount} famílies pendents.`;
 
