@@ -9,6 +9,8 @@ export default function AdminPage() {
   const [classes, setClasses] = useState([]);
   const [families, setFamilies] = useState([]);
   const [familyContacts, setFamilyContacts] = useState([]);
+  const [adminPolls, setAdminPolls] = useState([]);
+  const [adminPollVotes, setAdminPollVotes] = useState([]);
   const [adminEvents, setAdminEvents] = useState([]);
   const [adminOrganizations, setAdminOrganizations] = useState([]);
   const [organizationResponses, setOrganizationResponses] = useState([]);
@@ -45,6 +47,14 @@ export default function AdminPage() {
   const [showPastEvents, setShowPastEvents] = useState(false);
   const [detailEventId, setDetailEventId] = useState(null);
   const [showEventFormModal, setShowEventFormModal] = useState(false);
+  const [showPollFormModal, setShowPollFormModal] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [pollDescription, setPollDescription] = useState("");
+  const [pollCloseDate, setPollCloseDate] = useState("");
+  const [pollIsImportant, setPollIsImportant] = useState(false);
+  const [pollOptions, setPollOptions] = useState(["", ""]);
+  const [pollSaving, setPollSaving] = useState(false);
+  const [pollUpdatingId, setPollUpdatingId] = useState(null);
   const [reminderSendingOrganizationId, setReminderSendingOrganizationId] = useState(null);
   const [reminderStatusMessage, setReminderStatusMessage] = useState("");
 
@@ -275,6 +285,249 @@ export default function AdminPage() {
     setOrganizationResponses(responsesResult.data || []);
     setOrganizationRegistrations(registrationsResult.data || []);
   }
+
+  async function loadAdminPolls(classId) {
+    if (!classId) return;
+
+    const { data: pollsData, error: pollsError } = await supabase
+      .from("ch_polls")
+      .select("*, ch_poll_options(*)")
+      .eq("class_id", Number(classId))
+      .order("created_at", { ascending: false });
+
+    if (pollsError) {
+      console.error(pollsError);
+      setMessage("No s'han pogut carregar les votacions.");
+      return;
+    }
+
+    const loadedPolls = pollsData || [];
+    setAdminPolls(
+      loadedPolls.map((poll) => ({
+        ...poll,
+        ch_poll_options: [...(poll.ch_poll_options || [])].sort(
+          (a, b) => a.sort_order - b.sort_order
+        ),
+      }))
+    );
+
+    const pollIds = loadedPolls.map((poll) => poll.id);
+
+    if (pollIds.length === 0) {
+      setAdminPollVotes([]);
+      return;
+    }
+
+    const { data: votesData, error: votesError } = await supabase
+      .from("ch_poll_votes")
+      .select("*")
+      .in("poll_id", pollIds);
+
+    if (votesError) {
+      console.error(votesError);
+      setMessage("No s'han pogut carregar els vots.");
+      return;
+    }
+
+    setAdminPollVotes(votesData || []);
+  }
+
+  function resetPollForm() {
+    setShowPollFormModal(false);
+    setPollQuestion("");
+    setPollDescription("");
+    setPollCloseDate("");
+    setPollIsImportant(false);
+    setPollOptions(["", ""]);
+    setPollSaving(false);
+  }
+
+  function getPollVotes(pollId) {
+    return adminPollVotes.filter((vote) => vote.poll_id === pollId);
+  }
+
+  function getPollOptionVotes(pollId, optionId) {
+    return adminPollVotes.filter(
+      (vote) => vote.poll_id === pollId && vote.option_id === optionId
+    );
+  }
+
+  function getPollPendingFamilies(pollId) {
+    const votedFamilyIds = new Set(
+      getPollVotes(pollId).map((vote) => vote.family_id)
+    );
+
+    return activeFamilies.filter((family) => !votedFamilyIds.has(family.id));
+  }
+
+  function updatePollOption(index, value) {
+    setPollOptions((currentOptions) =>
+      currentOptions.map((option, optionIndex) =>
+        optionIndex === index ? value : option
+      )
+    );
+  }
+
+  function addPollOption() {
+    setPollOptions((currentOptions) => [...currentOptions, ""]);
+  }
+
+  function removePollOption(index) {
+    setPollOptions((currentOptions) =>
+      currentOptions.length <= 2
+        ? currentOptions
+        : currentOptions.filter((_, optionIndex) => optionIndex !== index)
+    );
+  }
+
+  async function handleCreatePoll(event) {
+    event.preventDefault();
+
+    if (!selectedClassId) {
+      setMessage("Cal seleccionar una classe abans de crear una votació.");
+      return;
+    }
+
+    const cleanQuestion = pollQuestion.trim();
+    const cleanOptions = pollOptions
+      .map((option) => option.trim())
+      .filter(Boolean);
+
+    if (!cleanQuestion) {
+      setMessage("Cal escriure la pregunta de la votació.");
+      return;
+    }
+
+    if (cleanOptions.length < 2) {
+      setMessage("Cal afegir com a mínim dues opcions de resposta.");
+      return;
+    }
+
+    setPollSaving(true);
+    setMessage("");
+
+    const { data: pollData, error: pollError } = await supabase
+      .from("ch_polls")
+      .insert({
+        class_id: Number(selectedClassId),
+        question: cleanQuestion,
+        description: pollDescription.trim() || null,
+        close_date: pollCloseDate || null,
+        is_active: true,
+        is_important: pollIsImportant,
+      })
+      .select()
+      .single();
+
+    if (pollError) {
+      console.error(pollError);
+      setPollSaving(false);
+      setMessage(`No s'ha pogut crear la votació: ${pollError.message}`);
+      return;
+    }
+
+    const optionsPayload = cleanOptions.map((option, index) => ({
+      poll_id: pollData.id,
+      text: option,
+      sort_order: index + 1,
+    }));
+
+    const { error: optionsError } = await supabase
+      .from("ch_poll_options")
+      .insert(optionsPayload);
+
+    if (optionsError) {
+      console.error(optionsError);
+      setPollSaving(false);
+      setMessage(
+        `S'ha creat la votació, però no s'han pogut crear les opcions: ${optionsError.message}`
+      );
+      await loadAdminPolls(selectedClassId);
+      return;
+    }
+
+    resetPollForm();
+    setMessage("Votació creada correctament.");
+    await loadAdminPolls(selectedClassId);
+  }
+
+  async function handleTogglePollActive(poll) {
+    setPollUpdatingId(poll.id);
+    setMessage("");
+
+    const { error } = await supabase
+      .from("ch_polls")
+      .update({ is_active: !poll.is_active })
+      .eq("id", poll.id);
+
+    setPollUpdatingId(null);
+
+    if (error) {
+      console.error(error);
+      setMessage(`No s'ha pogut actualitzar la votació: ${error.message}`);
+      return;
+    }
+
+    setMessage(
+      poll.is_active
+        ? "Votació desactivada correctament."
+        : "Votació activada correctament."
+    );
+
+    await loadAdminPolls(selectedClassId);
+  }
+
+  async function handleDeletePoll(poll) {
+    const confirmed = window.confirm(
+      `Vols eliminar la votació "${poll.question}"? També s'eliminaran els seus vots.`
+    );
+
+    if (!confirmed) return;
+
+    setPollUpdatingId(poll.id);
+    setMessage("");
+
+    const { error: votesError } = await supabase
+      .from("ch_poll_votes")
+      .delete()
+      .eq("poll_id", poll.id);
+
+    if (votesError) {
+      console.error(votesError);
+      setPollUpdatingId(null);
+      setMessage(`No s'han pogut eliminar els vots: ${votesError.message}`);
+      return;
+    }
+
+    const { error: optionsError } = await supabase
+      .from("ch_poll_options")
+      .delete()
+      .eq("poll_id", poll.id);
+
+    if (optionsError) {
+      console.error(optionsError);
+      setPollUpdatingId(null);
+      setMessage(`No s'han pogut eliminar les opcions: ${optionsError.message}`);
+      return;
+    }
+
+    const { error: pollError } = await supabase
+      .from("ch_polls")
+      .delete()
+      .eq("id", poll.id);
+
+    setPollUpdatingId(null);
+
+    if (pollError) {
+      console.error(pollError);
+      setMessage(`No s'ha pogut eliminar la votació: ${pollError.message}`);
+      return;
+    }
+
+    setMessage("Votació eliminada correctament.");
+    await loadAdminPolls(selectedClassId);
+  }
+
 
   async function loadFamilies(classId) {
     if (!classId) return;
@@ -769,6 +1022,7 @@ PIN: ${family.access_pin}`;
         loadAdminEvents(data[0].id);
         loadAdminActionData(data[0].id);
         loadFamilies(data[0].id);
+        loadAdminPolls(data[0].id);
         loadFeedbacks();
       }
     }
@@ -990,6 +1244,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                   loadAdminEvents(event.target.value);
                   loadAdminActionData(event.target.value);
                   loadFamilies(event.target.value);
+                  loadAdminPolls(event.target.value);
                 }}
               >
                 {classes.map((classItem) => (
@@ -1335,6 +1590,99 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         <Card className="span-2">
           <SectionTitle
             icon={<CalendarDays size={22} />}
+            title="Votacions"
+            subtitle="Crea consultes ràpides per a les famílies i revisa els resultats."
+          />
+
+          <div className="admin-row-actions family-toolbar-actions">
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={() => {
+                resetPollForm();
+                setShowPollFormModal(true);
+                setMessage("");
+              }}
+            >
+              + Nova votació
+            </button>
+          </div>
+
+          <div className="admin-list">
+            {adminPolls.length === 0 ? (
+              <p>No hi ha cap votació creada per aquesta classe.</p>
+            ) : (
+              adminPolls.map((poll) => {
+                const pollVotes = getPollVotes(poll.id);
+                const pendingFamilies = getPollPendingFamilies(poll.id);
+
+                return (
+                  <div className="admin-row poll-admin-row" key={poll.id}>
+                    <div>
+                      <strong>{poll.question}</strong>
+
+                      {poll.description && <p>{poll.description}</p>}
+
+                      <p>
+                        {poll.is_active ? "🟢 Activa" : "⚪ Inactiva"}
+                        {poll.close_date ? ` · límit ${shortDate(poll.close_date)}` : ""}
+                        {poll.is_important ? " · destacada" : ""}
+                      </p>
+
+                      <p>
+                        {pollVotes.length}/{activeFamilies.length} famílies han votat
+                        {pendingFamilies.length > 0
+                          ? ` · ${pendingFamilies.length} pendents`
+                          : " · totes han votat"}
+                      </p>
+
+                      <div className="poll-admin-results">
+                        {(poll.ch_poll_options || []).map((option) => {
+                          const optionVotes = getPollOptionVotes(poll.id, option.id);
+
+                          return (
+                            <div className="poll-admin-result" key={option.id}>
+                              <span>{option.text}</span>
+                              <strong>{optionVotes.length}</strong>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="admin-row-actions">
+                      <button
+                        type="button"
+                        className="secondary-action"
+                        disabled={pollUpdatingId === poll.id}
+                        onClick={() => handleTogglePollActive(poll)}
+                      >
+                        {pollUpdatingId === poll.id
+                          ? "Actualitzant..."
+                          : poll.is_active
+                            ? "Desactivar"
+                            : "Activar"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="secondary-action danger-text"
+                        disabled={pollUpdatingId === poll.id}
+                        onClick={() => handleDeletePoll(poll)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </Card>
+
+        <Card className="span-2">
+          <SectionTitle
+            icon={<CalendarDays size={22} />}
             title="Feedback rebut"
             subtitle="Missatges enviats per les famílies des de la part pública."
           />
@@ -1356,6 +1704,114 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           </div>
         </Card>
       </section>
+
+      {showPollFormModal && (
+        <div
+          className="modal-backdrop"
+          onClick={() => {
+            if (!pollSaving) resetPollForm();
+          }}
+        >
+          <article
+            className="modal admin-event-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              disabled={pollSaving}
+              onClick={resetPollForm}
+            >
+              Tancar
+            </button>
+
+            <Card className="span-2">
+              <SectionTitle
+                icon={<CalendarDays size={22} />}
+                title="Crear votació"
+                subtitle="Fes una pregunta a les famílies i defineix les opcions de resposta."
+              />
+
+              <form className="registration-form" onSubmit={handleCreatePoll}>
+                <label className="span-all">
+                  Pregunta
+                  <input
+                    type="text"
+                    value={pollQuestion}
+                    onChange={(event) => setPollQuestion(event.target.value)}
+                    placeholder="Ex: Quin dia us va millor?"
+                    autoFocus
+                  />
+                </label>
+
+                <label className="span-all">
+                  Descripció
+                  <input
+                    type="text"
+                    value={pollDescription}
+                    onChange={(event) => setPollDescription(event.target.value)}
+                    placeholder="Text breu opcional per donar context"
+                  />
+                </label>
+
+                <label>
+                  Data límit
+                  <input
+                    type="date"
+                    value={pollCloseDate}
+                    onChange={(event) => setPollCloseDate(event.target.value)}
+                  />
+                </label>
+
+                <label className="span-all checkbox-row">
+                  <input
+                    type="checkbox"
+                    checked={pollIsImportant}
+                    onChange={(event) => setPollIsImportant(event.target.checked)}
+                  />
+                  Marcar com a important
+                </label>
+
+                <div className="span-all poll-options-editor">
+                  <strong>Opcions de resposta</strong>
+
+                  {pollOptions.map((option, index) => (
+                    <div className="poll-option-editor-row" key={index}>
+                      <input
+                        type="text"
+                        value={option}
+                        onChange={(event) => updatePollOption(index, event.target.value)}
+                        placeholder={`Opció ${index + 1}`}
+                      />
+
+                      <button
+                        type="button"
+                        className="secondary-action danger-text"
+                        disabled={pollOptions.length <= 2}
+                        onClick={() => removePollOption(index)}
+                      >
+                        Treure
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    className="secondary-action"
+                    onClick={addPollOption}
+                  >
+                    + Afegir opció
+                  </button>
+                </div>
+
+                <button className="span-all" disabled={pollSaving}>
+                  {pollSaving ? "Guardant..." : "Crear votació"}
+                </button>
+              </form>
+            </Card>
+          </article>
+        </div>
+      )}
 
       {showEventFormModal && (
         <div
@@ -1407,6 +1863,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                   loadAdminEvents(event.target.value);
                   loadAdminActionData(event.target.value);
                   loadFamilies(event.target.value);
+                  loadAdminPolls(event.target.value);
                 }}
               >
                 {classes.map((classItem) => (
