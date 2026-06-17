@@ -1401,28 +1401,19 @@ const visibleEvents = showFullCalendar
       under3Count,
       comment
     ) {
-      const registrationRequest = familyAccessPin
-        ? supabase.rpc("register_organization_with_pin", {
-            p_organization_id: organizationId,
-            p_access_pin: familyAccessPin,
-            p_adults_count: adultsCount,
-            p_children_count: childrenCount,
-            p_under3_count: under3Count,
-            p_comment: comment || "",
-          })
-        : supabase
-            .from("ch_organization_registrations")
-            .upsert(
-              {
-                organization_id: organizationId,
-                family_id: familyId,
-                adults_count: adultsCount,
-                children_count: childrenCount,
-                under3_count: under3Count,
-                comment,
-              },
-              { onConflict: "organization_id,family_id" }
-            );
+      if (!familyAccessPin) {
+        alert("Cal accedir amb el PIN familiar per guardar la inscripció.");
+        return;
+      }
+
+      const registrationRequest = supabase.rpc("register_organization_with_pin", {
+        p_organization_id: organizationId,
+        p_access_pin: familyAccessPin,
+        p_adults_count: adultsCount,
+        p_children_count: childrenCount,
+        p_under3_count: under3Count,
+        p_comment: comment || "",
+      });
 
       const { error: registrationError } = await registrationRequest;
     
@@ -1435,22 +1426,16 @@ const visibleEvents = showFullCalendar
       await loadData();
     }
   async function handleOrganizationResponse(organizationId, familyId, response) {
-    const responseRequest = familyAccessPin
-      ? supabase.rpc("respond_organization_with_pin", {
-          p_organization_id: organizationId,
-          p_access_pin: familyAccessPin,
-          p_response: response,
-        })
-      : supabase
-          .from("ch_organization_responses")
-          .upsert(
-            {
-              organization_id: organizationId,
-              family_id: familyId,
-              response,
-            },
-            { onConflict: "organization_id,family_id" }
-          );
+    if (!familyAccessPin) {
+      alert("Cal accedir amb el PIN familiar per guardar la resposta.");
+      return;
+    }
+
+    const responseRequest = supabase.rpc("respond_organization_with_pin", {
+      p_organization_id: organizationId,
+      p_access_pin: familyAccessPin,
+      p_response: response,
+    });
 
     const { error: responseError } = await responseRequest;
 
