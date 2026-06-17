@@ -2751,3 +2751,65 @@ body,
     grid-template-columns: 1fr;
   }
 }
+
+/* Admin checklist */
+.admin-checklist-box {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.admin-checklist-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-checklist-header strong {
+  color: #111827;
+  font-size: 0.86rem;
+}
+
+.admin-checklist-empty {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.admin-checklist-list {
+  display: grid;
+  gap: 7px;
+}
+
+.admin-checklist-item {
+  display: grid;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 13px;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.admin-checklist-item span {
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.admin-checklist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (min-width: 720px) {
+  .admin-checklist-item {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}
