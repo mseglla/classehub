@@ -12,6 +12,7 @@ export default function AdminPage() {
   const [adminPolls, setAdminPolls] = useState([]);
   const [adminPollVotes, setAdminPollVotes] = useState([]);
   const [adminEvents, setAdminEvents] = useState([]);
+  const [adminChecklistItems, setAdminChecklistItems] = useState([]);
   const [adminOrganizations, setAdminOrganizations] = useState([]);
   const [organizationResponses, setOrganizationResponses] = useState([]);
   const [organizationRegistrations, setOrganizationRegistrations] = useState([]);
@@ -55,6 +56,10 @@ export default function AdminPage() {
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [pollSaving, setPollSaving] = useState(false);
   const [pollUpdatingId, setPollUpdatingId] = useState(null);
+  const [checklistFormInfo, setChecklistFormInfo] = useState(null);
+  const [checklistText, setChecklistText] = useState("");
+  const [checklistSaving, setChecklistSaving] = useState(false);
+  const [checklistUpdatingId, setChecklistUpdatingId] = useState(null);
   const [reminderSendingOrganizationId, setReminderSendingOrganizationId] = useState(null);
   const [reminderStatusMessage, setReminderStatusMessage] = useState("");
 
@@ -230,7 +235,139 @@ export default function AdminPage() {
       return;
     }
   
-    setAdminEvents(data || []);
+    const loadedEvents = data || [];
+    setAdminEvents(loadedEvents);
+
+    const eventIds = loadedEvents.map((eventItem) => eventItem.id);
+
+    if (eventIds.length === 0) {
+      setAdminChecklistItems([]);
+      return;
+    }
+
+    const { data: checklistData, error: checklistError } = await supabase
+      .from("ch_checklist_items")
+      .select("*")
+      .in("event_id", eventIds)
+      .order("sort_order");
+
+    if (checklistError) {
+      console.error(checklistError);
+      setMessage("No s'ha pogut carregar la checklist dels esdeveniments.");
+      return;
+    }
+
+    setAdminChecklistItems(checklistData || []);
+  }
+
+  function getEventChecklist(eventId) {
+    return adminChecklistItems
+      .filter((item) => item.event_id === eventId)
+      .sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  function resetChecklistForm() {
+    setChecklistFormInfo(null);
+    setChecklistText("");
+    setChecklistSaving(false);
+  }
+
+  function handleStartCreateChecklistItem(eventItem) {
+    setChecklistFormInfo({
+      eventId: eventItem.id,
+      eventTitle: eventItem.title,
+      itemId: null,
+    });
+    setChecklistText("");
+    setMessage("");
+  }
+
+  function handleStartEditChecklistItem(eventItem, item) {
+    setChecklistFormInfo({
+      eventId: eventItem.id,
+      eventTitle: eventItem.title,
+      itemId: item.id,
+    });
+    setChecklistText(item.text || "");
+    setMessage("");
+  }
+
+  async function handleSaveChecklistItem(event) {
+    event.preventDefault();
+
+    if (!checklistFormInfo?.eventId) return;
+
+    const cleanText = checklistText.trim();
+
+    if (!cleanText) {
+      setMessage("Cal escriure el text del punt de checklist.");
+      return;
+    }
+
+    setChecklistSaving(true);
+    setMessage("");
+
+    try {
+      if (checklistFormInfo.itemId) {
+        const { error } = await supabase
+          .from("ch_checklist_items")
+          .update({ text: cleanText })
+          .eq("id", checklistFormInfo.itemId);
+
+        if (error) throw error;
+
+        setMessage("Punt de checklist actualitzat correctament.");
+      } else {
+        const currentItems = getEventChecklist(checklistFormInfo.eventId);
+        const nextSortOrder =
+          currentItems.length > 0
+            ? Math.max(...currentItems.map((item) => item.sort_order || 0)) + 1
+            : 1;
+
+        const { error } = await supabase.from("ch_checklist_items").insert({
+          event_id: checklistFormInfo.eventId,
+          text: cleanText,
+          sort_order: nextSortOrder,
+        });
+
+        if (error) throw error;
+
+        setMessage("Punt de checklist afegit correctament.");
+      }
+
+      resetChecklistForm();
+      await loadAdminEvents(selectedClassId);
+    } catch (error) {
+      console.error(error);
+      setMessage(`No s'ha pogut guardar el punt de checklist: ${error.message}`);
+    } finally {
+      setChecklistSaving(false);
+    }
+  }
+
+  async function handleDeleteChecklistItem(item) {
+    const confirmed = window.confirm(`Vols eliminar "${item.text}"?`);
+
+    if (!confirmed) return;
+
+    setChecklistUpdatingId(item.id);
+    setMessage("");
+
+    const { error } = await supabase
+      .from("ch_checklist_items")
+      .delete()
+      .eq("id", item.id);
+
+    setChecklistUpdatingId(null);
+
+    if (error) {
+      console.error(error);
+      setMessage(`No s'ha pogut eliminar el punt de checklist: ${error.message}`);
+      return;
+    }
+
+    setMessage("Punt de checklist eliminat correctament.");
+    await loadAdminEvents(selectedClassId);
   }
 
   async function loadAdminActionData(classId) {
@@ -1340,6 +1477,53 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           ) : (
             <p>ℹ️ Només informatiu</p>
           )}
+
+          <div className="admin-checklist-box">
+            <div className="admin-checklist-header">
+              <strong>Checklist</strong>
+
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() => handleStartCreateChecklistItem(event)}
+              >
+                + Afegir punt
+              </button>
+            </div>
+
+            {getEventChecklist(event.id).length === 0 ? (
+              <p className="admin-checklist-empty">
+                Cap punt afegit.
+              </p>
+            ) : (
+              <div className="admin-checklist-list">
+                {getEventChecklist(event.id).map((item) => (
+                  <div className="admin-checklist-item" key={item.id}>
+                    <span>{item.text}</span>
+
+                    <div className="admin-checklist-actions">
+                      <button
+                        type="button"
+                        className="secondary-action"
+                        onClick={() => handleStartEditChecklistItem(event, item)}
+                      >
+                        Editar
+                      </button>
+
+                      <button
+                        type="button"
+                        className="secondary-action danger-text"
+                        disabled={checklistUpdatingId === item.id}
+                        onClick={() => handleDeleteChecklistItem(item)}
+                      >
+                        {checklistUpdatingId === item.id ? "Eliminant..." : "Eliminar"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="admin-row-actions">
@@ -1704,6 +1888,55 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           </div>
         </Card>
       </section>
+
+      {checklistFormInfo && (
+        <div
+          className="modal-backdrop"
+          onClick={() => {
+            if (!checklistSaving) resetChecklistForm();
+          }}
+        >
+          <article
+            className="modal family-form-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              disabled={checklistSaving}
+              onClick={resetChecklistForm}
+            >
+              Tancar
+            </button>
+
+            <p className="eyebrow">Checklist</p>
+            <h2>
+              {checklistFormInfo.itemId ? "Editar punt" : "Afegir punt"}
+            </h2>
+
+            <p className="modal-intro">
+              Esdeveniment: <strong>{checklistFormInfo.eventTitle}</strong>
+            </p>
+
+            <form className="registration-form" onSubmit={handleSaveChecklistItem}>
+              <label className="span-all">
+                Text del punt
+                <input
+                  type="text"
+                  value={checklistText}
+                  onChange={(event) => setChecklistText(event.target.value)}
+                  placeholder="Ex: Portar aigua, autorització signada..."
+                  autoFocus
+                />
+              </label>
+
+              <button className="span-all" disabled={checklistSaving}>
+                {checklistSaving ? "Guardant..." : "Guardar punt"}
+              </button>
+            </form>
+          </article>
+        </div>
+      )}
 
       {showPollFormModal && (
         <div
