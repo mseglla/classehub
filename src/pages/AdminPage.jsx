@@ -121,12 +121,11 @@ export default function AdminPage() {
 
   const attendanceSummary = detailResponses.reduce(
     (summary, response) => {
-      if (response.response === "yes") return { ...summary, yes: summary.yes + 1 };
+      if (["yes", "sí", "si"].includes(response.response)) return { ...summary, yes: summary.yes + 1 };
       if (response.response === "no") return { ...summary, no: summary.no + 1 };
-      if (response.response === "maybe") return { ...summary, maybe: summary.maybe + 1 };
-      return { ...summary, other: summary.other + 1 };
+      return summary;
     },
-    { yes: 0, no: 0, maybe: 0, other: 0 }
+    { yes: 0, no: 0 }
   );
 
   const detailAnsweredCount =
@@ -150,7 +149,7 @@ export default function AdminPage() {
   }
 
   function formatResponse(response) {
-    if (response === "yes") return "Sí";
+    if (["yes", "sí", "si"].includes(response)) return "Sí";
     if (response === "no") return "No";
     if (response === "maybe") return "Potser";
     return response || "Sense resposta";
@@ -1167,6 +1166,10 @@ PIN: ${family.access_pin}`;
     loadClasses();
   }, []);
   function handleStartEdit(eventItem) {
+    const linkedOrganization = adminOrganizations.find(
+      (organization) => organization.event_id === eventItem.id
+    );
+
     setEditingEventId(eventItem.id);
     setTitle(eventItem.title || "");
     setEventType(eventItem.event_type || "classe");
@@ -1174,8 +1177,8 @@ PIN: ${family.access_pin}`;
     setStartTime(eventItem.start_time ? eventItem.start_time.slice(0, 5) : "");
     setLocation(eventItem.location || "");
     setDescription(eventItem.summary || eventItem.details || "");
-    setPublicationType("info");
-    setCloseDate("");
+    setPublicationType(linkedOrganization?.organization_type || "info");
+    setCloseDate(linkedOrganization?.close_date || "");
     setShowEventFormModal(true);
     setMessage("Estàs editant aquest esdeveniment.");
   }
@@ -2599,16 +2602,6 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                   <div>
                     <span>No</span>
                     <strong>{attendanceSummary.no}</strong>
-                  </div>
-
-                  <div>
-                    <span>Potser</span>
-                    <strong>{attendanceSummary.maybe}</strong>
-                  </div>
-
-                  <div>
-                    <span>Altres</span>
-                    <strong>{attendanceSummary.other}</strong>
                   </div>
 
                   <div>
