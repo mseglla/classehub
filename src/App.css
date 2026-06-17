@@ -2696,3 +2696,58 @@ body,
     align-items: center;
   }
 }
+
+/* Admin polls */
+.poll-admin-row {
+  align-items: start;
+}
+
+.poll-admin-results {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.poll-admin-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.poll-admin-result span {
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.poll-admin-result strong {
+  color: #111827;
+  font-size: 0.85rem;
+}
+
+.poll-options-editor {
+  display: grid;
+  gap: 10px;
+}
+
+.poll-options-editor > strong {
+  color: #111827;
+  font-size: 0.9rem;
+}
+
+.poll-option-editor-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (max-width: 560px) {
+  .poll-option-editor-row {
+    grid-template-columns: 1fr;
+  }
+}
