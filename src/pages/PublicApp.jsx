@@ -341,6 +341,14 @@ function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }
   const pollVotes = votes.filter((vote) => vote.poll_id === poll.id);
   const votedFamilies = new Set(pollVotes.map((vote) => vote.family_id));
 
+  const activeFamilyVote = activeFamily
+    ? pollVotes.find((vote) => vote.family_id === activeFamily.id)
+    : null;
+
+  const activeFamilyOption = activeFamilyVote
+    ? poll.ch_poll_options?.find((option) => option.id === activeFamilyVote.option_id)
+    : null;
+
   async function submitVote(e) {
     e.preventDefault();
 
@@ -368,13 +376,16 @@ function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }
         </small>
       </div>
 
+      {activeFamilyOption && (
+        <div className="span-all linked-family-box">
+          <span>✅ Ja has votat</span>
+          <strong>{activeFamilyOption.text}</strong>
+          <small>Pots canviar el vot seleccionant una altra opció.</small>
+        </div>
+      )}
+
       <form className="registration-form" onSubmit={submitVote}>
-        {activeFamily ? (
-          <div className="span-all linked-family-box">
-            <span>Família identificada</span>
-            <strong>{activeFamily.student_name}</strong>
-          </div>
-        ) : (
+        {!activeFamily && (
           <label className="span-all">
             Família
             <select value={familyId} onChange={(e) => setFamilyId(e.target.value)}>
@@ -392,7 +403,9 @@ function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }
         <label className="span-all">
           Resposta
           <select value={optionId} onChange={(e) => setOptionId(e.target.value)}>
-            <option value="">Tria opció</option>
+            <option value="">
+              {activeFamilyOption ? "Tria una nova opció" : "Tria opció"}
+            </option>
             {poll.ch_poll_options?.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.text}
@@ -401,7 +414,9 @@ function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }
           </select>
         </label>
 
-        <button className="span-all">Votar</button>
+        <button className="span-all">
+          {activeFamilyOption ? "Actualitzar vot" : "Votar"}
+        </button>
       </form>
 
       <button className="secondary-action" onClick={() => onOpenResults(poll)}>
