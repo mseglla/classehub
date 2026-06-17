@@ -1471,13 +1471,17 @@ const visibleEvents = showFullCalendar
     window.localStorage.setItem("classehub-install-banner-dismissed", "true");
   }
 
-  async function handleVote(pollId, optionId, familyId) {
-    const { error: voteError } = await supabase
-      .from("ch_poll_votes")
-      .upsert(
-        { poll_id: pollId, option_id: optionId, family_id: familyId },
-        { onConflict: "poll_id,family_id" }
-      );
+  async function handleVote(pollId, optionId) {
+    if (!familyAccessPin) {
+      alert("Cal accedir amb el PIN familiar per votar.");
+      return;
+    }
+
+    const { error: voteError } = await supabase.rpc("vote_poll_with_pin", {
+      p_poll_id: pollId,
+      p_option_id: optionId,
+      p_access_pin: familyAccessPin,
+    });
 
     if (voteError) {
       alert("No s'ha pogut guardar el vot.");
