@@ -1157,6 +1157,7 @@ export default function PublicApp() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [familyAccessPin, setFamilyAccessPin] = useState(() => getFamilyAccessPin(slug));
+  const [activeFamilyFromPin, setActiveFamilyFromPin] = useState(null);
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
@@ -1195,11 +1196,9 @@ export default function PublicApp() {
       responsesRes,
       registrationsRes,
     ] = await Promise.all([
-      supabase
-        .from("ch_families")
-        .select("*")
-        .eq("class_id", classId)
-        .order("student_name"),
+      supabase.rpc("get_public_families_for_class", {
+        p_class_id: classId,
+      }),
       supabase
         .from("ch_events")
         .select("*")
@@ -1283,6 +1282,30 @@ export default function PublicApp() {
   }, [slug]);
 
   useEffect(() => {
+    async function loadFamilyFromSavedPin() {
+      if (!classInfo?.id || !familyAccessPin || activeFamilyFromPin) return;
+
+      const { data, error } = await supabase.rpc("get_family_by_pin", {
+        p_class_id: classInfo.id,
+        p_access_pin: familyAccessPin,
+      });
+
+      const matchedFamily = data?.[0] || null;
+
+      if (error || !matchedFamily) {
+        setActiveFamilyFromPin(null);
+        setPinError("El PIN guardat no és vàlid per aquesta classe. Torna'l a introduir.");
+        return;
+      }
+
+      setActiveFamilyFromPin(matchedFamily);
+      setPinError("");
+    }
+
+    loadFamilyFromSavedPin();
+  }, [classInfo?.id, familyAccessPin, activeFamilyFromPin]);
+
+  useEffect(() => {
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true;
@@ -1310,18 +1333,9 @@ export default function PublicApp() {
     };
   }, []);
 
-  const activeFamily = useMemo(() => {
-    if (!familyAccessPin) return null;
+  const activeFamily = activeFamilyFromPin;
 
-    return (
-      families.find(
-        (family) =>
-          String(family.access_pin || "").trim() === String(familyAccessPin).trim()
-      ) || null
-    );
-  }, [families, familyAccessPin]);
-
-  function submitFamilyPin(event) {
+  async function submitFamilyPin(event) {
     event.preventDefault();
 
     const cleanPin = pinInput.trim();
@@ -1331,15 +1345,24 @@ export default function PublicApp() {
       return;
     }
 
-    const matchedFamily = families.find(
-      (family) => String(family.access_pin || "").trim() === cleanPin
-    );
+    if (!classInfo?.id) {
+      setPinError("Encara no s'ha carregat la classe. Torna-ho a provar.");
+      return;
+    }
 
-    if (!matchedFamily) {
+    const { data, error } = await supabase.rpc("get_family_by_pin", {
+      p_class_id: classInfo.id,
+      p_access_pin: cleanPin,
+    });
+
+    const matchedFamily = data?.[0] || null;
+
+    if (error || !matchedFamily) {
       setPinError("Aquest PIN no coincideix amb cap família de la classe.");
       return;
     }
 
+    setActiveFamilyFromPin(matchedFamily);
     saveFamilyAccessPin(slug, cleanPin);
     setFamilyAccessPin(cleanPin);
     setPinInput("");
