@@ -5,6 +5,14 @@ import { Card, SectionTitle } from "../components/LayoutComponents";
 import { shortDate } from "../utils/dateHelpers";
 import { typeMeta } from "../utils/eventHelpers";
 
+const ADMIN_TABS = [
+  { id: "home", label: "Inici" },
+  { id: "agenda", label: "Agenda" },
+  { id: "families", label: "Famílies" },
+  { id: "polls", label: "Vots" },
+  { id: "comms", label: "Més" },
+];
+
 export default function AdminPage() {
   const [classes, setClasses] = useState([]);
   const [families, setFamilies] = useState([]);
@@ -62,6 +70,7 @@ export default function AdminPage() {
   const [checklistUpdatingId, setChecklistUpdatingId] = useState(null);
   const [reminderSendingOrganizationId, setReminderSendingOrganizationId] = useState(null);
   const [reminderStatusMessage, setReminderStatusMessage] = useState("");
+  const [activeAdminTab, setActiveAdminTab] = useState("home");
 
   const selectedClass = classes.find(
     (classItem) => String(classItem.id) === selectedClassId
@@ -1352,7 +1361,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
    
   return (
     <main className="page">
-      <header className="hero">
+      <header className="hero admin-hero">
         <div className="hero-main">
           <div>
             <p className="eyebrow">ClasseHub Admin</p>
@@ -1366,7 +1375,21 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         </div>
       </header>
 
+      <nav className="admin-tabs" aria-label="Seccions de l'administració">
+        {ADMIN_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={activeAdminTab === tab.id ? "active" : ""}
+            onClick={() => setActiveAdminTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
       <section className="layout">
+        {activeAdminTab === "home" && (
         <Card className="span-2">
           <SectionTitle
             icon={<CalendarDays size={22} />}
@@ -1409,7 +1432,9 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
           {message && <p className="admin-message">{message}</p>}
         </Card>
+        )}
 
+        {activeAdminTab === "agenda" && (
         <Card className="span-2">
           <SectionTitle
             icon={<CalendarDays size={22} />}
@@ -1565,7 +1590,9 @@ console.log("Resultat guardar esdeveniment:", { data, error });
   )}
 </div>
         </Card>
+        )}
 
+        {activeAdminTab === "families" && (
         <Card className="span-2">
           <SectionTitle
             icon={<Users size={22} />}
@@ -1773,7 +1800,9 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             )}
           </div>
         </Card>
+        )}
 
+        {activeAdminTab === "polls" && (
         <Card className="span-2">
           <SectionTitle
             icon={<CalendarDays size={22} />}
@@ -1866,7 +1895,9 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             )}
           </div>
         </Card>
+        )}
 
+        {activeAdminTab === "comms" && (
         <Card className="span-2">
           <SectionTitle
             icon={<CalendarDays size={22} />}
@@ -1890,6 +1921,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             )}
           </div>
         </Card>
+        )}
       </section>
 
       {checklistFormInfo && (

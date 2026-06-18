@@ -2813,3 +2813,123 @@ body,
     align-items: center;
   }
 }
+
+
+/* Mobile-first admin navigation */
+.admin-hero {
+  padding: 24px 20px;
+  margin-bottom: 12px;
+}
+
+.admin-hero h1 {
+  font-size: clamp(2rem, 9vw, 3.5rem);
+  line-height: 0.95;
+}
+
+.admin-hero .eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.26em;
+}
+
+.admin-hero .hero-badge {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 16px;
+  font-size: 1rem;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 16px 12px;
+  margin: -2px 0 12px;
+  scrollbar-width: none;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-tabs button {
+  flex: 0 0 auto;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  min-height: auto;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.admin-tabs button.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+/* Mobile: bottom app navigation */
+@media (max-width: 640px) {
+  .page {
+    padding-bottom: 96px;
+  }
+
+  .admin-hero {
+    padding: 22px 18px;
+    border-radius: 28px;
+    margin-bottom: 12px;
+  }
+
+  .admin-hero .hero-main {
+    gap: 18px;
+  }
+
+  .admin-hero h1 {
+    font-size: 2.55rem;
+  }
+
+  .admin-hero .hero-badge {
+    font-size: 0.95rem;
+  }
+
+  .admin-tabs {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 80;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    padding: 8px;
+    margin: 0;
+    overflow: visible;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
+  }
+
+  .admin-tabs button {
+    width: 100%;
+    min-width: 0;
+    padding: 10px 2px;
+    border: 0;
+    border-radius: 22px;
+    background: transparent;
+    color: #64748b;
+    box-shadow: none;
+    font-size: 0.76rem;
+    line-height: 1;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .admin-tabs button.active {
+    background: #0f172a;
+    color: #ffffff;
+  }
+}
