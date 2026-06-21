@@ -1390,44 +1390,137 @@ console.log("Resultat guardar esdeveniment:", { data, error });
 
       <section className="layout">
         {activeAdminTab === "home" && (
-        <Card className="span-2">
-          <SectionTitle
-            icon={<CalendarDays size={22} />}
-            title="Panell d'administració"
-            subtitle="Gestiona la classe, crea esdeveniments i revisa l'activitat recent."
-          />
+        <Card className="span-2 admin-home-card">
+          <div className="admin-home-heading">
+            <p className="eyebrow">Admin de classe</p>
+            <h2>
+              {selectedClass
+                ? `${selectedClass.emoji || ""} ${selectedClass.name}`
+                : "Classe"}
+            </h2>
+            <p>
+              {selectedClass?.school_year
+                ? `Curs ${selectedClass.school_year}`
+                : "Panell de gestió per a delegats"}
+            </p>
+          </div>
 
-          <div className="admin-toolbar">
-            <label>
-              Classe administrada
-              <select
-                value={selectedClassId}
-                onChange={(event) => {
-                  setSelectedClassId(event.target.value);
-                  loadAdminEvents(event.target.value);
-                  loadAdminActionData(event.target.value);
-                  loadFamilies(event.target.value);
-                  loadAdminPolls(event.target.value);
-                }}
-              >
-                {classes.map((classItem) => (
-                  <option key={classItem.id} value={classItem.id}>
-                    {classItem.emoji} {classItem.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+          <div className="admin-action-panel">
+            <div className="admin-action-panel-header">
+              <span>Crear una acció</span>
+              <small>Tria què necessites fer</small>
+            </div>
 
             <button
               type="button"
+              className="admin-action-item"
               onClick={() => {
                 resetForm();
+                setPublicationType("info");
                 setMessage("");
                 setShowEventFormModal(true);
               }}
             >
-              + Nou esdeveniment
+              <span className="admin-action-icon">i</span>
+              <span>
+                <strong>Informar</strong>
+                <small>Comunica un avís, una data o una informació.</small>
+              </span>
+              <span className="admin-action-arrow">›</span>
             </button>
+
+            <button
+              type="button"
+              className="admin-action-item"
+              onClick={() => {
+                resetForm();
+                setPublicationType("attendance");
+                setMessage("");
+                setShowEventFormModal(true);
+              }}
+            >
+              <span className="admin-action-icon">✓</span>
+              <span>
+                <strong>Demanar confirmació</strong>
+                <small>Pregunta qui vindrà i envia recordatoris.</small>
+              </span>
+              <span className="admin-action-arrow">›</span>
+            </button>
+
+            <button
+              type="button"
+              className="admin-action-item"
+              onClick={() => {
+                resetForm();
+                setPublicationType("registration");
+                setMessage("");
+                setShowEventFormModal(true);
+              }}
+            >
+              <span className="admin-action-icon">+</span>
+              <span>
+                <strong>Crear inscripció</strong>
+                <small>Recull adults, infants i comentaris.</small>
+              </span>
+              <span className="admin-action-arrow">›</span>
+            </button>
+
+            <button
+              type="button"
+              className="admin-action-item"
+              onClick={() => {
+                resetPollForm();
+                setShowPollFormModal(true);
+                setMessage("");
+              }}
+            >
+              <span className="admin-action-icon">?</span>
+              <span>
+                <strong>Crear votació</strong>
+                <small>Fes una consulta ràpida a les famílies.</small>
+              </span>
+              <span className="admin-action-arrow">›</span>
+            </button>
+
+            <button
+              type="button"
+              className="admin-action-item"
+              onClick={() => {
+                setEditingFamilyId(null);
+                setNewFamilyName("");
+                setMessage("");
+                setShowFamilyFormModal(true);
+              }}
+            >
+              <span className="admin-action-icon">F</span>
+              <span>
+                <strong>Afegir família</strong>
+                <small>Crea una família i el seu accés amb PIN.</small>
+              </span>
+              <span className="admin-action-arrow">›</span>
+            </button>
+          </div>
+
+          <div className="admin-home-summary compact">
+            <div>
+              <span>Famílies</span>
+              <strong>{activeFamilies.length}</strong>
+            </div>
+
+            <div>
+              <span>Agenda</span>
+              <strong>{visibleAdminEvents.length}</strong>
+            </div>
+
+            <div>
+              <span>Vots</span>
+              <strong>{adminPolls.filter((poll) => poll.is_active).length}</strong>
+            </div>
+
+            <div>
+              <span>Bústia</span>
+              <strong>{feedbacks.length}</strong>
+            </div>
           </div>
 
           {message && <p className="admin-message">{message}</p>}
