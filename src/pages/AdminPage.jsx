@@ -1599,7 +1599,12 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             <p>ℹ️ Només informatiu</p>
           )}
 
-          <div className="admin-checklist-box">
+          <details className="admin-checklist-box admin-checklist-details">
+            <summary>
+              <span>Checklist</span>
+              <strong>{getEventChecklist(event.id).length} punts</strong>
+            </summary>
+
             <div className="admin-checklist-header">
               <strong>Checklist</strong>
 
@@ -1644,7 +1649,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                 ))}
               </div>
             )}
-          </div>
+          </details>
         </div>
 
         <div className="admin-row-actions">

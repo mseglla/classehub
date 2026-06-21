@@ -3101,3 +3101,37 @@ body,
     font-size: 0.62rem;
   }
 }
+
+
+/* Compact admin agenda */
+.admin-checklist-details {
+  margin-top: 12px;
+}
+
+.admin-checklist-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.04);
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.admin-checklist-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-checklist-details summary strong {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.admin-checklist-details[open] summary {
+  margin-bottom: 12px;
+}
