@@ -1739,159 +1739,174 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               <p>No hi ha famílies carregades per aquesta classe.</p>
             ) : (
               families.map((family) => (
-                <div className="admin-row family-admin-row" key={family.id}>
-                  <div>
-                    <strong>{family.student_name}</strong>
-                    <div className="family-status-row">
-                      <span
-                        className={
-                          family.is_active === false
-                            ? "status-pill danger-pill"
-                            : "status-pill success-pill"
-                        }
-                      >
-                        {family.is_active === false ? "Desactivada" : "Activa"}
-                      </span>
+                <div className="admin-row family-admin-row family-admin-row-lean" key={family.id}>
+                  <div className="family-card-content">
+                    <div className="family-card-topline">
+                      <div className="family-card-identity">
+                        <strong>{family.student_name}</strong>
 
-                      {family.is_active === false && (
-                        <span className="family-status-note">
-                          Es manté l'historial, però no s'afegirà a noves accions.
+                        <span
+                          className={
+                            family.is_active === false
+                              ? "status-pill danger-pill"
+                              : "status-pill success-pill"
+                          }
+                        >
+                          {family.is_active === false ? "Desactivada" : "Activa"}
                         </span>
-                      )}
-                    </div>
-
-                    <div className="family-pin-row">
-                      <p className="family-pin">
-                        PIN familiar: <strong>{family.access_pin || "pendent de generar"}</strong>
-                      </p>
-
-                      {family.is_active !== false && (
-                        <>
-                          <button
-                            type="button"
-                            className="secondary-action family-copy-action"
-                            disabled={!family.access_pin}
-                            onClick={() => handleCopyFamilyAccess(family)}
-                          >
-                            {copiedAccessFamilyId === family.id
-                              ? "Copiat!"
-                              : "Copiar accés"}
-                          </button>
-
-                          <button
-                            type="button"
-                            className="secondary-action family-pin-action"
-                            disabled={pinUpdatingFamilyId === family.id}
-                            onClick={() => handleGenerateFamilyPin(family)}
-                          >
-                            {pinUpdatingFamilyId === family.id
-                              ? "Actualitzant..."
-                              : family.access_pin
-                                ? "Regenerar PIN"
-                                : "Generar PIN"}
-                          </button>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="family-contacts-box">
-                      <div className="family-contacts-header">
-                        <strong>Contactes email</strong>
-
-                        {family.is_active !== false && (
-                          <button
-                            type="button"
-                            className="secondary-action"
-                            onClick={() => handleStartCreateContact(family)}
-                          >
-                            + Afegir email
-                          </button>
-                        )}
                       </div>
 
-                      {getFamilyContacts(family.id).length === 0 ? (
-                        <p className="family-contact-empty">
-                          Cap email configurat.
+                      {family.is_active === false && (
+                        <p className="family-status-note">
+                          Es manté l'historial, però no s'afegirà a noves accions.
                         </p>
-                      ) : (
-                        <div className="family-contact-list">
-                          {getFamilyContacts(family.id).map((contact) => (
-                            <div className="family-contact-row" key={contact.id}>
-                              <div>
-                                <strong>{contact.contact_name || "Contacte"}</strong>
-                                <span>{contact.email}</span>
-
-                                <div className="family-contact-badges">
-                                  {contact.is_primary && (
-                                    <small>Principal</small>
-                                  )}
-
-                                  <small>
-                                    {contact.wants_email_reminders
-                                      ? "Rep recordatoris"
-                                      : "Sense recordatoris"}
-                                  </small>
-                                </div>
-                              </div>
-
-                              {family.is_active !== false && (
-                                <div className="family-contact-actions">
-                                  <button
-                                    type="button"
-                                    className="secondary-action"
-                                    onClick={() => handleStartEditContact(family, contact)}
-                                  >
-                                    Editar
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="secondary-action danger-text"
-                                    onClick={() => handleDeleteContact(contact)}
-                                  >
-                                    Eliminar
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
                       )}
                     </div>
-                  </div>
 
-                  <div className="admin-row-actions family-general-actions">
-                    {family.is_active === false ? (
-                      <>
-                        <span className="admin-message">Desactivada</span>
+                    <div className="family-access-line">
+                      <div className="family-pin-lean">
+                        <span>PIN</span>
+                        <strong>{family.access_pin || "pendent"}</strong>
+                      </div>
 
+                      {family.is_active !== false && (
                         <button
                           type="button"
-                          className="secondary-action"
-                          onClick={() => handleReactivateFamily(family)}
+                          className="secondary-action family-copy-action family-copy-action-lean"
+                          disabled={!family.access_pin}
+                          onClick={() => handleCopyFamilyAccess(family)}
                         >
-                          Reactivar
+                          {copiedAccessFamilyId === family.id
+                            ? "Copiat!"
+                            : "Copiar accés"}
                         </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          className="secondary-action"
-                          onClick={() => handleStartEditFamily(family)}
-                        >
-                          Editar
-                        </button>
+                      )}
+                    </div>
 
-                        <button
-                          type="button"
-                          className="secondary-action danger-text"
-                          onClick={() => handleRequestDeleteFamily(family)}
-                        >
-                          Eliminar
-                        </button>
-                      </>
-                    )}
+                    <details className="family-management-details">
+                      <summary>
+                        <span>Gestionar família</span>
+                        <strong>
+                          {getFamilyContacts(family.id).length === 0
+                            ? "Sense emails"
+                            : `${getFamilyContacts(family.id).length} emails`}
+                        </strong>
+                      </summary>
+
+                      <div className="family-management-panel">
+                        <div className="family-contacts-box family-contacts-box-lean">
+                          <div className="family-contacts-header">
+                            <strong>Contactes email</strong>
+
+                            {family.is_active !== false && (
+                              <button
+                                type="button"
+                                className="secondary-action"
+                                onClick={() => handleStartCreateContact(family)}
+                              >
+                                + Afegir email
+                              </button>
+                            )}
+                          </div>
+
+                          {getFamilyContacts(family.id).length === 0 ? (
+                            <p className="family-contact-empty">
+                              Cap email configurat.
+                            </p>
+                          ) : (
+                            <div className="family-contact-list">
+                              {getFamilyContacts(family.id).map((contact) => (
+                                <div className="family-contact-row" key={contact.id}>
+                                  <div>
+                                    <strong>{contact.contact_name || "Contacte"}</strong>
+                                    <span>{contact.email}</span>
+
+                                    <div className="family-contact-badges">
+                                      {contact.is_primary && (
+                                        <small>Principal</small>
+                                      )}
+
+                                      <small>
+                                        {contact.wants_email_reminders
+                                          ? "Rep recordatoris"
+                                          : "Sense recordatoris"}
+                                      </small>
+                                    </div>
+                                  </div>
+
+                                  {family.is_active !== false && (
+                                    <div className="family-contact-actions">
+                                      <button
+                                        type="button"
+                                        className="secondary-action"
+                                        onClick={() => handleStartEditContact(family, contact)}
+                                      >
+                                        Editar
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        className="secondary-action danger-text"
+                                        onClick={() => handleDeleteContact(contact)}
+                                      >
+                                        Eliminar
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="family-management-actions">
+                          <strong>Accions de gestió</strong>
+
+                          <div className="family-management-action-row">
+                            {family.is_active === false ? (
+                              <button
+                                type="button"
+                                className="secondary-action"
+                                onClick={() => handleReactivateFamily(family)}
+                              >
+                                Reactivar família
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  className="secondary-action"
+                                  onClick={() => handleStartEditFamily(family)}
+                                >
+                                  Editar família
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="secondary-action"
+                                  disabled={pinUpdatingFamilyId === family.id}
+                                  onClick={() => handleGenerateFamilyPin(family)}
+                                >
+                                  {pinUpdatingFamilyId === family.id
+                                    ? "Actualitzant..."
+                                    : family.access_pin
+                                      ? "Regenerar PIN"
+                                      : "Generar PIN"}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="secondary-action danger-text"
+                                  onClick={() => handleRequestDeleteFamily(family)}
+                                >
+                                  Eliminar família
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </details>
                   </div>
                 </div>
               ))

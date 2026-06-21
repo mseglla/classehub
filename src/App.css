@@ -3135,3 +3135,475 @@ body,
 .admin-checklist-details[open] summary {
   margin-bottom: 12px;
 }
+
+
+/* Compact admin families */
+.family-compact-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.family-compact-meta span {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: rgba(15, 23, 42, 0.04);
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.family-pin-row-compact {
+  margin-top: 10px;
+}
+
+.family-pin-row-compact .family-copy-action {
+  flex: 1;
+}
+
+.family-pin-row-compact .family-pin-action {
+  flex: 1;
+}
+
+.family-contacts-details {
+  margin-top: 12px;
+}
+
+.family-contacts-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.04);
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.family-contacts-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.family-contacts-details summary strong {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-size: 0.76rem;
+}
+
+.family-contacts-details[open] summary {
+  margin-bottom: 12px;
+}
+
+
+/* Lean admin family cards */
+.family-admin-row-lean {
+  align-items: stretch;
+}
+
+.family-card-content {
+  width: 100%;
+}
+
+.family-card-topline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.family-card-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.family-card-identity strong {
+  font-size: 1rem;
+}
+
+.family-access-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.family-pin-lean {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.family-pin-lean span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.family-pin-lean strong {
+  color: #0f172a;
+  font-size: 0.98rem;
+}
+
+.family-copy-action-lean {
+  white-space: nowrap;
+}
+
+.family-management-details {
+  margin-top: 12px;
+}
+
+.family-management-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.family-management-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.family-management-details summary strong {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.family-management-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.family-contacts-box-lean {
+  margin-top: 0;
+  width: 100%;
+}
+
+.family-management-actions {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.family-management-actions > strong {
+  color: #334155;
+  font-size: 0.82rem;
+}
+
+.family-management-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .family-access-line {
+    grid-template-columns: 1fr;
+  }
+
+  .family-copy-action-lean {
+    width: 100%;
+  }
+
+  .family-management-action-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fix lean family cards mobile layout */
+.family-admin-row-lean {
+  display: block;
+}
+
+.family-card-content {
+  width: 100%;
+  display: grid;
+  gap: 12px;
+}
+
+.family-card-topline {
+  display: block;
+}
+
+.family-card-identity {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.family-card-identity strong {
+  line-height: 1.15;
+}
+
+.family-access-line {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.family-pin-lean {
+  justify-content: flex-start;
+}
+
+.family-copy-action-lean {
+  width: 100%;
+}
+
+.family-management-details {
+  width: 100%;
+  margin-top: 0;
+}
+
+.family-management-details summary {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.family-management-panel {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.family-contacts-header {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.family-contacts-header .secondary-action {
+  width: 100%;
+}
+
+.family-management-action-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.family-management-action-row .secondary-action {
+  width: 100%;
+}
+
+@media (min-width: 760px) {
+  .family-access-line {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .family-copy-action-lean {
+    width: auto;
+  }
+
+  .family-contacts-header {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .family-contacts-header .secondary-action {
+    width: auto;
+  }
+}
+
+/* Reset family admin cards - clean mobile-first layout */
+.family-admin-row.family-admin-row-lean {
+  display: block !important;
+  width: 100%;
+  padding: 16px !important;
+  box-sizing: border-box;
+}
+
+.family-admin-row-lean .family-card-content {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: none !important;
+  gap: 12px !important;
+  box-sizing: border-box;
+}
+
+.family-admin-row-lean .family-card-topline,
+.family-admin-row-lean .family-card-identity,
+.family-admin-row-lean .family-access-line,
+.family-admin-row-lean .family-management-details,
+.family-admin-row-lean .family-management-panel,
+.family-admin-row-lean .family-contacts-box,
+.family-admin-row-lean .family-contact-list,
+.family-admin-row-lean .family-management-actions {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+.family-admin-row-lean .family-card-identity {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.family-admin-row-lean .family-card-identity strong {
+  flex: 1 !important;
+  min-width: 0 !important;
+  font-size: 1.05rem !important;
+  line-height: 1.2 !important;
+}
+
+.family-admin-row-lean .family-card-identity .status-pill {
+  flex: 0 0 auto !important;
+}
+
+.family-admin-row-lean .family-access-line {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+  background: rgba(15, 23, 42, 0.04) !important;
+}
+
+.family-admin-row-lean .family-pin-lean {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+
+.family-admin-row-lean .family-pin-lean span {
+  font-size: 0.72rem !important;
+}
+
+.family-admin-row-lean .family-pin-lean strong {
+  font-size: 1.1rem !important;
+}
+
+.family-admin-row-lean .family-copy-action-lean {
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+.family-admin-row-lean .family-management-details {
+  margin: 0 !important;
+}
+
+.family-admin-row-lean .family-management-details summary {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+}
+
+.family-admin-row-lean .family-management-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  margin-top: 14px !important;
+}
+
+.family-admin-row-lean .family-contacts-header {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+.family-admin-row-lean .family-contacts-header .secondary-action {
+  width: 100% !important;
+}
+
+.family-admin-row-lean .family-contact-row {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+.family-admin-row-lean .family-contact-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-top: 10px !important;
+}
+
+.family-admin-row-lean .family-contact-actions .secondary-action {
+  width: 100% !important;
+}
+
+.family-admin-row-lean .family-management-action-row {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.family-admin-row-lean .family-management-action-row .secondary-action {
+  width: 100% !important;
+}
+
+@media (min-width: 760px) {
+  .family-admin-row-lean .family-access-line {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .family-admin-row-lean .family-copy-action-lean {
+    width: auto !important;
+  }
+
+  .family-admin-row-lean .family-contacts-header {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .family-admin-row-lean .family-contacts-header .secondary-action {
+    width: auto !important;
+  }
+}
