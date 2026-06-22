@@ -4004,3 +4004,43 @@ body,
 .ch-field input[type="date"]::-webkit-calendar-picker-indicator {
   margin-left: 0;
 }
+
+/* Family signup success state */
+.ch-signup-success-card {
+  text-align: center;
+}
+
+.ch-signup-success-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  border-radius: 20px;
+  background: #dcfce7;
+  font-size: 1.7rem;
+}
+
+.ch-signup-pin-result {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border-radius: 26px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.ch-signup-pin-result span {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ch-signup-pin-result strong {
+  color: #0f172a;
+  font-size: 2.4rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}

@@ -1,11 +1,16 @@
 import { useMemo, useState } from "react";
 import { AppCard, FormField, PrimaryButton, ProgressDots, SecondaryButton } from "../components/ui";
+import { supabase } from "../lib/supabase";
 
 function getSlug() {
   const parts = window.location.pathname.split("/").filter(Boolean);
   const classIndex = parts.indexOf("classe");
   if (classIndex >= 0 && parts[classIndex + 1]) return parts[classIndex + 1];
   return "orenetes";
+}
+
+function saveFamilyAccessPin(slug, pin) {
+  window.localStorage.setItem(`classehub-family-pin-${slug}`, pin);
 }
 
 const steps = [
@@ -24,8 +29,8 @@ const steps = [
   {
     id: "review",
     stepLabel: "Pas 3 de 3",
-    title: "Revisa l’alta",
-    text: "Si tot és correcte, crearem l’accés familiar a ClasseHub.",
+    title: "Revisa les dades",
+    text: "Encara no hem creat res. Revisa que tot sigui correcte abans de generar el PIN familiar.",
   },
 ];
 
@@ -33,6 +38,10 @@ export default function FamilySignupPage() {
   const [slug] = useState(getSlug());
   const [currentStep, setCurrentStep] = useState(0);
   const [message, setMessage] = useState("");
+  const [submitStatus, setSubmitStatus] = useState("");
+  const [createdAccess, setCreatedAccess] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     childName: "",
     birthDate: "",
@@ -43,6 +52,7 @@ export default function FamilySignupPage() {
 
   const className = slug === "orenetes" ? "Orenetes" : slug;
   const step = steps[currentStep];
+  const classUrl = `/classe/${slug}`;
 
   const canContinue = useMemo(() => {
     if (step.id === "child") return formData.childName.trim().length >= 2;
@@ -78,7 +88,7 @@ export default function FamilySignupPage() {
     setCurrentStep((value) => Math.max(value - 1, 0));
   }
 
-  function submitSignup(event) {
+  async function submitSignup(event) {
     event.preventDefault();
 
     if (!formData.childName.trim() || !formData.adultName.trim()) {
@@ -86,14 +96,132 @@ export default function FamilySignupPage() {
       return;
     }
 
-    setMessage("Alta preparada. El següent pas serà crear el PIN familiar.");
+    setSaving(true);
+    setMessage("");
+    setSubmitStatus("");
+
+    const { data, error } = await supabase.rpc("self_register_family", {
+      p_class_slug: slug,
+      p_child_name: formData.childName.trim(),
+      p_child_birth_date: formData.birthDate || null,
+      p_adult_name: formData.adultName.trim(),
+      p_email: formData.email.trim() || null,
+      p_phone: formData.phone.trim() || null,
+    });
+
+    setSaving(false);
+
+    if (error) {
+      console.error(error);
+      setSubmitStatus("error");
+      setMessage(`No s'ha pogut crear l'alta: ${error.message}`);
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+
+    if (!result) {
+      setSubmitStatus("error");
+      setMessage("No s'ha rebut resposta del servidor. Torna-ho a provar.");
+      return;
+    }
+
+    if (result.status === "possible_duplicate") {
+      setSubmitStatus("possible_duplicate");
+      setMessage(result.message);
+      return;
+    }
+
+    if (result.status !== "created" || !result.access_pin) {
+      setSubmitStatus("error");
+      setMessage(result.message || "No s'ha pogut completar l'alta.");
+      return;
+    }
+
+    saveFamilyAccessPin(slug, result.access_pin);
+
+    setCreatedAccess({
+      familyId: result.family_id,
+      accessPin: result.access_pin,
+      childName: formData.childName.trim(),
+      accessUrl: `${window.location.origin}${classUrl}?pin=${result.access_pin}`,
+    });
+    setSubmitStatus("created");
+  }
+
+  async function copyAccess() {
+    if (!createdAccess) return;
+
+    const accessMessage = `Hola! Per accedir a ClasseHub:
+
+${createdAccess.accessUrl}
+
+Família: ${createdAccess.childName}
+PIN: ${createdAccess.accessPin}`;
+
+    try {
+      await navigator.clipboard.writeText(accessMessage);
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 1800);
+    } catch (error) {
+      console.error(error);
+      setMessage("No s'ha pogut copiar l'accés.");
+    }
+  }
+
+  if (submitStatus === "created" && createdAccess) {
+    return (
+      <main className="ch-signup-screen">
+        <AppCard className="ch-signup-card ch-signup-success-card">
+          <div className="ch-signup-success-icon">✅</div>
+
+          <div className="ch-signup-copy">
+            <p>Alta completada</p>
+            <h1>PIN familiar creat</h1>
+            <span>
+              Ja pots entrar a ClasseHub. Guarda aquest PIN o comparteix-lo
+              amb l’altre adult de la família.
+            </span>
+          </div>
+
+          <div className="ch-signup-pin-result">
+            <span>PIN familiar</span>
+            <strong>{createdAccess.accessPin}</strong>
+          </div>
+
+          <div className="ch-signup-actions">
+            <SecondaryButton type="button" onClick={copyAccess}>
+              {copied ? "Accés copiat!" : "Copiar accés"}
+            </SecondaryButton>
+
+            <PrimaryButton
+              type="button"
+              onClick={() => {
+                window.location.href = `${classUrl}?pin=${createdAccess.accessPin}`;
+              }}
+            >
+              Entrar a ClasseHub
+            </PrimaryButton>
+          </div>
+
+          {message && <p className="ch-signup-message">{message}</p>}
+
+          <p className="ch-signup-note">
+            Més endavant podràs afegir altres contactes de la família.
+          </p>
+        </AppCard>
+      </main>
+    );
   }
 
   return (
     <main className="ch-signup-screen">
       <AppCard className="ch-signup-card">
         <header className="ch-signup-header">
-          <a href={`/classe/${slug}`} className="ch-signup-back">
+          <a href={classUrl} className="ch-signup-back">
             Ja tinc PIN
           </a>
 
@@ -214,23 +342,49 @@ export default function FamilySignupPage() {
 
           {message && <p className="ch-signup-message">{message}</p>}
 
-          <div className="ch-signup-actions">
-            {currentStep > 0 && (
-              <SecondaryButton type="button" onClick={previousStep}>
-                Tornar
+          {submitStatus === "possible_duplicate" && (
+            <div className="ch-signup-actions">
+              <SecondaryButton
+                type="button"
+                onClick={() => {
+                  setSubmitStatus("");
+                  setMessage("");
+                  setCurrentStep(0);
+                }}
+              >
+                Revisar dades
               </SecondaryButton>
-            )}
 
-            {currentStep < steps.length - 1 ? (
-              <PrimaryButton type="button" onClick={nextStep}>
-                Continuar
+              <PrimaryButton
+                type="button"
+                onClick={() => {
+                  window.location.href = classUrl;
+                }}
+              >
+                Entrar amb PIN
               </PrimaryButton>
-            ) : (
-              <PrimaryButton type="submit">
-                Crear accés familiar
-              </PrimaryButton>
-            )}
-          </div>
+            </div>
+          )}
+
+          {submitStatus !== "possible_duplicate" && (
+            <div className="ch-signup-actions">
+              {currentStep > 0 && (
+                <SecondaryButton type="button" onClick={previousStep}>
+                  Tornar
+                </SecondaryButton>
+              )}
+
+              {currentStep < steps.length - 1 ? (
+                <PrimaryButton type="button" onClick={nextStep}>
+                  Continuar
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton type="submit" disabled={saving}>
+                  {saving ? "Creant accés..." : "Crear PIN familiar"}
+                </PrimaryButton>
+              )}
+            </div>
+          )}
         </form>
 
         <p className="ch-signup-note">
