@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminPage from "./pages/AdminPage";
 import PublicApp from "./pages/PublicApp";
+import FamilySignupPage from "./pages/FamilySignupPage";
 import { supabase } from "./lib/supabase";
 
 function AdminLogin({ onLogin }) {
@@ -133,10 +134,16 @@ function AdminAuthGate() {
 }
 
 function App() {
-  const isAdmin = window.location.pathname.startsWith("/admin");
+  const pathname = window.location.pathname;
+  const isAdmin = pathname.startsWith("/admin");
+  const isFamilySignup = /^\/classe\/[^/]+\/alta\/?$/.test(pathname);
 
   if (isAdmin) {
     return <AdminAuthGate />;
+  }
+
+  if (isFamilySignup) {
+    return <FamilySignupPage />;
   }
 
   return <PublicApp />;
