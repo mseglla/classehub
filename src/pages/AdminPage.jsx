@@ -1152,7 +1152,9 @@ PIN: ${family.access_pin}`;
       const { data, error } = await supabase
         .from("ch_classes")
         .select("*")
-        .order("name");
+        .eq("is_active", true)
+        .order("name")
+        .order("school_year", { ascending: false });
 
       if (error) {
         console.error(error);
