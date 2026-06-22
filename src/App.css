@@ -4044,3 +4044,15 @@ body,
   line-height: 1;
   letter-spacing: -0.05em;
 }
+
+/* Signup back action must stay visually secondary */
+.ch-signup-actions-clean .ch-signup-back-button {
+  background: transparent !important;
+  color: #94a3b8 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.ch-signup-actions-clean .ch-signup-back-button:hover {
+  color: #64748b !important;
+}

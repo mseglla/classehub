@@ -367,21 +367,34 @@ PIN: ${createdAccess.accessPin}`;
           )}
 
           {submitStatus !== "possible_duplicate" && (
-            <div className="ch-signup-actions">
-              {currentStep > 0 && (
-                <SecondaryButton type="button" onClick={previousStep}>
-                  Tornar
-                </SecondaryButton>
-              )}
-
+            <div className="ch-signup-actions ch-signup-actions-clean">
               {currentStep < steps.length - 1 ? (
-                <PrimaryButton type="button" onClick={nextStep}>
+                <PrimaryButton
+                  key={`continue-${currentStep}`}
+                  type="button"
+                  onClick={nextStep}
+                >
                   Continuar
                 </PrimaryButton>
               ) : (
-                <PrimaryButton type="submit" disabled={saving}>
-                  {saving ? "Creant accés..." : "Crear PIN familiar"}
+                <PrimaryButton
+                  key="create-pin"
+                  type="submit"
+                  disabled={saving}
+                >
+                  {saving ? "Creant PIN..." : "Crear PIN familiar"}
                 </PrimaryButton>
+              )}
+
+              {currentStep > 0 && (
+                <button
+                  key={`back-${currentStep}`}
+                  type="button"
+                  className="ch-signup-back-button"
+                  onClick={previousStep}
+                >
+                  Tornar al pas anterior
+                </button>
               )}
             </div>
           )}
