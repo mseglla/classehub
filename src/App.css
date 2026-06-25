@@ -4056,3 +4056,172 @@ body,
 .ch-signup-actions-clean .ch-signup-back-button:hover {
   color: #64748b !important;
 }
+
+/* Cleaner family access login */
+.family-access-logo-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: fit-content;
+  margin: 0 auto 4px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.family-access-logo-row img {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.family-access-card .family-access-icon {
+  display: none;
+}
+
+.family-access-card h1 {
+  margin-top: 6px;
+  font-size: clamp(2rem, 10vw, 2.7rem);
+}
+
+.family-access-year {
+  margin-top: -2px;
+  color: #94a3b8;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.family-access-intro {
+  margin-top: 10px;
+  font-size: 0.96rem;
+  line-height: 1.4;
+}
+
+/* Cleaner login signup entry */
+.family-access-logo-row {
+  background: transparent !important;
+  padding: 0 !important;
+  margin-bottom: 8px !important;
+}
+
+.family-access-logo-row img {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 12px !important;
+}
+
+.family-access-logo-row span {
+  display: none !important;
+}
+
+.family-signup-entry {
+  margin-top: 18px !important;
+  padding: 16px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  background: #f8fafc !important;
+}
+
+.family-signup-entry p {
+  color: #334155 !important;
+  font-size: 0.9rem !important;
+  font-weight: 950 !important;
+}
+
+.family-signup-entry-button {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: #fff7ed !important;
+  color: #92400e !important;
+  border: 1px solid #fed7aa !important;
+  box-shadow: none !important;
+}
+
+.family-signup-entry small {
+  color: #64748b !important;
+}
+
+/* Login action hierarchy */
+.family-login-secondary {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 22px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.family-login-secondary p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.family-register-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 18px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #92400e;
+  font-size: 0.94rem;
+  font-weight: 950;
+  text-decoration: none;
+}
+
+.family-access-help {
+  margin-top: 14px !important;
+  color: #94a3b8 !important;
+  font-size: 0.8rem !important;
+  line-height: 1.35 !important;
+}
+
+.family-delegate-link {
+  margin-top: 4px !important;
+  background: transparent !important;
+  border: 0 !important;
+  color: #64748b !important;
+  font-size: 0.8rem !important;
+  font-weight: 850 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  padding: 8px !important;
+}
+
+/* Login help action */
+.family-login-help {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  text-align: center;
+}
+
+.family-login-help p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.family-help-whatsapp-link {
+  width: fit-content;
+  margin: 0 auto;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

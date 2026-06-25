@@ -112,6 +112,7 @@ function FamilyPinAccessScreen({
   showInstallBanner,
   onInstallApp,
   onDismissInstallBanner,
+  signupUrl = "/classe/orenetes/alta",
 }) {
   return (
     <main className="family-access-page">
@@ -123,16 +124,15 @@ function FamilyPinAccessScreen({
       )}
 
       <section className="family-access-card">
-        <div className="family-access-badge">ClasseHub</div>
-
-        <div className="family-access-icon">🎒</div>
+        <div className="family-access-logo-row">
+          <img src="/icons/logo-base.png" alt="ClasseHub" />
+        </div>
 
         <h1>{displayClassName}</h1>
-        <p className="family-access-year">{displaySchoolYear}</p>
+        <p className="family-access-year">Curs {displaySchoolYear}</p>
 
         <p className="family-access-intro">
-          Introdueix el teu PIN familiar per veure l'agenda, confirmar assistència
-          i gestionar les inscripcions de la família.
+          Entra amb el PIN familiar per veure l'agenda i confirmar activitats.
         </p>
 
         <form className="family-pin-form" onSubmit={onSubmit}>
@@ -154,11 +154,28 @@ function FamilyPinAccessScreen({
           <button type="submit">Entrar a ClasseHub</button>
         </form>
 
-        <p className="family-access-help">
-          No saps el PIN? Demana'l al delegat o delegada de la classe.
-        </p>
+        <div className="family-login-secondary">
+          <p>Encara no tens accés?</p>
 
-        <a className="delegate-access-link" href="/admin">
+          <a className="family-register-link" href={signupUrl}>
+            Donar-me d'alta com a família
+          </a>
+        </div>
+
+        <div className="family-login-help">
+          <p>Problemes per entrar?</p>
+
+          <a
+            className="family-help-whatsapp-link"
+            href="https://wa.me/34607931880?text=Hola%2C%20tinc%20problemes%20per%20accedir%20a%20ClasseHub%20Orenetes."
+            target="_blank"
+            rel="noreferrer"
+          >
+            Necessito ajuda per WhatsApp
+          </a>
+        </div>
+
+        <a className="delegate-access-link family-delegate-link" href="/admin">
           Accés delegats
         </a>
       </section>
@@ -1308,8 +1325,10 @@ export default function PublicApp() {
       const matchedFamily = data?.[0] || null;
 
       if (error || !matchedFamily) {
+        window.localStorage.removeItem(`classehub-family-pin-${slug}`);
+        setFamilyAccessPin("");
         setActiveFamilyFromPin(null);
-        setPinError("El PIN guardat no és vàlid per aquesta classe. Torna'l a introduir.");
+        setPinError("");
         return;
       }
 
