@@ -128,7 +128,7 @@ function AdminAuthGate() {
         </button>
       </div>
 
-      <AdminPage />
+      <AdminPage session={session} />
     </>
   );
 }

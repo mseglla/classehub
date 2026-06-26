@@ -13,7 +13,7 @@ const ADMIN_TABS = [
   { id: "comms", label: "Més" },
 ];
 
-export default function AdminPage() {
+export default function AdminPage({ session }) {
   const [classes, setClasses] = useState([]);
   const [families, setFamilies] = useState([]);
   const [familyContacts, setFamilyContacts] = useState([]);
@@ -75,6 +75,15 @@ export default function AdminPage() {
   const selectedClass = classes.find(
     (classItem) => String(classItem.id) === selectedClassId
   );
+
+  function handleSelectAdminClass(classId) {
+    setSelectedClassId(classId);
+    setMessage("");
+    loadAdminEvents(classId);
+    loadAdminActionData(classId);
+    loadFamilies(classId);
+    loadAdminPolls(classId);
+  }
 
   const todayIso = new Date().toISOString().slice(0, 10);
 
@@ -1149,9 +1158,37 @@ PIN: ${family.access_pin}`;
 
   useEffect(() => {
     async function loadClasses() {
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        setMessage("No s'ha pogut identificar l'usuari administrador.");
+        return;
+      }
+
+      const { data: permissionsData, error: permissionsError } = await supabase
+        .from("ch_admin_class_permissions")
+        .select("class_id, role")
+        .eq("user_id", userId);
+
+      if (permissionsError) {
+        console.error(permissionsError);
+        setMessage("No s'han pogut carregar els permisos de l'administrador.");
+        return;
+      }
+
+      const allowedClassIds = (permissionsData || []).map((permission) => permission.class_id);
+
+      if (allowedClassIds.length === 0) {
+        setClasses([]);
+        setSelectedClassId("");
+        setMessage("Aquest usuari no té cap classe assignada.");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("ch_classes")
         .select("*")
+        .in("id", allowedClassIds)
         .eq("is_active", true)
         .order("name")
         .order("school_year", { ascending: false });
@@ -1175,7 +1212,7 @@ PIN: ${family.access_pin}`;
     }
 
     loadClasses();
-  }, []);
+  }, [session?.user?.id]);
   function handleStartEdit(eventItem) {
     const linkedOrganization = adminOrganizations.find(
       (organization) => organization.event_id === eventItem.id
@@ -1376,6 +1413,34 @@ console.log("Resultat guardar esdeveniment:", { data, error });
           </div>
         </div>
       </header>
+
+      {classes.length > 1 && (
+        <section className="admin-class-context" aria-label="Classe administrada">
+          <div>
+            <p>Classe administrada</p>
+            <strong>
+              {selectedClass
+                ? `${selectedClass.emoji || ""} ${selectedClass.name}`.trim()
+                : "Cap classe seleccionada"}
+            </strong>
+            {selectedClass?.school_year && <span>Curs {selectedClass.school_year}</span>}
+          </div>
+
+          <select
+            value={selectedClassId}
+            onChange={(event) => handleSelectAdminClass(event.target.value)}
+            aria-label="Canviar classe administrada"
+          >
+            {classes.map((classItem) => (
+              <option key={classItem.id} value={classItem.id}>
+                {classItem.emoji ? `${classItem.emoji} ` : ""}
+                {classItem.name}
+                {classItem.school_year ? ` · ${classItem.school_year}` : ""}
+              </option>
+            ))}
+          </select>
+        </section>
+      )}
 
       <nav className="admin-tabs" aria-label="Seccions de l'administració">
         {ADMIN_TABS.map((tab) => (
@@ -2242,11 +2307,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               <select
                 value={selectedClassId}
                 onChange={(event) => {
-                  setSelectedClassId(event.target.value);
-                  loadAdminEvents(event.target.value);
-                  loadAdminActionData(event.target.value);
-                  loadFamilies(event.target.value);
-                  loadAdminPolls(event.target.value);
+                  handleSelectAdminClass(event.target.value);
                 }}
               >
                 {classes.map((classItem) => (
