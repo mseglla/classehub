@@ -1855,7 +1855,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               <p>No hi ha famílies carregades per aquesta classe.</p>
             ) : (
               families.map((family) => (
-                <div className="admin-row family-admin-row family-admin-row-lean" key={family.id}>
+                <div className="admin-row family-admin-row-lean" key={family.id}>
                   <div className="family-card-content">
                     <div className="family-card-topline">
                       <div className="family-card-identity">

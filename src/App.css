@@ -3471,19 +3471,19 @@ body,
 }
 
 /* Reset family admin cards - clean mobile-first layout */
-.family-admin-row.family-admin-row-lean {
-  display: block !important;
+.family-admin-row-lean {
+  display: block;
   width: 100%;
-  padding: 16px !important;
+  padding: 16px;
   box-sizing: border-box;
 }
 
 .family-admin-row-lean .family-card-content {
-  display: flex !important;
-  flex-direction: column !important;
-  width: 100% !important;
-  max-width: none !important;
-  gap: 12px !important;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none;
+  gap: 12px;
   box-sizing: border-box;
 }
 
@@ -3495,142 +3495,142 @@ body,
 .family-admin-row-lean .family-contacts-box,
 .family-admin-row-lean .family-contact-list,
 .family-admin-row-lean .family-management-actions {
-  width: 100% !important;
-  max-width: none !important;
-  box-sizing: border-box !important;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
 }
 
 .family-admin-row-lean .family-card-identity {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-start !important;
-  justify-content: space-between !important;
-  gap: 12px !important;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .family-admin-row-lean .family-card-identity strong {
-  flex: 1 !important;
-  min-width: 0 !important;
-  font-size: 1.05rem !important;
-  line-height: 1.2 !important;
+  flex: 1;
+  min-width: 0;
+  font-size: 1.05rem;
+  line-height: 1.2;
 }
 
 .family-admin-row-lean .family-card-identity .status-pill {
-  flex: 0 0 auto !important;
+  flex: 0 0 auto;
 }
 
 .family-admin-row-lean .family-access-line {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 10px !important;
-  margin: 0 !important;
-  padding: 12px !important;
-  border-radius: 18px !important;
-  background: rgba(15, 23, 42, 0.04) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.04);
 }
 
 .family-admin-row-lean .family-pin-lean {
-  display: flex !important;
-  align-items: baseline !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 8px;
 }
 
 .family-admin-row-lean .family-pin-lean span {
-  font-size: 0.72rem !important;
+  font-size: 0.72rem;
 }
 
 .family-admin-row-lean .family-pin-lean strong {
-  font-size: 1.1rem !important;
+  font-size: 1.1rem;
 }
 
 .family-admin-row-lean .family-copy-action-lean {
-  width: 100% !important;
-  justify-content: center !important;
+  width: 100%;
+  justify-content: center;
 }
 
 .family-admin-row-lean .family-management-details {
-  margin: 0 !important;
+  margin: 0;
 }
 
 .family-admin-row-lean .family-management-details summary {
-  width: 100% !important;
-  max-width: none !important;
-  box-sizing: border-box !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  padding: 12px !important;
-  border-radius: 18px !important;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
 }
 
 .family-admin-row-lean .family-management-panel {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
-  margin-top: 14px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 14px;
 }
 
 .family-admin-row-lean .family-contacts-header {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 10px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
 }
 
 .family-admin-row-lean .family-contacts-header .secondary-action {
-  width: 100% !important;
+  width: 100%;
 }
 
 .family-admin-row-lean .family-contact-row {
-  width: 100% !important;
-  max-width: none !important;
-  box-sizing: border-box !important;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
 }
 
 .family-admin-row-lean .family-contact-actions {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 8px !important;
-  width: 100% !important;
-  margin-top: 10px !important;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
 }
 
 .family-admin-row-lean .family-contact-actions .secondary-action {
-  width: 100% !important;
+  width: 100%;
 }
 
 .family-admin-row-lean .family-management-action-row {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-  width: 100% !important;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
 }
 
 .family-admin-row-lean .family-management-action-row .secondary-action {
-  width: 100% !important;
+  width: 100%;
 }
 
 @media (min-width: 760px) {
   .family-admin-row-lean .family-access-line {
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .family-admin-row-lean .family-copy-action-lean {
-    width: auto !important;
+    width: auto;
   }
 
   .family-admin-row-lean .family-contacts-header {
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .family-admin-row-lean .family-contacts-header .secondary-action {
-    width: auto !important;
+    width: auto;
   }
 }
 
