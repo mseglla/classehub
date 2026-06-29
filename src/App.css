@@ -3984,10 +3984,10 @@ body,
 .ch-card {
   width: 100%;
   box-sizing: border-box;
-  border-radius: 28px;
+  border-radius: var(--radius-2xl);
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(229, 231, 235, 0.9);
-  box-shadow: 0 18px 55px rgba(17, 24, 39, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .ch-button {
@@ -4018,7 +4018,7 @@ body,
   align-items: center;
   justify-content: center;
   width: fit-content;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 10px;
   font-size: 0.74rem;
   font-weight: 950;
@@ -4036,7 +4036,7 @@ body,
 }
 
 .ch-pill-warning {
-  background: #fff7ed;
+  background: var(--color-accent-soft);
   color: #92400e;
 }
 
