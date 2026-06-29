@@ -1637,17 +1637,17 @@ const visibleEvents = showFullCalendar
   
           {nextEvent ? (
             <article className="next-event clean-next-event">
-              <div className="next-event-date">
-                <strong>{shortDate(nextEvent.start_date)}</strong>
-                {nextEvent.start_time && (
-                  <span>{nextEvent.start_time.slice(0, 5)}</span>
-                )}
-              </div>
-  
               <div className="next-event-content">
-                <span className={`event-type-pill event-type-pill-${nextEvent.event_type || "default"}`}>
-                  {typeMeta[nextEvent.event_type]?.label || "Esdeveniment"}
-                </span>
+                <div className="timeline-meta-row next-event-meta-row">
+                  <span className="timeline-date">
+                    {shortDate(nextEvent.start_date)}
+                    {nextEvent.start_time ? ` · ${nextEvent.start_time.slice(0, 5)}` : ""}
+                  </span>
+
+                  <span className={`event-type-pill event-type-pill-${nextEvent.event_type || "default"}`}>
+                    {typeMeta[nextEvent.event_type]?.label || "Esdeveniment"}
+                  </span>
+                </div>
 
                 <h2>{nextEvent.title}</h2>
 
@@ -1737,14 +1737,16 @@ const visibleEvents = showFullCalendar
     }
   }}
 >
-        <span>
-          {shortDate(event.start_date)}
-          {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
-        </span>
+        <div className="timeline-meta-row">
+          <span className="timeline-date">
+            {shortDate(event.start_date)}
+            {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
+          </span>
 
-        <span className={`event-type-pill timeline-event-type-pill event-type-pill-${event.event_type || "default"}`}>
-          {typeMeta[event.event_type]?.label || "Esdeveniment"}
-        </span>
+          <span className={`event-type-pill timeline-event-type-pill event-type-pill-${event.event_type || "default"}`}>
+            {typeMeta[event.event_type]?.label || "Esdeveniment"}
+          </span>
+        </div>
 
         <strong>{event.title}</strong>
 
@@ -1767,18 +1769,16 @@ const visibleEvents = showFullCalendar
             </button>
           )}
 
-          {linkedRegistrationOrganization && (
-            <button
-              className="timeline-info-button"
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedRegistrationResults(linkedRegistrationOrganization);
-              }}
-            >
-              Confirmats
-            </button>
-          )}
+          <button
+            className="timeline-info-button"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedItem(eventToDetail(event));
+            }}
+          >
+            + info
+          </button>
 
           <button
             className="timeline-calendar-button"
@@ -1791,16 +1791,18 @@ const visibleEvents = showFullCalendar
             + calendari
           </button>
 
-          <button
-            className="timeline-info-button"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedItem(eventToDetail(event));
-            }}
-          >
-            + info
-          </button>
+          {linkedRegistrationOrganization && (
+            <button
+              className="timeline-info-button"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedRegistrationResults(linkedRegistrationOrganization);
+              }}
+            >
+              Confirmats
+            </button>
+          )}
         </div>
       </div>
     );

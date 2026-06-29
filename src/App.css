@@ -924,14 +924,32 @@ select {
   min-width: 0;
 }
 
+.next-event-meta-row {
+  margin-bottom: 8px;
+}
+
 .event-type-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 6px;
-  font-size: 0.73rem;
-  font-weight: 700;
-  color: #6b7280;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.event-type-pill-classe {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.event-type-pill-escola {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
 }
 
 .clean-next-event h2 {
@@ -1037,9 +1055,23 @@ select {
   padding: 14px;
 }
 
-.timeline-row > span {
+.timeline-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.timeline-date {
+  color: #6b7280;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 850;
+}
+
+.timeline-event-type-pill {
+  margin-top: 0;
+  flex: 0 0 auto;
 }
 
 .timeline-row > strong {
@@ -1068,12 +1100,6 @@ select {
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;
-}
-
-.confirm-button {
-  border-color: #f97316;
-  background: #f97316;
-  color: #ffffff;
 }
 
 .timeline-calendar-button:hover,
@@ -4296,30 +4322,4 @@ body,
 
 .admin-action-item-school {
   background: #f8fafc;
-}
-
-/* Public event scope badges */
-.event-type-pill {
-  border-radius: 999px;
-  padding: 5px 9px;
-  font-size: 0.72rem;
-  font-weight: 950;
-  letter-spacing: 0.01em;
-}
-
-.event-type-pill-classe {
-  background: #eef2ff;
-  color: #3730a3;
-  border: 1px solid #c7d2fe;
-}
-
-.event-type-pill-escola {
-  background: #fff7ed;
-  color: #c2410c;
-  border: 1px solid #fed7aa;
-}
-
-.timeline-event-type-pill {
-  width: fit-content;
-  margin-top: 6px;
 }
