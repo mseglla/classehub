@@ -15,6 +15,7 @@ const ADMIN_TABS = [
 
 export default function AdminPage({ session }) {
   const [classes, setClasses] = useState([]);
+  const [adminClassPermissions, setAdminClassPermissions] = useState([]);
   const [families, setFamilies] = useState([]);
   const [familyContacts, setFamilyContacts] = useState([]);
   const [adminPolls, setAdminPolls] = useState([]);
@@ -75,6 +76,19 @@ export default function AdminPage({ session }) {
   const selectedClass = classes.find(
     (classItem) => String(classItem.id) === selectedClassId
   );
+
+  const selectedClassPermission = adminClassPermissions.find(
+    (permission) => String(permission.class_id) === selectedClassId
+  );
+  const selectedClassRole = selectedClassPermission?.role || "delegate";
+  const canCreateSchoolEvents = selectedClassRole === "admin";
+
+  useEffect(() => {
+    if (!canCreateSchoolEvents && eventType === "escola") {
+      setEventType("classe");
+      setPublicationType("info");
+    }
+  }, [canCreateSchoolEvents, eventType]);
 
   function handleSelectAdminClass(classId) {
     setSelectedClassId(classId);
@@ -1176,6 +1190,8 @@ PIN: ${family.access_pin}`;
         return;
       }
 
+      setAdminClassPermissions(permissionsData || []);
+
       const allowedClassIds = (permissionsData || []).map((permission) => permission.class_id);
 
       if (allowedClassIds.length === 0) {
@@ -1244,12 +1260,39 @@ PIN: ${family.access_pin}`;
     setShowEventFormModal(false);
   }
 
+  function openClassEventForm(nextPublicationType = "info") {
+    resetForm();
+    setEventType("classe");
+    setPublicationType(nextPublicationType);
+    setMessage("");
+    setShowEventFormModal(true);
+  }
+
+  function openSchoolNoticeForm() {
+    resetForm();
+    setEventType("escola");
+    setPublicationType("info");
+    setCloseDate("");
+    setMessage("");
+    setShowEventFormModal(true);
+  }
+
   async function handleCreateEvent(event) {
     event.preventDefault();
     setMessage("");
 
+    if (eventType === "escola" && !canCreateSchoolEvents) {
+      setMessage("Només un administrador pot crear esdeveniments d'escola.");
+      return;
+    }
+
     if (!title || !startDate || (eventType !== "escola" && !selectedClassId)) {
       setMessage("Cal indicar com a mínim títol, data i classe si no és un esdeveniment d’escola.");
+      return;
+    }
+
+    if (eventType === "escola" && publicationType !== "info") {
+      setMessage("Els esdeveniments d'escola només poden ser informatius.");
       return;
     }
 
@@ -1481,12 +1524,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             <button
               type="button"
               className="admin-action-item"
-              onClick={() => {
-                resetForm();
-                setPublicationType("info");
-                setMessage("");
-                setShowEventFormModal(true);
-              }}
+              onClick={() => openClassEventForm("info")}
             >
               <span className="admin-action-icon">i</span>
               <span>
@@ -1499,12 +1537,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             <button
               type="button"
               className="admin-action-item"
-              onClick={() => {
-                resetForm();
-                setPublicationType("attendance");
-                setMessage("");
-                setShowEventFormModal(true);
-              }}
+              onClick={() => openClassEventForm("attendance")}
             >
               <span className="admin-action-icon">✓</span>
               <span>
@@ -1517,12 +1550,7 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             <button
               type="button"
               className="admin-action-item"
-              onClick={() => {
-                resetForm();
-                setPublicationType("registration");
-                setMessage("");
-                setShowEventFormModal(true);
-              }}
+              onClick={() => openClassEventForm("registration")}
             >
               <span className="admin-action-icon">+</span>
               <span>
@@ -1566,6 +1594,27 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               </span>
               <span className="admin-action-arrow">›</span>
             </button>
+            {canCreateSchoolEvents && (
+              <>
+                <div className="admin-action-section-label">
+                  Gestió d'escola
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-action-item admin-action-item-school"
+                  onClick={openSchoolNoticeForm}
+                >
+                  <span className="admin-action-icon">E</span>
+                  <span>
+                    <strong>Avís d'escola</strong>
+                    <small>Comunica una informació visible a totes les classes.</small>
+                  </span>
+                  <span className="admin-action-arrow">›</span>
+                </button>
+              </>
+            )}
+
           </div>
 
           <div className="admin-home-summary compact">
@@ -2287,11 +2336,21 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         <Card className="span-2">
           <SectionTitle
             icon={<CalendarDays size={22} />}
-            title={editingEventId ? "Editar esdeveniment" : "Crear esdeveniment"}
+            title={
+              editingEventId
+                ? eventType === "escola"
+                  ? "Editar avís d'escola"
+                  : "Editar esdeveniment de classe"
+                : eventType === "escola"
+                  ? "Crear avís d'escola"
+                  : "Crear esdeveniment de classe"
+            }
             subtitle={
               editingEventId
                 ? "Modifica les dades de l’esdeveniment seleccionat."
-                : "Afegeix un nou esdeveniment al calendari."
+                : eventType === "escola"
+                  ? "Afegeix una informació visible a totes les classes."
+                  : "Afegeix un nou esdeveniment per a la classe seleccionada."
             }
           />
 
@@ -2301,73 +2360,60 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             </div>
           )}
 
-          <div className="admin-message">
-            <label>
-              Classe administrada
-              <select
-                value={selectedClassId}
-                onChange={(event) => {
-                  handleSelectAdminClass(event.target.value);
-                }}
-              >
-                {classes.map((classItem) => (
-                  <option key={classItem.id} value={classItem.id}>
-                    {classItem.emoji} {classItem.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
           <form className="registration-form" onSubmit={handleCreateEvent}>
-            <label className="span-all">
-              Què vols crear?
-              <select
-                value={publicationType}
-                onChange={(event) => setPublicationType(event.target.value)}
-                disabled={Boolean(editingEventId)}
-              >
-                <option value="info">Només informar</option>
-                <option value="attendance">Demanar confirmació sí/no</option>
-                <option value="registration">Obrir inscripció familiar</option>
-              </select>
-            </label>
+            {eventType === "escola" ? (
+              <div className="admin-message span-all">
+                <strong>Avís d'escola</strong>
+                <br />
+                Visible a totes les classes. No demana confirmació ni inscripció.
+              </div>
+            ) : (
+              <>
+                <div className="admin-message span-all">
+                  <strong>Esdeveniment de classe</strong>
+                  <br />
+                  Visible només per {selectedClass?.name || "la classe seleccionada"}.
+                </div>
 
-            <div className="admin-message span-all">
-              {publicationType === "info" && (
-                <span>Es crearà només un esdeveniment informatiu a l’agenda.</span>
-              )}
+                <label className="span-all">
+                  Què vols crear?
+                  <select
+                    value={publicationType}
+                    onChange={(event) => setPublicationType(event.target.value)}
+                    disabled={Boolean(editingEventId)}
+                  >
+                    <option value="info">Només informar</option>
+                    <option value="attendance">Demanar confirmació sí/no</option>
+                    <option value="registration">Obrir inscripció familiar</option>
+                  </select>
+                </label>
 
-              {publicationType === "attendance" && (
-                <span>Les famílies podran confirmar si vindran o no.</span>
-              )}
+                <div className="admin-message span-all">
+                  {publicationType === "info" && (
+                    <span>Es crearà un esdeveniment informatiu només per aquesta classe.</span>
+                  )}
 
-              {publicationType === "registration" && (
-                <span>Les famílies podran inscriure adults, infants i comentaris.</span>
-              )}
-            </div>
+                  {publicationType === "attendance" && (
+                    <span>Les famílies podran confirmar si vindran o no.</span>
+                  )}
 
-            {publicationType !== "info" && (
-              <label className="span-all">
-                Data límit de resposta
-                <input
-                  type="date"
-                  value={closeDate}
-                  onChange={(event) => setCloseDate(event.target.value)}
-                />
-              </label>
+                  {publicationType === "registration" && (
+                    <span>Les famílies podran inscriure adults, infants i comentaris.</span>
+                  )}
+                </div>
+
+                {publicationType !== "info" && (
+                  <label className="span-all">
+                    Data límit de resposta
+                    <input
+                      type="date"
+                      value={closeDate}
+                      onChange={(event) => setCloseDate(event.target.value)}
+                    />
+                  </label>
+                )}
+              </>
             )}
-
-            <label>
-              Tipus
-              <select
-                value={eventType}
-                onChange={(event) => setEventType(event.target.value)}
-              >
-                <option value="classe">Classe</option>
-                <option value="escola">Escola</option>
-              </select>
-            </label>
 
             <label>
               Data

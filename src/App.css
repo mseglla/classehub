@@ -4283,3 +4283,17 @@ body,
     align-items: center;
   }
 }
+
+/* Admin school-level action */
+.admin-action-section-label {
+  margin: 8px 4px 2px;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-action-item-school {
+  background: #f8fafc;
+}
