@@ -4051,7 +4051,7 @@ body,
   width: 100%;
   box-sizing: border-box;
   padding: 14px;
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
   background: #f8fafc;
   border: 1px solid rgba(148, 163, 184, 0.22);
 }
@@ -4068,10 +4068,10 @@ body,
   width: 100%;
   box-sizing: border-box;
   border: 1px solid rgba(148, 163, 184, 0.34);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 13px 14px;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--color-surface);
+  color: var(--color-heading);
   font: inherit;
   font-size: 1rem;
   font-weight: 700;
@@ -4099,12 +4099,12 @@ body,
 
 .ch-progress-dots span {
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: #e2e8f0;
 }
 
 .ch-progress-dots span.is-active {
-  background: #0f172a;
+  background: var(--color-heading);
 }
 
 /* Fix native date inputs inside ClasseHub fields */
