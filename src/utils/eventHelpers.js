@@ -1,5 +1,5 @@
 export const typeMeta = {
-  escola: { label: "Escola", icon: "🏫" },
+  escola: { label: "Avís d'escola", icon: "🏫" },
   classe: { label: "Classe", icon: "👨‍👩‍👧‍👦" },
 };
 

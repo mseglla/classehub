@@ -1445,7 +1445,10 @@ export default function PublicApp() {
     ? classInfo.name.charAt(0).toUpperCase() + classInfo.name.slice(1)
     : "Orenetes";
 
-  const displaySchoolYear = classInfo?.school_year || "2025-2026";
+  const displaySchoolYear = classInfo?.school_year || "";
+  const agendaTitle = displayClassName.match(/^[AEIOUÀÈÉÍÒÓÚH]/i)
+    ? `Agenda d'${displayClassName}`
+    : `Agenda de ${displayClassName}`;
 
 const visibleEvents = showFullCalendar
   ? futureEvents.slice(1)
@@ -1603,7 +1606,7 @@ const visibleEvents = showFullCalendar
         <div className="hero-main class-hero-main">
           <div className="class-hero-copy">
             <h1>{displayClassName}</h1>
-            <p>{displaySchoolYear}</p>
+            {displaySchoolYear && <p>Curs {displaySchoolYear}</p>}
 
             {activeFamily && (
               <div className="family-session-banner">
@@ -1636,24 +1639,21 @@ const visibleEvents = showFullCalendar
             <article className="next-event clean-next-event">
               <div className="next-event-date">
                 <strong>{shortDate(nextEvent.start_date)}</strong>
-                <span>
-                  {nextEvent.start_time
-                    ? nextEvent.start_time.slice(0, 5)
-                    : "Hora pendent"}
-                </span>
+                {nextEvent.start_time && (
+                  <span>{nextEvent.start_time.slice(0, 5)}</span>
+                )}
               </div>
   
               <div className="next-event-content">
-                <span className="event-type-pill">
-                  {typeMeta[nextEvent.event_type]?.icon}{" "}
+                <span className={`event-type-pill event-type-pill-${nextEvent.event_type || "default"}`}>
                   {typeMeta[nextEvent.event_type]?.label || "Esdeveniment"}
                 </span>
 
                 <h2>{nextEvent.title}</h2>
 
-                <small>
-                  {nextEvent.location || "Ubicació pendent"}
-                </small>
+                {nextEvent.location && (
+                  <small>{nextEvent.location}</small>
+                )}
               </div>
   
               <div className="quick-actions">
@@ -1702,7 +1702,7 @@ const visibleEvents = showFullCalendar
         <div className="section-title-row">
   <SectionTitle
     icon={<CalendarDays size={22} />}
-    title="Agenda d'Orenetes"
+    title={agendaTitle}
     subtitle="Tot el que vols saber, quan ho vols saber."
   />
 </div>
@@ -1742,9 +1742,11 @@ const visibleEvents = showFullCalendar
           {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ""}
         </span>
 
-        <strong>
-          {typeMeta[event.event_type]?.icon} {event.title}
-        </strong>
+        <span className={`event-type-pill timeline-event-type-pill event-type-pill-${event.event_type || "default"}`}>
+          {typeMeta[event.event_type]?.label || "Esdeveniment"}
+        </span>
+
+        <strong>{event.title}</strong>
 
         <div className="timeline-actions">
           {linkedActionOrganization && (
