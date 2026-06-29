@@ -2553,70 +2553,26 @@ body,
 /* Admin pending reminder */
 .pending-reminder-box {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   margin: 16px 0;
   padding: 14px;
-  border-radius: 18px;
-  border: 1px solid #fed7aa;
-  background: #fff7ed;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-soft);
 }
 
 .pending-reminder-box strong {
   display: block;
-  color: #9a3412;
+  color: var(--color-text);
   font-size: 0.98rem;
   font-weight: 950;
 }
 
-.pending-reminder-box span {
-  display: block;
-  margin-top: 4px;
-  color: #c2410c;
-  font-size: 0.86rem;
-  font-weight: 750;
-}
-
-.pending-reminder-box button {
-  width: 100%;
-}
-
-.pending-reminder-status {
-  margin: 14px 0;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid #bbf7d0;
-  background: #f0fdf4;
-  color: #166534;
-  font-size: 0.9rem;
-  font-weight: 900;
-}
-
-/* Admin pending reminder polish */
-.pending-reminder-box {
-  display: grid;
-  gap: 10px;
-  margin: 16px 0;
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-}
-
-.pending-reminder-header {
-  display: grid;
-  gap: 10px;
-}
-
-.pending-reminder-box strong {
-  display: block;
-  color: #111827;
-  font-size: 0.98rem;
-  font-weight: 950;
-}
-
+.pending-reminder-box span,
 .pending-reminder-box p {
-  margin: 0;
-  color: #4b5563;
+  display: block;
+  margin: 4px 0 0;
+  color: var(--color-muted-strong);
   font-size: 0.86rem;
   font-weight: 750;
   line-height: 1.4;
@@ -2629,20 +2585,23 @@ body,
 .pending-reminder-status {
   margin: 14px 0;
   padding: 12px 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-success-border);
+  background: #f0fdf4;
+  color: #166534;
   font-size: 0.9rem;
   font-weight: 900;
 }
 
 .pending-reminder-status.is-success {
-  border: 1px solid #bbf7d0;
+  border-color: var(--color-success-border);
   background: #f0fdf4;
   color: #166534;
 }
 
 .pending-reminder-status.is-error {
-  border: 1px solid #fecaca;
-  background: #fef2f2;
+  border-color: var(--color-danger-border);
+  background: var(--color-danger-soft);
   color: #991b1b;
 }
 
