@@ -726,30 +726,29 @@ button, .poll-form button {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
-  .person-card {
-    display: block;
-    padding: 10px 11px;
-    border-radius: 14px;
-    background: #ffffff;
-    border: 1px solid #d1fae5;
-    color: #065f46;
-    font-size: 14px;
-    font-weight: 800;
-  }
-  .person-card::before {
-    content: "✓ ";
-    color: #10b981;
-    font-weight: 900;
-  }
-  .person-card.pending {
-    color: #9a3412;
-    border-color: #fed7aa;
-    background: #fff7ed;
-  }
 }
 
-.person-card.pending {
+.people-grid .person-card {
+  display: block;
+  padding: 10px 11px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #d1fae5;
+  color: #065f46;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.people-grid .person-card::before {
+  content: "✓ ";
+  color: #10b981;
+  font-weight: 900;
+}
+
+.people-grid .person-card.pending {
   color: #9a3412;
+  border-color: #fed7aa;
+  background: #fff7ed;
 }
 
 .empty-result {
