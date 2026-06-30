@@ -3689,8 +3689,9 @@ body,
 
 /* Admin class context */
 .admin-class-context {
-  width: min(1120px, calc(100% - 28px));
-  margin: -10px auto 14px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 14px;
   display: grid;
   gap: 12px;
   padding: 14px;
@@ -3728,12 +3729,13 @@ body,
 
 .admin-class-context select {
   width: 100%;
+  box-sizing: border-box;
   min-height: 46px;
   border: 1px solid rgba(148, 163, 184, 0.35);
   border-radius: 16px;
   background: #f8fafc;
   color: #0f172a;
-  font-size: 0.94rem;
+  font-size: 1rem;
   font-weight: 900;
   padding: 0 12px;
 }
