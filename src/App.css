@@ -2207,13 +2207,6 @@ body,
   font-weight: 850;
 }
 
-.family-access-help {
-  margin: 16px 0 0;
-  color: #64748b;
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
 .delegate-access-link {
   display: inline-flex;
   justify-content: center;
@@ -3629,34 +3622,6 @@ body,
 }
 
 /* Cleaner login signup entry */
-.family-signup-entry {
-  margin-top: 18px !important;
-  padding: 16px !important;
-  border-radius: 22px !important;
-  border: 1px solid rgba(148, 163, 184, 0.22) !important;
-  background: #f8fafc !important;
-}
-
-.family-signup-entry p {
-  color: #334155 !important;
-  font-size: 0.9rem !important;
-  font-weight: 950 !important;
-}
-
-.family-signup-entry-button {
-  display: block !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  background: #fff7ed !important;
-  color: #92400e !important;
-  border: 1px solid #fed7aa !important;
-  box-shadow: none !important;
-}
-
-.family-signup-entry small {
-  color: #64748b !important;
-}
-
 /* Login action hierarchy */
 .family-login-secondary {
   display: grid;
@@ -3690,13 +3655,6 @@ body,
   font-size: 0.94rem;
   font-weight: 950;
   text-decoration: none;
-}
-
-.family-access-help {
-  margin-top: 14px !important;
-  color: #94a3b8 !important;
-  font-size: 0.8rem !important;
-  line-height: 1.35 !important;
 }
 
 .family-delegate-link {
