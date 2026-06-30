@@ -1447,7 +1447,6 @@ console.log("Resultat guardar esdeveniment:", { data, error });
         <div className="hero-main">
           <div>
             <p className="eyebrow">ClasseHub Admin</p>
-            <h1>Administració</h1>
           </div>
 
           <div className="hero-badge">
