@@ -3658,15 +3658,15 @@ body,
 }
 
 .family-delegate-link {
-  margin-top: 4px !important;
-  background: transparent !important;
-  border: 0 !important;
-  color: #64748b !important;
-  font-size: 0.8rem !important;
-  font-weight: 850 !important;
-  text-decoration: underline !important;
-  text-underline-offset: 3px !important;
-  padding: 8px !important;
+  margin-top: 4px;
+  background: transparent;
+  border: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 8px;
 }
 
 /* Login help action */
