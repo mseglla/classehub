@@ -1700,17 +1700,6 @@ button, .poll-form button {
   background: #b91c1c;
 }
 
-.family-pin {
-  margin-top: 6px;
-  font-size: 0.9rem;
-  color: #475569;
-}
-
-.family-pin strong {
-  color: #0f172a;
-  letter-spacing: 0.08em;
-}
-
 .family-toolbar-actions {
   align-items: center;
 }
@@ -1726,71 +1715,15 @@ button, .poll-form button {
   align-items: center;
   min-height: 36px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.85rem;
   font-weight: 700;
 }
 
 .success-pill {
-  background: #ecfdf5;
+  background: var(--color-success-soft);
   color: #047857;
   border: 1px solid #a7f3d0;
-}
-
-.family-pin-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-}
-
-.family-pin-row .family-pin {
-  margin-top: 0;
-}
-
-.inline-link-action {
-  background: transparent;
-  color: #2563eb;
-  border: 0;
-  padding: 0;
-  font-size: 0.85rem;
-  font-weight: 700;
-  box-shadow: none;
-}
-
-.inline-link-action:hover:not(:disabled) {
-  color: #1d4ed8;
-  text-decoration: underline;
-  transform: none;
-  box-shadow: none;
-}
-
-.inline-link-action:disabled {
-  color: #94a3b8;
-  cursor: not-allowed;
-}
-
-.family-pin-row {
-  align-items: baseline;
-}
-
-.inline-link-action {
-  white-space: nowrap;
-}
-
-@media (max-width: 720px) {
-  .family-pin-row {
-    align-items: center;
-  }
-}
-
-.family-status-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 6px;
 }
 
 .family-status-note {
@@ -1799,9 +1732,9 @@ button, .poll-form button {
 }
 
 .danger-pill {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  background: var(--color-danger-soft);
+  color: var(--color-danger-dark);
+  border: 1px solid var(--color-danger-border);
 }
 
 /* Admin mobile viewport safety */
@@ -1907,52 +1840,7 @@ body,
   }
 }
 
-/* Admin family cards mobile layout */
-.family-status-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.family-pin-row {
-  margin-top: 10px;
-}
-
-.family-pin {
-  margin: 0;
-  color: #64748b;
-  font-size: 0.92rem;
-  font-weight: 800;
-}
-
-.family-pin strong {
-  color: #0f172a;
-  letter-spacing: 0.06em;
-}
-
-.inline-link-action {
-  border: 1px solid #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
-  box-shadow: none;
-  border-radius: 999px;
-  padding: 9px 12px;
-  font-size: 0.84rem;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.inline-link-action:hover:not(:disabled) {
-  background: #dbeafe;
-  border-color: #93c5fd;
-  color: #1e40af;
-}
-
-.inline-link-action:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
+/* Admin family toolbar mobile layout */
 @media (max-width: 720px) {
   .family-toolbar-actions {
     display: grid;
@@ -1967,42 +1855,13 @@ body,
     justify-content: center;
   }
 
-  .family-status-row {
-    justify-content: flex-end;
-  }
-
-  .family-status-row .status-pill {
-    flex: 0 0 auto;
-    min-height: 30px;
-    padding: 0 10px;
-    font-size: 0.78rem;
-  }
-
   .family-status-note {
     grid-column: 1 / -1;
+    display: block;
     margin-top: 8px;
     font-size: 0.82rem;
     line-height: 1.35;
   }
-
-  .family-pin-row {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin-top: 12px;
-  }
-
-  .family-pin {
-    font-size: 0.94rem;
-  }
-
-  .inline-link-action {
-    width: 100%;
-    min-height: 40px;
-    justify-content: center;
-  }
-
 }
 
 /* Compact admin action buttons on mobile */
@@ -2021,7 +1880,6 @@ body,
   .admin-event-row .admin-row-actions button:nth-child(3) {
     grid-column: 1 / -1;
   }
-
 }
 
 /* Wider mobile admin action layout */
@@ -2041,81 +1899,13 @@ body,
   }
 }
 
-/* Family card action grouping */
-.family-copy-action,
-.family-pin-action {
-  justify-content: center;
-}
-
-@media (max-width: 720px) {
-  .family-pin-row {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 12px;
-  }
-
-  .family-pin-row .family-pin {
-    grid-column: 1 / -1;
-  }
-
-  .family-copy-action,
-  .family-pin-action {
-    width: 100%;
-    min-height: 40px;
-    padding: 9px 8px;
-    font-size: 0.8rem;
-  }
-
-  .family-general-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    width: 100%;
-    gap: 8px;
-  }
-
-  .family-general-actions button,
-  .family-general-actions .secondary-action {
-    width: 100%;
-    min-height: 40px;
-  }
-}
-
-/* Family admin card final polish */
-.family-status-row {
-  margin-top: 0;
-}
-
-.family-pin-row {
-  margin-top: 10px;
-}
-
-.family-pin {
-  margin: 0;
-  color: #64748b;
-  font-size: 0.92rem;
-  font-weight: 800;
-  line-height: 1.35;
-}
-
-.family-pin strong {
-  display: inline;
-  color: #0f172a;
-  font-weight: 950;
-  letter-spacing: 0.04em;
-}
-
-.family-copy-action,
-.family-pin-action {
-  justify-content: center;
-  box-shadow: none;
-}
-
+/* Family card copy action */
 .family-copy-action {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
+  justify-content: center;
+  border-color: var(--color-info-border);
+  background: var(--color-info-soft);
+  color: var(--color-info-dark);
+  box-shadow: none;
 }
 
 .family-copy-action:hover:not(:disabled) {
@@ -2124,70 +1914,16 @@ body,
   color: #1e40af;
 }
 
-.family-pin-action {
-  border-color: #fed7aa;
-  background: #fff7ed;
-  color: #c2410c;
-}
-
-.family-pin-action:hover:not(:disabled) {
-  border-color: #fdba74;
-  background: #ffedd5;
-  color: #9a3412;
-}
-
 @media (max-width: 720px) {
-  .family-status-row {
-    justify-self: end;
-    margin: 0;
-  }
-
-  .family-status-row .status-pill {
-    min-height: 30px;
-    padding: 0 10px;
-    font-size: 0.78rem;
-    white-space: nowrap;
-  }
-
-  .family-status-note {
-    grid-column: 1 / -1;
-    display: block;
-    margin-top: 8px;
-    font-size: 0.82rem;
-    line-height: 1.35;
-  }
-
-  .family-pin-row {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 12px;
-  }
-
-  .family-pin-row .family-pin {
-    grid-column: 1 / -1;
-  }
-
-  .family-copy-action,
-  .family-pin-action,
-  .family-general-actions button,
-  .family-general-actions .secondary-action {
+  .family-copy-action {
     width: 100%;
     min-height: 40px;
     padding: 9px 8px;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     font-size: 0.8rem;
     line-height: 1.1;
     white-space: normal;
     text-align: center;
-  }
-
-  .family-general-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    width: 100%;
-    gap: 8px;
   }
 }
 
@@ -3190,18 +2926,6 @@ body,
   color: #64748b;
   font-size: 0.76rem;
   font-weight: 900;
-}
-
-.family-pin-row-compact {
-  margin-top: 10px;
-}
-
-.family-pin-row-compact .family-copy-action {
-  flex: 1;
-}
-
-.family-pin-row-compact .family-pin-action {
-  flex: 1;
 }
 
 .family-contacts-details {
