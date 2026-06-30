@@ -466,9 +466,10 @@ button, .poll-form button {
 
 .footer {
   display: flex;
-  gap: 8px;
   align-items: center;
   justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
   color: #4b5563;
   font-weight: 750;
   margin-top: 26px;
@@ -1600,14 +1601,6 @@ button, .poll-form button {
   margin: 0;
   padding: 16px;
   color: var(--color-muted);
-}
-
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  flex-wrap: wrap;
 }
 
 .footer span {
