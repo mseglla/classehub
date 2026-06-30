@@ -3562,14 +3562,14 @@ body,
 
 /* Signup back action must stay visually secondary */
 .ch-signup-actions-clean .ch-signup-back-button {
-  background: transparent !important;
-  color: #94a3b8 !important;
-  border: 0 !important;
-  box-shadow: none !important;
+  background: transparent;
+  color: #94a3b8;
+  border: 0;
+  box-shadow: none;
 }
 
 .ch-signup-actions-clean .ch-signup-back-button:hover {
-  color: #64748b !important;
+  color: #64748b;
 }
 
 /* Cleaner family access login */
