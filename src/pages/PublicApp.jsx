@@ -1632,6 +1632,14 @@ const visibleEvents = showFullCalendar
   
       <section className="layout">
         <Card className="span-2 next-event-card clean-next-event-card">
+          <div className="section-title-row">
+            <SectionTitle
+              icon={<CalendarDays size={22} />}
+              title={agendaTitle}
+              subtitle="Tot el que vols saber, quan ho vols saber."
+            />
+          </div>
+
           <div className="next-event-heading">
             <p className="eyebrow">Proper esdeveniment</p>
             {nextEvent && <span>{daysUntil(nextEvent.start_date)}</span>}
@@ -1698,16 +1706,10 @@ const visibleEvents = showFullCalendar
           ) : (
             <p>No hi ha cap esdeveniment proper.</p>
           )}
-        </Card>
-  
-        <Card className="span-2">
-        <div className="section-title-row">
-  <SectionTitle
-    icon={<CalendarDays size={22} />}
-    title={agendaTitle}
-    subtitle="Tot el que vols saber, quan ho vols saber."
-  />
-</div>
+
+          <div className="agenda-list-heading">
+            <p className="eyebrow">Més endavant</p>
+          </div>
 
 <div className="timeline">
   {visibleEvents.map((event) => {
