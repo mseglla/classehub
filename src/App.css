@@ -397,13 +397,14 @@ h2 {
   font-weight: 850;
 }
 
-.tag {
+.poll-card .tag,
+.attendance-header .tag {
   display: inline-block;
-  margin: 0 0 8px !important;
+  margin: 0 0 8px;
   padding: 6px 10px;
   border-radius: 999px;
   background: #fff7ed;
-  color: #c2410c !important;
+  color: #c2410c;
   font-size: 12px;
   font-weight: 950;
 }
