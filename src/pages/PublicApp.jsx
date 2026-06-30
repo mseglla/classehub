@@ -1605,13 +1605,14 @@ const visibleEvents = showFullCalendar
       <header className="hero class-hero">
         <div className="hero-main class-hero-main">
           <div className="class-hero-copy">
-            <h1>{displayClassName}</h1>
-            {displaySchoolYear && <p>Curs {displaySchoolYear}</p>}
+            <h1>
+              {displayClassName}
+              {displaySchoolYear && <span> · Curs {displaySchoolYear}</span>}
+            </h1>
 
             {activeFamily && (
               <div className="family-session-banner">
-                <span>👋 Benvinguda, família de {activeFamily.student_name}</span>
-                <small>Esteu accedint amb el vostre PIN familiar.</small>
+                <span>Família de {activeFamily.student_name}</span>
               </div>
             )}
           </div>
@@ -1619,9 +1620,10 @@ const visibleEvents = showFullCalendar
           <button
             className="suggestion-button"
             type="button"
+            aria-label="Obrir bústia de suggeriments"
             onClick={() => setShowFeedbackModal(true)}
           >
-            <MessageCircle size={17} />
+            <MessageCircle size={15} />
             <span>Bústia</span>
           </button>
         </div>

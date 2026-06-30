@@ -1028,20 +1028,20 @@ button, .poll-form button {
 
 /* Mobile-first public class redesign */
 .class-hero {
-  padding: 18px;
-  border-radius: 28px;
+  padding: 14px;
+  border-radius: 24px;
   background:
-    radial-gradient(circle at top left, rgba(255,255,255,0.72), transparent 38%),
-    linear-gradient(135deg, #fff7ed 0%, #fef3c7 42%, #fde68a 100%);
-  border: 1px solid rgba(251, 191, 36, 0.35);
-  box-shadow: 0 18px 45px rgba(120, 53, 15, 0.10);
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.74), transparent 42%),
+    linear-gradient(135deg, #fff7ed 0%, #fef3c7 58%, #fde68a 100%);
+  border: 1px solid rgba(251, 191, 36, 0.34);
+  box-shadow: 0 14px 34px rgba(120, 53, 15, 0.10);
 }
 
-.class-hero-main {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
+.class-hero .class-hero-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
 }
 
 .class-hero-copy {
@@ -1060,10 +1060,18 @@ button, .poll-form button {
 
 .class-hero h1 {
   margin: 0;
-  font-size: clamp(2rem, 13vw, 3.4rem);
-  line-height: 0.95;
-  letter-spacing: -0.07em;
   color: #1f2937;
+  font-size: clamp(1.35rem, 6vw, 2rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  font-weight: 950;
+}
+
+.class-hero h1 span {
+  color: #92400e;
+  font-size: 0.72em;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
 }
 
 .class-hero p {
@@ -1074,19 +1082,20 @@ button, .poll-form button {
 }
 
 .suggestion-button {
+  justify-self: end;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 9px 12px;
-  border: 1px solid rgba(146, 64, 14, 0.18);
+  gap: 5px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(146, 64, 14, 0.22);
   border-radius: 999px;
-  background: rgba(255,255,255,0.74);
+  background: rgba(255, 255, 255, 0.82);
   color: #78350f;
-  font-size: 0.84rem;
-  font-weight: 700;
-  box-shadow: 0 10px 24px rgba(120, 53, 15, 0.08);
+  font-size: 0.78rem;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(120, 53, 15, 0.08);
 }
 
 .clean-next-event-card {
@@ -2058,30 +2067,33 @@ body,
 /* Family session banner */
 .family-session-banner {
   display: inline-flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 16px;
+  margin-top: 8px;
+  padding: 6px 9px;
+  border-radius: 999px;
   border: 1px solid #bbf7d0;
-  background: #ecfdf5;
+  background: rgba(236, 253, 245, 0.9);
   color: #064e3b;
 }
 
 .family-session-banner span {
   font-weight: 900;
-  font-size: 0.9rem;
-}
-
-.family-session-banner small {
-  color: #047857;
-  font-size: 0.78rem;
-  font-weight: 750;
+  font-size: 0.82rem;
 }
 
 @media (max-width: 520px) {
+  .class-hero .class-hero-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .suggestion-button {
+    min-height: 32px;
+    padding: 7px 9px;
+  }
+
   .family-session-banner {
-    width: 100%;
+    width: fit-content;
+    max-width: 100%;
   }
 }
 
