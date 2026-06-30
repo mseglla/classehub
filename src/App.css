@@ -2447,15 +2447,15 @@ body,
   gap: 8px;
 }
 
-.checkbox-row {
-  display: flex !important;
-  flex-direction: row !important;
+.registration-form .checkbox-row {
+  display: flex;
+  flex-direction: row;
   gap: 10px;
   align-items: center;
   font-weight: 800;
 }
 
-.checkbox-row input {
+.registration-form .checkbox-row input {
   width: auto;
 }
 
