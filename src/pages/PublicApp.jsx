@@ -399,8 +399,6 @@ function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }
       {activeFamilyOption && (
         <div className="span-all linked-family-box">
           <span>✅ Ja has votat</span>
-          <strong>{activeFamilyOption.text}</strong>
-          <small>Pots canviar el vot seleccionant una altra opció.</small>
         </div>
       )}
 
@@ -563,9 +561,10 @@ function AttendanceOrganizationCard({
   families,
   participants,
   responses,
+  activeFamily,
   onOpen,
 }) {
-  const { availableFamilies, yesFamilies, noFamilies } = getAttendanceData(
+  const { availableFamilies, responseByFamily, yesFamilies, noFamilies } = getAttendanceData(
     organization,
     families,
     participants,
@@ -573,6 +572,9 @@ function AttendanceOrganizationCard({
   );
 
   const answeredCount = yesFamilies.length + noFamilies.length;
+  const activeFamilyResponse = activeFamily
+    ? responseByFamily.get(activeFamily.id)
+    : null;
 
   return (
     <div className="attendance-card">
@@ -595,8 +597,14 @@ function AttendanceOrganizationCard({
           famílies han respost
         </p>
 
+        {activeFamilyResponse && (
+          <div className="span-all linked-family-box">
+            <span>✅ Ja has respost</span>
+          </div>
+        )}
+
         <button onClick={() => onOpen(organization)}>
-          Respondre
+          {activeFamilyResponse ? "Canviar resposta" : "Respondre"}
         </button>
       </div>
     </div>
@@ -748,6 +756,7 @@ function RegistrationOrganizationCard({
   families,
   participants,
   registrations,
+  activeFamily,
   onOpen,
   onOpenResults,
 }) {
@@ -764,6 +773,10 @@ function RegistrationOrganizationCard({
   const orgRegistrations = registrations.filter(
     (item) => item.organization_id === organization.id
   );
+
+  const activeFamilyRegistration = activeFamily
+    ? orgRegistrations.find((registration) => registration.family_id === activeFamily.id)
+    : null;
 
   return (
     <div className="attendance-card registration-public-card">
@@ -786,9 +799,15 @@ function RegistrationOrganizationCard({
           famílies s'han inscrit
         </p>
 
+        {activeFamilyRegistration && (
+          <div className="span-all linked-family-box">
+            <span>✅ Ja t'has inscrit</span>
+          </div>
+        )}
+
         <div className="pending-action-buttons registration-card-actions">
           <button onClick={() => onOpen(organization)}>
-            Inscriure'm
+            {activeFamilyRegistration ? "Modificar inscripció" : "Inscriure'm"}
           </button>
 
           <button
@@ -1858,6 +1877,7 @@ const visibleEvents = showFullCalendar
                     families={families}
                     participants={organizationParticipants}
                     responses={organizationResponses}
+                    activeFamily={activeFamily}
                     onOpen={setSelectedOrganization}
                   />
                 ) : org.organization_type === "registration" ? (
@@ -1867,6 +1887,7 @@ const visibleEvents = showFullCalendar
                     families={families}
                     participants={organizationParticipants}
                     registrations={organizationRegistrations}
+                    activeFamily={activeFamily}
                     onOpen={setSelectedRegistration}
                     onOpenResults={setSelectedRegistrationResults}
                   />
