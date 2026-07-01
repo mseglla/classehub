@@ -160,14 +160,34 @@ export default function AdminPage({ session }) {
     { yes: 0, no: 0 }
   );
 
-  const detailAnsweredCount =
-    detailOrganization?.organization_type === "registration"
-      ? detailRegistrations.length
-      : detailResponses.length;
+  const detailResponseByFamily = new Map(
+    detailResponses.map((response) => [response.family_id, response.response])
+  );
 
-  const detailPendingCount = detailOrganization
-    ? Math.max(activeFamilies.length - detailAnsweredCount, 0)
-    : 0;
+  const detailAnsweredFamilyIds = new Set(
+    detailResponses.map((response) => response.family_id)
+  );
+
+  if (detailOrganization?.organization_type === "registration") {
+    detailRegistrations.forEach((registration) => {
+      detailAnsweredFamilyIds.add(registration.family_id);
+    });
+  }
+
+  const detailNotAttendingFamilies =
+    detailOrganization?.organization_type === "registration"
+      ? activeFamilies.filter(
+          (family) => detailResponseByFamily.get(family.id) === "no"
+        )
+      : [];
+
+  const detailPendingFamilies = detailOrganization
+    ? activeFamilies.filter((family) => !detailAnsweredFamilyIds.has(family.id))
+    : [];
+
+  const detailAnsweredCount = detailAnsweredFamilyIds.size;
+
+  const detailPendingCount = detailPendingFamilies.length;
 
   function getFamilyName(familyId) {
     return (
@@ -2807,8 +2827,18 @@ console.log("Resultat guardar esdeveniment:", { data, error });
               {detailOrganization.organization_type === "registration" ? (
                 <>
                   <div>
-                    <span>Famílies</span>
+                    <span>Respostes</span>
+                    <strong>{detailAnsweredCount}</strong>
+                  </div>
+
+                  <div>
+                    <span>Inscrites</span>
                     <strong>{detailRegistrations.length}</strong>
+                  </div>
+
+                  <div>
+                    <span>No vindran</span>
+                    <strong>{detailNotAttendingFamilies.length}</strong>
                   </div>
 
                   <div>
@@ -2898,6 +2928,38 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                       )}
                     </div>
                   ))
+                )}
+                {detailNotAttendingFamilies.length > 0 && (
+                  <>
+                    <div className="action-detail-summary">
+                      {detailNotAttendingFamilies.length} famílies no vindran
+                    </div>
+
+                    {detailNotAttendingFamilies.map((family) => (
+                      <div className="action-detail-row" key={family.id}>
+                        <div className="action-detail-main">
+                          <strong>{family.student_name}</strong>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {detailPendingFamilies.length > 0 && (
+                  <>
+                    <div className="action-detail-summary">
+                      {detailPendingFamilies.length} famílies pendents
+                    </div>
+
+                    {detailPendingFamilies.map((family) => (
+                      <div className="action-detail-row" key={family.id}>
+                        <div className="action-detail-main">
+                          <strong>{family.student_name}</strong>
+                          <span>Pendent de resposta</span>
+                        </div>
+                      </div>
+                    ))}
+                  </>
                 )}
               </div>
             )}
