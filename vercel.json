@@ -1,8 +1,30 @@
 {
-    "rewrites": [
-      {
-        "source": "/(.*)",
-        "destination": "/"
-      }
-    ]
-  }
+  "redirects": [
+    {
+      "source": "/orenetes",
+      "destination": "/classe/orenetes",
+      "permanent": false
+    },
+    {
+      "source": "/orenetes/alta",
+      "destination": "/classe/orenetes/alta",
+      "permanent": false
+    },
+    {
+      "source": "/senglars",
+      "destination": "/classe/senglars",
+      "permanent": false
+    },
+    {
+      "source": "/senglars/alta",
+      "destination": "/classe/senglars/alta",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+}
