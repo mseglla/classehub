@@ -2082,6 +2082,15 @@ body,
   letter-spacing: 0.04em;
 }
 
+.linked-family-box-pending {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.linked-family-box-pending span {
+  color: #b91c1c;
+}
+
 .linked-family-box strong {
   display: block;
   margin-top: 4px;

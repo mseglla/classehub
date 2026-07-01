@@ -373,9 +373,13 @@ function PollCard({ poll, families, votes, activeFamily, onOpenVote, onOpenResul
         </p>
       </div>
 
-      {activeFamilyVote && (
-        <div className="span-all linked-family-box">
-          <span>✅ Ja has votat</span>
+      {activeFamily && (
+        <div
+          className={`span-all linked-family-box ${
+            activeFamilyVote ? "" : "linked-family-box-pending"
+          }`}
+        >
+          <span>{activeFamilyVote ? "✅ Ja has votat" : "Encara no has votat"}</span>
         </div>
       )}
 
@@ -613,9 +617,15 @@ function AttendanceOrganizationCard({
           famílies han respost
         </p>
 
-        {activeFamilyResponse && (
-          <div className="span-all linked-family-box">
-            <span>✅ Ja has respost</span>
+        {activeFamily && (
+          <div
+            className={`span-all linked-family-box ${
+              activeFamilyResponse ? "" : "linked-family-box-pending"
+            }`}
+          >
+            <span>
+              {activeFamilyResponse ? "✅ Ja has respost" : "Encara no has respost"}
+            </span>
           </div>
         )}
 
@@ -824,9 +834,15 @@ function RegistrationOrganizationCard({
           famílies s'han inscrit
         </p>
 
-        {activeFamilyRegistration && (
-          <div className="span-all linked-family-box">
-            <span>✅ Ja t'has inscrit</span>
+        {activeFamily && (
+          <div
+            className={`span-all linked-family-box ${
+              activeFamilyRegistration ? "" : "linked-family-box-pending"
+            }`}
+          >
+            <span>
+              {activeFamilyRegistration ? "✅ Ja t'has inscrit" : "Encara no t'has inscrit"}
+            </span>
           </div>
         )}
 
