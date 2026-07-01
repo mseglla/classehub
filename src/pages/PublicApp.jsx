@@ -351,36 +351,13 @@ function DetailModal({ item, checklist, onClose }) {
   );
 }
 
-function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }) {
-  const [familyId, setFamilyId] = useState("");
-  const [optionId, setOptionId] = useState("");
-
+function PollCard({ poll, families, votes, activeFamily, onOpenVote, onOpenResults }) {
   const pollVotes = votes.filter((vote) => vote.poll_id === poll.id);
   const votedFamilies = new Set(pollVotes.map((vote) => vote.family_id));
 
   const activeFamilyVote = activeFamily
     ? pollVotes.find((vote) => vote.family_id === activeFamily.id)
     : null;
-
-  const activeFamilyOption = activeFamilyVote
-    ? poll.ch_poll_options?.find((option) => option.id === activeFamilyVote.option_id)
-    : null;
-
-  async function submitVote(e) {
-    e.preventDefault();
-
-    const selectedFamilyId = activeFamily?.id || Number(familyId);
-
-    if (!selectedFamilyId || !optionId) return;
-
-    await onVote(poll.id, Number(optionId), selectedFamilyId);
-
-    if (!activeFamily) {
-      setFamilyId("");
-    }
-
-    setOptionId("");
-  }
 
   return (
     <div className="poll-card">
@@ -396,53 +373,92 @@ function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }
         </p>
       </div>
 
-      {activeFamilyOption && (
+      {activeFamilyVote && (
         <div className="span-all linked-family-box">
           <span>✅ Ja has votat</span>
         </div>
       )}
 
-      <form className="registration-form" onSubmit={submitVote}>
-        {!activeFamily && (
-          <label className="span-all">
-            Família
-            <select value={familyId} onChange={(e) => setFamilyId(e.target.value)}>
-              <option value="">Selecciona família</option>
-              {families.map((family) => (
-                <option key={family.id} value={family.id}>
-                  {votedFamilies.has(family.id) ? "✓ " : ""}
-                  {family.student_name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        <label className="span-all">
-          Resposta
-          <select value={optionId} onChange={(e) => setOptionId(e.target.value)}>
-            <option value="">
-              {activeFamilyOption ? "Tria una nova opció" : "Tria opció"}
-            </option>
-            {poll.ch_poll_options?.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.text}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <button className="span-all">
-          {activeFamilyOption ? "Canviar vot" : "Votar"}
+      <div className="pending-action-buttons registration-card-actions">
+        <button onClick={() => onOpenVote(poll)}>
+          {activeFamilyVote ? "Canviar vot" : "Votar"}
         </button>
-      </form>
 
-      <button className="secondary-action" onClick={() => onOpenResults(poll)}>
-        Veure resultats
-      </button>
+        <button
+          className="secondary-pending-button"
+          onClick={() => onOpenResults(poll)}
+        >
+          Veure resultats
+        </button>
+      </div>
     </div>
   );
 }
+function PollVoteModal({ poll, activeFamily, onVote, onClose }) {
+  const [optionId, setOptionId] = useState("");
+
+  if (!poll) return null;
+
+  async function submitVote(event) {
+    event.preventDefault();
+
+    if (!optionId) return;
+
+    const saved = await onVote(poll.id, Number(optionId));
+
+    if (saved) {
+      setOptionId("");
+      onClose();
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <article className="modal" onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>
+          Tancar
+        </button>
+
+        <p className="eyebrow">Votació</p>
+        <h2>🗳️ {poll.question}</h2>
+
+        {poll.description && (
+          <p className="detail-text">{poll.description}</p>
+        )}
+
+        <div className="checklist-box">
+          <h3>Tria una opció</h3>
+
+          <form className="registration-form" onSubmit={submitVote}>
+            {activeFamily && (
+              <div className="span-all linked-family-box">
+                <span>Família identificada</span>
+                <strong>{activeFamily.student_name}</strong>
+              </div>
+            )}
+
+            <label className="span-all">
+              Resposta
+              <select value={optionId} onChange={(event) => setOptionId(event.target.value)}>
+                <option value="">Tria opció</option>
+                {poll.ch_poll_options?.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.text}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <button className="span-all">
+              Guardar vot
+            </button>
+          </form>
+        </div>
+      </article>
+    </div>
+  );
+}
+
 function PollResultsModal({ poll, families, votes, onClose }) {
   if (!poll) return null;
 
@@ -1199,6 +1215,7 @@ export default function PublicApp() {
   const [selectedRegistration, setSelectedRegistration] = useState(null);
   const [selectedRegistrationResults, setSelectedRegistrationResults] = useState(null);
   const [selectedPoll, setSelectedPoll] = useState(null);
+  const [selectedPollVote, setSelectedPollVote] = useState(null);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -1554,6 +1571,7 @@ const visibleEvents = showFullCalendar
     }
 
     await loadData();
+    return true;
   }
 
   async function handleInstallApp() {
@@ -1582,7 +1600,7 @@ const visibleEvents = showFullCalendar
   async function handleVote(pollId, optionId) {
     if (!familyAccessPin) {
       alert("Cal accedir amb el PIN familiar per votar.");
-      return;
+      return false;
     }
 
     const { error: voteError } = await supabase.rpc("vote_poll_with_pin", {
@@ -1594,10 +1612,11 @@ const visibleEvents = showFullCalendar
     if (voteError) {
       alert("No s'ha pogut guardar el vot.");
       console.error(voteError);
-      return;
+      return false;
     }
 
     await loadData();
+    return true;
   }
 
   const selectedChecklist =
@@ -1938,7 +1957,7 @@ const visibleEvents = showFullCalendar
                   families={families}
                   votes={votes}
                   activeFamily={activeFamily}
-                  onVote={handleVote}
+                  onOpenVote={setSelectedPollVote}
                   onOpenResults={setSelectedPoll}
                 />
               ))}
@@ -2040,6 +2059,13 @@ const visibleEvents = showFullCalendar
         onClose={() => setSelectedRegistrationResults(null)}
       />
   
+      <PollVoteModal
+        poll={selectedPollVote}
+        activeFamily={activeFamily}
+        onVote={handleVote}
+        onClose={() => setSelectedPollVote(null)}
+      />
+
       <PollResultsModal
         poll={selectedPoll}
         families={families}
