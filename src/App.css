@@ -3825,3 +3825,7 @@ body,
   font-weight: 900;
   text-align: center;
 }
+
+.modal-action-summary {
+  margin-top: 18px;
+}

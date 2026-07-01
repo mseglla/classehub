@@ -364,7 +364,6 @@ function PollCard({ poll, families, votes, activeFamily, onOpenVote, onOpenResul
       <div>
         <p className="tag">Votació</p>
         <h3>{poll.question}</h3>
-        {poll.description && <p>{poll.description}</p>}
         <p className="action-summary">
           <strong>
             {votedFamilies.size}/{families.length}
@@ -601,7 +600,6 @@ function AttendanceOrganizationCard({
       <div className="attendance-header">
         <p className="tag">Confirmació</p>
         <h3>{organization.title}</h3>
-        {organization.description && <p>{organization.description}</p>}
         {organization.event_date && (
   <small className="org-date">
     {shortDate(organization.event_date)} · {daysUntil(organization.event_date)}
@@ -778,13 +776,10 @@ function AttendanceOrganizationModal({
           </div>
         )}
 
-        <div className="organization-results">
-          <div className="result-column yes">
-            <strong>
-              {answeredCount}/{availableFamilies.length} famílies han respost
-            </strong>
-          </div>
-        </div>
+        <p className="action-summary modal-action-summary">
+          <strong>{answeredCount}/{availableFamilies.length}</strong>{" "}
+          famílies han respost
+        </p>
       </article>
     </div>
   );
@@ -821,7 +816,6 @@ function RegistrationOrganizationCard({
       <div className="attendance-header">
         <p className="tag">Inscripció</p>
         <h3>{organization.title}</h3>
-        {organization.description && <p>{organization.description}</p>}
         {organization.event_date && (
           <small className="org-date">
             {shortDate(organization.event_date)} · {daysUntil(organization.event_date)}
