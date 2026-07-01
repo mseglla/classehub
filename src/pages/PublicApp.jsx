@@ -433,7 +433,7 @@ function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }
         </label>
 
         <button className="span-all">
-          {activeFamilyOption ? "Actualitzar vot" : "Votar"}
+          {activeFamilyOption ? "Canviar vot" : "Votar"}
         </button>
       </form>
 
@@ -603,9 +603,18 @@ function AttendanceOrganizationCard({
           </div>
         )}
 
-        <button onClick={() => onOpen(organization)}>
-          {activeFamilyResponse ? "Canviar resposta" : "Respondre"}
-        </button>
+        <div className="pending-action-buttons registration-card-actions">
+          <button onClick={() => onOpen(organization)}>
+            {activeFamilyResponse ? "Canviar resposta" : "Respondre"}
+          </button>
+
+          <button
+            className="secondary-pending-button"
+            onClick={() => onOpen(organization)}
+          >
+            Veure respostes
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -814,7 +823,7 @@ function RegistrationOrganizationCard({
             className="secondary-pending-button"
             onClick={() => onOpenResults(organization)}
           >
-            Veure confirmats
+            Veure inscrits
           </button>
         </div>
       </div>
