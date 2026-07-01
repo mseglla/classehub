@@ -4059,3 +4059,42 @@ body,
   font-weight: 850;
   line-height: 1.35;
 }
+
+.ch-signup-inline-action {
+  width: 100%;
+  border: 1px dashed rgba(15, 23, 42, 0.2);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.9);
+  color: #0f172a;
+  font-weight: 800;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.ch-signup-extra-contact {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  padding: 16px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.ch-signup-extra-contact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ch-signup-extra-contact-header strong {
+  color: #0f172a;
+}
+
+.ch-signup-extra-contact-header button {
+  border: 0;
+  background: transparent;
+  color: #dc2626;
+  font-weight: 800;
+  cursor: pointer;
+}

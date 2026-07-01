@@ -42,12 +42,16 @@ export default function FamilySignupPage() {
   const [createdAccess, setCreatedAccess] = useState(null);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showSecondContact, setShowSecondContact] = useState(false);
   const [formData, setFormData] = useState({
     childName: "",
     birthDate: "",
     adultName: "",
     email: "",
     phone: "",
+    secondContactName: "",
+    secondEmail: "",
+    secondPhone: "",
   });
 
   const className = slug === "orenetes" ? "Orenetes" : slug;
@@ -125,6 +129,9 @@ export default function FamilySignupPage() {
       p_adult_name: formData.adultName.trim(),
       p_email: formData.email.trim() || null,
       p_phone: formData.phone.trim() || null,
+      p_second_contact_name: formData.secondContactName.trim() || null,
+      p_second_email: formData.secondEmail.trim() || null,
+      p_second_phone: formData.secondPhone.trim() || null,
     });
 
     setSaving(false);
@@ -329,6 +336,70 @@ PIN: ${createdAccess.accessPin}`;
                   autoComplete="tel"
                 />
               </FormField>
+
+              {!showSecondContact ? (
+                <button
+                  type="button"
+                  className="ch-signup-inline-action"
+                  onClick={() => setShowSecondContact(true)}
+                >
+                  + Afegir un altre contacte
+                </button>
+              ) : (
+                <div className="ch-signup-extra-contact">
+                  <div className="ch-signup-extra-contact-header">
+                    <strong>Contacte addicional</strong>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowSecondContact(false);
+                        setFormData((current) => ({
+                          ...current,
+                          secondContactName: "",
+                          secondEmail: "",
+                          secondPhone: "",
+                        }));
+                      }}
+                    >
+                      Treure
+                    </button>
+                  </div>
+
+                  <FormField label="Nom del segon contacte">
+                    <input
+                      type="text"
+                      name="secondContactName"
+                      value={formData.secondContactName}
+                      onChange={updateField}
+                      placeholder="Nom i cognoms"
+                      autoComplete="name"
+                    />
+                  </FormField>
+
+                  <FormField label="Email del segon contacte">
+                    <input
+                      type="email"
+                      name="secondEmail"
+                      value={formData.secondEmail}
+                      onChange={updateField}
+                      placeholder="Opcional"
+                      autoComplete="email"
+                    />
+                  </FormField>
+
+                  <FormField label="Telèfon del segon contacte">
+                    <input
+                      type="tel"
+                      name="secondPhone"
+                      value={formData.secondPhone}
+                      onChange={updateField}
+                      placeholder="Opcional"
+                      autoComplete="tel"
+                    />
+                  </FormField>
+                </div>
+              )}
             </div>
           )}
 
@@ -352,12 +423,27 @@ PIN: ${createdAccess.accessPin}`;
               </div>
 
               <div>
-                <span>Contacte</span>
+                <span>Contacte principal</span>
                 <strong>
                   {[formData.email, formData.phone].filter(Boolean).join(" · ") ||
                     "Sense contacte informat"}
                 </strong>
               </div>
+
+              {(formData.secondContactName || formData.secondEmail || formData.secondPhone) && (
+                <div>
+                  <span>Contacte addicional</span>
+                  <strong>
+                    {[
+                      formData.secondContactName,
+                      formData.secondEmail,
+                      formData.secondPhone,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </strong>
+                </div>
+              )}
 
               <p>
                 Només cal una alta per família. Després podràs compartir el PIN
