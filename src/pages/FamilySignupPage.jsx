@@ -13,6 +13,20 @@ function saveFamilyAccessPin(slug, pin) {
   window.localStorage.setItem(`classehub-family-pin-${slug}`, pin);
 }
 
+function isValidEmail(value) {
+  if (!value) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function isValidPhone(value) {
+  if (!value) return true;
+
+  const cleanValue = value.trim();
+  const digits = cleanValue.replace(/\D/g, "");
+
+  return /^[0-9+()\s-]+$/.test(cleanValue) && digits.length >= 6;
+}
+
 const steps = [
   {
     id: "child",
@@ -81,6 +95,45 @@ export default function FamilySignupPage() {
     }));
   }
 
+  function validateAdultStep() {
+    const primaryEmail = formData.email.trim();
+    const primaryPhone = formData.phone.trim();
+    const secondEmail = formData.secondEmail.trim();
+    const secondPhone = formData.secondPhone.trim();
+
+    if (!formData.adultName.trim()) {
+      setMessage("Escriu el nom de l’adult de referència per continuar.");
+      return false;
+    }
+
+    if (!isValidEmail(primaryEmail)) {
+      setMessage("Revisa el correu electrònic del contacte principal.");
+      return false;
+    }
+
+    if (!isValidPhone(primaryPhone)) {
+      setMessage("Revisa el telèfon del contacte principal. No pot contenir lletres i ha de tenir com a mínim 6 dígits.");
+      return false;
+    }
+
+    if ((secondEmail || secondPhone) && !formData.secondContactName.trim()) {
+      setMessage("Si informes un segon contacte, cal indicar-ne el nom.");
+      return false;
+    }
+
+    if (!isValidEmail(secondEmail)) {
+      setMessage("Revisa el correu electrònic del segon contacte.");
+      return false;
+    }
+
+    if (!isValidPhone(secondPhone)) {
+      setMessage("Revisa el telèfon del segon contacte. No pot contenir lletres i ha de tenir com a mínim 6 dígits.");
+      return false;
+    }
+
+    return true;
+  }
+
   function nextStep() {
     if (!canContinue) {
       if (step.id === "child" && formData.birthDate && formData.birthDate > todayIso) {
@@ -93,6 +146,10 @@ export default function FamilySignupPage() {
           ? "Escriu el nom del fill/a i la data de naixement per continuar."
           : "Escriu el nom de l’adult de referència per continuar."
       );
+      return;
+    }
+
+    if (step.id === "adult" && !validateAdultStep()) {
       return;
     }
 
@@ -115,6 +172,11 @@ export default function FamilySignupPage() {
 
     if (formData.birthDate > todayIso) {
       setMessage("La data de naixement no pot ser futura.");
+      return;
+    }
+
+    if (!validateAdultStep()) {
+      setCurrentStep(1);
       return;
     }
 
@@ -334,6 +396,7 @@ PIN: ${createdAccess.accessPin}`;
                   onChange={updateField}
                   placeholder="Opcional"
                   autoComplete="tel"
+                  inputMode="tel"
                 />
               </FormField>
 
@@ -396,6 +459,7 @@ PIN: ${createdAccess.accessPin}`;
                       onChange={updateField}
                       placeholder="Opcional"
                       autoComplete="tel"
+                      inputMode="tel"
                     />
                   </FormField>
                 </div>
