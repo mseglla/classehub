@@ -1015,15 +1015,25 @@ button, .poll-form button {
   
 }
 .action-summary {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
   margin: 0;
-  color: #374151;
-  font-size: 15px;
-  font-weight: 800;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  font-size: 0.88rem;
+  font-weight: 850;
+  line-height: 1;
 }
 
 .action-summary strong {
   color: #111827;
-  font-size: 18px;
+  font-size: 1rem;
+  font-weight: 950;
 }
 
 /* Mobile-first public class redesign */

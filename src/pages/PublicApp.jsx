@@ -388,9 +388,12 @@ function PollCard({ poll, families, votes, activeFamily, onVote, onOpenResults }
         <p className="tag">Votació</p>
         <h3>{poll.question}</h3>
         {poll.description && <p>{poll.description}</p>}
-        <small>
-          {votedFamilies.size}/{families.length} famílies han votat
-        </small>
+        <p className="action-summary">
+          <strong>
+            {votedFamilies.size}/{families.length}
+          </strong>{" "}
+          famílies han votat
+        </p>
       </div>
 
       {activeFamilyOption && (
@@ -562,12 +565,14 @@ function AttendanceOrganizationCard({
   responses,
   onOpen,
 }) {
-  const { yesFamilies, noFamilies, pendingFamilies } = getAttendanceData(
+  const { availableFamilies, yesFamilies, noFamilies } = getAttendanceData(
     organization,
     families,
     participants,
     responses
   );
+
+  const answeredCount = yesFamilies.length + noFamilies.length;
 
   return (
     <div className="attendance-card">
@@ -584,7 +589,10 @@ function AttendanceOrganizationCard({
 
       <div className="attendance-summary">
         <p className="action-summary">
-          <strong>{yesFamilies.length + noFamilies.length}</strong> famílies han respost
+          <strong>
+            {answeredCount}/{availableFamilies.length}
+          </strong>{" "}
+          famílies han respost
         </p>
 
         <button onClick={() => onOpen(organization)}>
@@ -616,6 +624,8 @@ function AttendanceOrganizationModal({
     noFamilies,
     pendingFamilies,
   } = getAttendanceData(organization, families, participants, responses);
+
+  const answeredCount = yesFamilies.length + noFamilies.length;
 
   const activeAvailableFamily =
     activeFamily &&
@@ -724,8 +734,9 @@ function AttendanceOrganizationModal({
 
         <div className="organization-results">
           <div className="result-column yes">
-            <strong>{yesFamilies.length + noFamilies.length} famílies han respost</strong>
-            <span>{yesFamilies.length} sí · {noFamilies.length} no</span>
+            <strong>
+              {answeredCount}/{availableFamilies.length} famílies han respost
+            </strong>
           </div>
         </div>
       </article>
@@ -754,23 +765,6 @@ function RegistrationOrganizationCard({
     (item) => item.organization_id === organization.id
   );
 
-  const totalAdults = orgRegistrations.reduce(
-    (sum, item) => sum + (item.adults_count || 0),
-    0
-  );
-
-  const totalChildren = orgRegistrations.reduce(
-    (sum, item) => sum + (item.children_count || 0),
-    0
-  );
-
-  const totalUnder3 = orgRegistrations.reduce(
-    (sum, item) => sum + (item.under3_count || 0),
-    0
-  );
-
-  const pendingCount = Math.max(availableFamilies.length - orgRegistrations.length, 0);
-
   return (
     <div className="attendance-card registration-public-card">
       <div className="attendance-header">
@@ -785,15 +779,12 @@ function RegistrationOrganizationCard({
       </div>
 
       <div className="attendance-summary registration-card-summary">
-        <div className="registration-main-stat">
-          <strong>{totalAdults + totalChildren}</strong>
-          <span>persones inscrites</span>
-        </div>
-
-        <div className="registration-meta-row">
-          <span>{orgRegistrations.length} famílies</span>
-          <span>{pendingCount} pendents</span>
-        </div>
+        <p className="action-summary">
+          <strong>
+            {orgRegistrations.length}/{availableFamilies.length}
+          </strong>{" "}
+          famílies s'han inscrit
+        </p>
 
         <div className="pending-action-buttons registration-card-actions">
           <button onClick={() => onOpen(organization)}>
