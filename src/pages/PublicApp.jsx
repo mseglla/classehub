@@ -1416,10 +1416,39 @@ export default function PublicApp() {
       );
   }, [events]);
 
+  const visibleOrganizations = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const eventById = new Map(events.map((event) => [event.id, event]));
+
+    return organizations.filter((organization) => {
+      if (organization.close_date) {
+        const closeDate = new Date(`${organization.close_date}T23:59:59`);
+        if (closeDate < today) {
+          return false;
+        }
+      }
+
+      if (!organization.event_id) {
+        return true;
+      }
+
+      const linkedEvent = eventById.get(organization.event_id);
+
+      if (!linkedEvent?.start_date) {
+        return false;
+      }
+
+      const eventDate = new Date(`${linkedEvent.start_date}T00:00:00`);
+      return eventDate >= today;
+    });
+  }, [events, organizations]);
+
   const nextEvent = futureEvents[0];
 
   const nextEventAttendanceOrganization = nextEvent
-    ? organizations.find(
+    ? visibleOrganizations.find(
         (org) =>
           org.event_id === nextEvent.id &&
           org.organization_type === "attendance"
@@ -1427,7 +1456,7 @@ export default function PublicApp() {
     : null;
 
   const nextEventRegistrationOrganization = nextEvent
-    ? organizations.find(
+    ? visibleOrganizations.find(
         (org) =>
           org.event_id === nextEvent.id &&
           org.organization_type === "registration"
@@ -1821,7 +1850,7 @@ const visibleEvents = showFullCalendar
 </button>
         </Card>
 
-        {organizations.length > 0 && (
+        {visibleOrganizations.length > 0 && (
           <Card className="span-2">
             <SectionTitle
               icon={<PartyPopper size={22} />}
@@ -1830,7 +1859,7 @@ const visibleEvents = showFullCalendar
             />
     
             <div className="org-list">
-              {organizations.map((org) =>
+              {visibleOrganizations.map((org) =>
                 org.organization_type === "attendance" ? (
                   <AttendanceOrganizationCard
                     key={org.id}
