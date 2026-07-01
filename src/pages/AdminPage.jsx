@@ -2374,20 +2374,15 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                   Visible només per {selectedClass?.name || "la classe seleccionada"}.
                 </div>
 
-                <label className="span-all">
-                  Què vols crear?
-                  <select
-                    value={publicationType}
-                    onChange={(event) => setPublicationType(event.target.value)}
-                    disabled={Boolean(editingEventId)}
-                  >
-                    <option value="info">Només informar</option>
-                    <option value="attendance">Demanar confirmació sí/no</option>
-                    <option value="registration">Obrir inscripció familiar</option>
-                  </select>
-                </label>
-
                 <div className="admin-message span-all">
+                  <strong>
+                    {publicationType === "attendance"
+                      ? "Confirmació d'assistència"
+                      : publicationType === "registration"
+                        ? "Inscripció familiar"
+                        : "Informació"}
+                  </strong>
+                  <br />
                   {publicationType === "info" && (
                     <span>Es crearà un esdeveniment informatiu només per aquesta classe.</span>
                   )}
