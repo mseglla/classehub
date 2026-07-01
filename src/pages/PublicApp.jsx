@@ -683,13 +683,16 @@ function AttendanceOrganizationModal({
 
     if (!selectedFamilyId || !response) return;
 
-    await onRespond(organization.id, Number(selectedFamilyId), response);
+    const saved = await onRespond(organization.id, Number(selectedFamilyId), response);
+
+    if (!saved) return;
 
     if (!activeAvailableFamily) {
       setFamilyId("");
     }
 
     setResponse("");
+    onClose();
   }
 
   return (
@@ -1103,7 +1106,7 @@ function RegistrationOrganizationModal({
 
     if (!selectedFamilyId) return;
 
-    await onRegister(
+    const saved = await onRegister(
       organization.id,
       selectedFamilyId,
       Number(adultsCount),
@@ -1112,6 +1115,8 @@ function RegistrationOrganizationModal({
       comment
     );
 
+    if (!saved) return;
+
     if (!activeAvailableFamily) {
       setFamilyId("");
       setAdultsCount(0);
@@ -1119,6 +1124,8 @@ function RegistrationOrganizationModal({
       setUnder3Count(0);
       setComment("");
     }
+
+    onClose();
   }
 
   return (
@@ -1544,7 +1551,7 @@ const visibleEvents = showFullCalendar
     ) {
       if (!familyAccessPin) {
         alert("Cal accedir amb el PIN familiar per guardar la inscripció.");
-        return;
+        return false;
       }
 
       const registrationRequest = supabase.rpc("register_organization_with_pin", {
@@ -1561,10 +1568,11 @@ const visibleEvents = showFullCalendar
       if (registrationError) {
         alert("No s'ha pogut guardar la inscripció.");
         console.error(registrationError);
-        return;
+        return false;
       }
     
       await loadData();
+      return true;
     }
   async function handleOrganizationResponse(organizationId, familyId, response) {
     if (!familyAccessPin) {
