@@ -53,12 +53,20 @@ export default function FamilySignupPage() {
   const className = slug === "orenetes" ? "Orenetes" : slug;
   const step = steps[currentStep];
   const classUrl = `/classe/${slug}`;
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   const canContinue = useMemo(() => {
-    if (step.id === "child") return formData.childName.trim().length >= 2;
+    if (step.id === "child") {
+      return (
+        formData.childName.trim().length >= 2 &&
+        Boolean(formData.birthDate) &&
+        formData.birthDate <= todayIso
+      );
+    }
+
     if (step.id === "adult") return formData.adultName.trim().length >= 2;
     return true;
-  }, [formData.childName, formData.adultName, step.id]);
+  }, [formData.childName, formData.birthDate, formData.adultName, step.id, todayIso]);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -71,9 +79,14 @@ export default function FamilySignupPage() {
 
   function nextStep() {
     if (!canContinue) {
+      if (step.id === "child" && formData.birthDate && formData.birthDate > todayIso) {
+        setMessage("La data de naixement no pot ser futura.");
+        return;
+      }
+
       setMessage(
         step.id === "child"
-          ? "Escriu el nom del fill/a per continuar."
+          ? "Escriu el nom del fill/a i la data de naixement per continuar."
           : "Escriu el nom de l’adult de referència per continuar."
       );
       return;
@@ -91,8 +104,13 @@ export default function FamilySignupPage() {
   async function submitSignup(event) {
     event.preventDefault();
 
-    if (!formData.childName.trim() || !formData.adultName.trim()) {
+    if (!formData.childName.trim() || !formData.birthDate || !formData.adultName.trim()) {
       setMessage("Revisa les dades obligatòries abans de continuar.");
+      return;
+    }
+
+    if (formData.birthDate > todayIso) {
+      setMessage("La data de naixement no pot ser futura.");
       return;
     }
 
@@ -256,13 +274,15 @@ PIN: ${createdAccess.accessPin}`;
 
               <FormField
                 label="Data de naixement"
-                hint="Opcional. Ens ajuda a organitzar els aniversaris del trimestre."
+                hint="Ens ajuda a organitzar els aniversaris i activitats de la classe."
               >
                 <input
                   type="date"
                   name="birthDate"
                   value={formData.birthDate}
                   onChange={updateField}
+                  max={todayIso}
+                  required
                 />
               </FormField>
             </div>
