@@ -282,18 +282,24 @@ PIN: ${createdAccess.accessPin}`;
                 />
               </FormField>
 
-              <FormField label="Email">
+              <FormField
+                label="Email"
+                hint="Opcional. El farem servir només per avisos importants de la classe o per ajudar-te a recuperar l’accés familiar."
+              >
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={updateField}
-                  placeholder="Opcional"
+                  placeholder="nom@email.com"
                   autoComplete="email"
                 />
               </FormField>
 
-              <FormField label="Telèfon mòbil">
+              <FormField
+                label="Telèfon mòbil"
+                hint="Opcional. Pot servir perquè el delegat pugui contactar amb la família si cal. No t’afegirem a cap grup sense permís."
+              >
                 <input
                   type="tel"
                   name="phone"
