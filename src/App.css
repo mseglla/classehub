@@ -3829,3 +3829,15 @@ body,
 .modal-action-summary {
   margin-top: 18px;
 }
+
+.action-button-completed {
+  border-color: #86efac;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.action-button-completed:hover {
+  border-color: #86efac;
+  background: #dcfce7;
+  color: #166534;
+}

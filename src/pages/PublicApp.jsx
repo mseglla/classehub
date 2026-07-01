@@ -1426,6 +1426,51 @@ export default function PublicApp() {
 
   const activeFamily = activeFamilyFromPin;
 
+  function hasActiveFamilyResponded(organization) {
+    if (!activeFamily || !organization) return false;
+
+    return organizationResponses.some(
+      (response) =>
+        response.organization_id === organization.id &&
+        response.family_id === activeFamily.id
+    );
+  }
+
+  function hasActiveFamilyRegistered(organization) {
+    if (!activeFamily || !organization) return false;
+
+    return organizationRegistrations.some(
+      (registration) =>
+        registration.organization_id === organization.id &&
+        registration.family_id === activeFamily.id
+    );
+  }
+
+  function getAgendaActionState(attendanceOrganization, registrationOrganization) {
+    if (attendanceOrganization) {
+      const completed = hasActiveFamilyResponded(attendanceOrganization);
+
+      return {
+        completed,
+        label: completed ? "Ja has confirmat" : "Confirmar",
+      };
+    }
+
+    if (registrationOrganization) {
+      const completed = hasActiveFamilyRegistered(registrationOrganization);
+
+      return {
+        completed,
+        label: completed ? "Ja t'has inscrit" : "Inscriure'm",
+      };
+    }
+
+    return {
+      completed: false,
+      label: "",
+    };
+  }
+
   async function submitFamilyPin(event) {
     event.preventDefault();
 
@@ -1523,9 +1568,10 @@ export default function PublicApp() {
   const nextEventActionOrganization =
     nextEventAttendanceOrganization || nextEventRegistrationOrganization;
 
-  const nextEventActionLabel = nextEventAttendanceOrganization
-    ? "Confirmar"
-    : "Inscriure'm";
+  const nextEventActionState = getAgendaActionState(
+    nextEventAttendanceOrganization,
+    nextEventRegistrationOrganization
+  );
 
   const displayClassName = classInfo?.name
     ? classInfo.name.charAt(0).toUpperCase() + classInfo.name.slice(1)
@@ -1783,7 +1829,9 @@ const visibleEvents = showFullCalendar
 
                 {nextEventActionOrganization && (
                   <button
-                    className="quick-action quick-action-primary"
+                    className={`quick-action quick-action-primary ${
+                      nextEventActionState.completed ? "action-button-completed" : ""
+                    }`}
                     type="button"
                     onClick={() => {
                       if (nextEventAttendanceOrganization) {
@@ -1793,7 +1841,7 @@ const visibleEvents = showFullCalendar
                       }
                     }}
                   >
-                    {nextEventActionLabel}
+                    {nextEventActionState.label}
                   </button>
                 )}
 
@@ -1830,9 +1878,10 @@ const visibleEvents = showFullCalendar
     const linkedActionOrganization =
       linkedAttendanceOrganization || linkedRegistrationOrganization;
 
-    const linkedActionLabel = linkedAttendanceOrganization
-      ? "Confirmar"
-      : "Inscriure'm";
+    const linkedActionState = getAgendaActionState(
+      linkedAttendanceOrganization,
+      linkedRegistrationOrganization
+    );
 
     return (
       <div
@@ -1863,7 +1912,9 @@ const visibleEvents = showFullCalendar
         <div className="timeline-actions">
           {linkedActionOrganization && (
             <button
-              className="confirm-button"
+              className={`confirm-button ${
+                linkedActionState.completed ? "action-button-completed" : ""
+              }`}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -1875,7 +1926,7 @@ const visibleEvents = showFullCalendar
                 }
               }}
             >
-              {linkedActionLabel}
+              {linkedActionState.label}
             </button>
           )}
 
