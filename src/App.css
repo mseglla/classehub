@@ -3841,3 +3841,221 @@ body,
   background: #dcfce7;
   color: #166534;
 }
+
+
+.identified-family-compact {
+  margin: 12px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #f9fafb;
+  color: #374151;
+}
+
+.identified-family-compact span,
+.identified-family-compact strong {
+  display: block;
+}
+
+.identified-family-compact span {
+  margin-bottom: 2px;
+  color: #6b7280;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.identified-family-compact strong {
+  color: #111827;
+  font-size: 0.96rem;
+  font-weight: 850;
+}
+
+.registration-response-box h3 {
+  margin-bottom: 14px;
+}
+
+.registration-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.registration-choice-button {
+  width: 100%;
+  min-height: 58px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #374151;
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.registration-choice-button strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.registration-choice-button-active.attending {
+  border-color: #16a34a;
+  background: #f0fdf4;
+  color: #166534;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.16);
+}
+
+.registration-choice-button-active.not-attending {
+  border-color: #f97316;
+  background: #fff7ed;
+  color: #9a3412;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.16);
+}
+
+.not-attending-box {
+  padding: 14px;
+  border: 1px solid #fed7aa;
+  border-radius: 18px;
+  background: #fff7ed;
+}
+
+.not-attending-box p {
+  margin: 0 0 12px;
+  color: #9a3412;
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.not-attending-box button {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: #ea580c;
+  color: #ffffff;
+  font-weight: 850;
+}
+
+.count-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 54px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.count-stepper > span {
+  color: #374151;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.count-stepper-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.count-stepper-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #f9fafb;
+  color: #111827;
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.count-stepper-controls button:disabled {
+  opacity: 0.35;
+}
+
+.count-stepper-controls strong {
+  min-width: 22px;
+  color: #111827;
+  font-size: 1.05rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.count-stepper-controls button {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.registration-results-overview {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: #f9fafb;
+}
+
+.registration-results-overview p {
+  margin: 0;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.registration-results-overview p strong {
+  font-size: 1.25rem;
+  font-weight: 950;
+}
+
+.registration-results-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.registration-results-chips span {
+  padding: 7px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #4b5563;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.registration-results-chips strong {
+  color: #111827;
+  font-weight: 950;
+}
+
+.registration-people-summary {
+  display: grid;
+  gap: 3px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.registration-people-summary span {
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.registration-people-summary strong {
+  color: #111827;
+  font-size: 0.92rem;
+  font-weight: 850;
+  line-height: 1.35;
+}

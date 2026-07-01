@@ -434,7 +434,7 @@ function PollVoteModal({ poll, activeFamily, onVote, onClose }) {
 
           <form className="registration-form" onSubmit={submitVote}>
             {activeFamily && (
-              <div className="span-all linked-family-box">
+              <div className="span-all identified-family-compact">
                 <span>Família identificada</span>
                 <strong>{activeFamily.student_name}</strong>
               </div>
@@ -734,7 +734,7 @@ function AttendanceOrganizationModal({
 
             <form className="registration-form" onSubmit={submitResponse}>
   {activeAvailableFamily ? (
-    <div className="span-all linked-family-box">
+    <div className="span-all identified-family-compact">
       <span>Família identificada</span>
       <strong>{activeAvailableFamily.student_name}</strong>
     </div>
@@ -789,6 +789,7 @@ function RegistrationOrganizationCard({
   families,
   participants,
   registrations,
+  responses,
   activeFamily,
   onOpen,
   onOpenResults,
@@ -807,9 +808,32 @@ function RegistrationOrganizationCard({
     (item) => item.organization_id === organization.id
   );
 
+  const orgResponses = responses.filter(
+    (item) => item.organization_id === organization.id
+  );
+
+  const responseByFamily = new Map(
+    orgResponses.map((item) => [item.family_id, item.response])
+  );
+
+  const answeredFamiliesCount = responseByFamily.size;
+
   const activeFamilyRegistration = activeFamily
     ? orgRegistrations.find((registration) => registration.family_id === activeFamily.id)
     : null;
+
+  const activeFamilyResponse = activeFamily
+    ? responseByFamily.get(activeFamily.id)
+    : null;
+
+  const activeFamilyHasAnswered = Boolean(activeFamilyResponse);
+
+  const activeFamilyStatusLabel =
+    activeFamilyResponse === "no"
+      ? "Has indicat que no pots venir"
+      : activeFamilyRegistration
+        ? "✅ Ja t'has inscrit"
+        : "Encara no has respost";
 
   return (
     <div className="attendance-card registration-public-card">
@@ -826,33 +850,31 @@ function RegistrationOrganizationCard({
       <div className="attendance-summary registration-card-summary">
         <p className="action-summary">
           <strong>
-            {orgRegistrations.length}/{availableFamilies.length}
+            {answeredFamiliesCount}/{availableFamilies.length}
           </strong>{" "}
-          famílies s'han inscrit
+          famílies han respost · {orgRegistrations.length} inscrites
         </p>
 
         {activeFamily && (
           <div
             className={`span-all linked-family-box ${
-              activeFamilyRegistration ? "" : "linked-family-box-pending"
+              activeFamilyHasAnswered ? "" : "linked-family-box-pending"
             }`}
           >
-            <span>
-              {activeFamilyRegistration ? "✅ Ja t'has inscrit" : "Encara no t'has inscrit"}
-            </span>
+            <span>{activeFamilyStatusLabel}</span>
           </div>
         )}
 
         <div className="pending-action-buttons registration-card-actions">
           <button onClick={() => onOpen(organization)}>
-            {activeFamilyRegistration ? "Modificar inscripció" : "Inscriure'm"}
+            {activeFamilyRegistration ? "Modificar resposta" : "Respondre"}
           </button>
 
           <button
             className="secondary-pending-button"
             onClick={() => onOpenResults(organization)}
           >
-            Veure inscrits
+            Veure respostes
           </button>
         </div>
       </div>
@@ -864,6 +886,7 @@ function RegistrationResultsModal({
   families,
   participants,
   registrations,
+  responses,
   onClose,
 }) {
   if (!organization) return null;
@@ -882,8 +905,16 @@ function RegistrationResultsModal({
     (item) => item.organization_id === organization.id
   );
 
+  const orgResponses = responses.filter(
+    (item) => item.organization_id === organization.id
+  );
+
   const registrationByFamily = new Map(
     orgRegistrations.map((item) => [item.family_id, item])
+  );
+
+  const responseByFamily = new Map(
+    orgResponses.map((item) => [item.family_id, item.response])
   );
 
   const confirmedRegistrations = orgRegistrations
@@ -893,9 +924,15 @@ function RegistrationResultsModal({
     }))
     .filter((registration) => registration.family);
 
-  const pendingFamilies = availableFamilies.filter(
-    (family) => !registrationByFamily.has(family.id)
+  const notAttendingFamilies = availableFamilies.filter(
+    (family) => responseByFamily.get(family.id) === "no"
   );
+
+  const pendingFamilies = availableFamilies.filter(
+    (family) => !responseByFamily.has(family.id)
+  );
+
+  const totalResponses = confirmedRegistrations.length + notAttendingFamilies.length;
 
   const totalAdults = orgRegistrations.reduce(
     (sum, item) => sum + (item.adults_count || 0),
@@ -917,36 +954,37 @@ function RegistrationResultsModal({
       <article className="modal" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>Tancar</button>
 
-        <p className="eyebrow">Confirmats</p>
+        <p className="eyebrow">Respostes</p>
         <h2>🎉 {organization.title}</h2>
 
-        <div className="organization-results">
-          <div className="result-column adults">
-            <strong>{orgRegistrations.length}</strong>
-            <span>famílies</span>
+        <div className="registration-results-overview">
+          <p>
+            <strong>{totalResponses}/{availableFamilies.length}</strong>{" "}
+            famílies han respost
+          </p>
+
+          <div className="registration-results-chips">
+            <span>
+              <strong>{confirmedRegistrations.length}</strong> inscrites
+            </span>
+            <span>
+              <strong>{notAttendingFamilies.length}</strong> no vindran
+            </span>
           </div>
 
-          <div className="result-column adults">
-            <strong>{totalAdults}</strong>
-            <span>adults</span>
-          </div>
-
-          <div className="result-column children">
-            <strong>{totalChildren}</strong>
-            <span>infants</span>
-          </div>
-
-          <div className="result-column children">
-            <strong>{totalUnder3}</strong>
-            <span>menors de 3</span>
+          <div className="registration-people-summary">
+            <span>Persones inscrites</span>
+            <strong>
+              {totalAdults} adults · {totalChildren} infants · {totalUnder3} menors de 3
+            </strong>
           </div>
         </div>
 
-        {confirmedRegistrations.length > 0 ? (
+        {confirmedRegistrations.length > 0 && (
           <div className="confirmed-families-box">
             <div className="confirmed-families-header">
-              <h3>Famílies confirmades</h3>
-              <span>{confirmedRegistrations.length} respostes</span>
+              <h3>Famílies inscrites</h3>
+              <span>{confirmedRegistrations.length} famílies</span>
             </div>
 
             <div className="confirmed-families-list">
@@ -967,8 +1005,23 @@ function RegistrationResultsModal({
               ))}
             </div>
           </div>
-        ) : (
-          <p className="detail-text">Encara no hi ha cap família confirmada.</p>
+        )}
+
+        {notAttendingFamilies.length > 0 && (
+          <div className="confirmed-families-box">
+            <div className="confirmed-families-header">
+              <h3>No vindran</h3>
+              <span>{notAttendingFamilies.length} famílies</span>
+            </div>
+
+            <div className="confirmed-families-list">
+              {notAttendingFamilies.map((family) => (
+                <div className="confirmed-family-row" key={family.id}>
+                  <strong>{family.student_name}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {pendingFamilies.length > 0 && (
@@ -993,16 +1046,57 @@ function RegistrationResultsModal({
   );
 }
 
+function CountStepper({ label, value, onChange, min = 0, max = 5 }) {
+  function decrease() {
+    onChange(Math.max(min, Number(value || 0) - 1));
+  }
+
+  function increase() {
+    onChange(Math.min(max, Number(value || 0) + 1));
+  }
+
+  return (
+    <div className="count-stepper">
+      <span>{label}</span>
+
+      <div className="count-stepper-controls">
+        <button
+          type="button"
+          onClick={decrease}
+          disabled={Number(value || 0) <= min}
+          aria-label={`Restar ${label.toLowerCase()}`}
+        >
+          −
+        </button>
+
+        <strong>{Number(value || 0)}</strong>
+
+        <button
+          type="button"
+          onClick={increase}
+          disabled={Number(value || 0) >= max}
+          aria-label={`Sumar ${label.toLowerCase()}`}
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function RegistrationOrganizationModal({
   organization,
   families,
   participants,
   registrations,
+  responses,
   activeFamily,
   onRegister,
+  onRespond,
   onClose,
 }) {
   const [familyId, setFamilyId] = useState("");
+  const [attendanceChoice, setAttendanceChoice] = useState("attending");
   const [adultsCount, setAdultsCount] = useState(0);
   const [childrenCount, setChildrenCount] = useState(0);
   const [under3Count, setUnder3Count] = useState(0);
@@ -1017,18 +1111,26 @@ function RegistrationOrganizationModal({
         registration.family_id === activeFamily.id
     );
 
+    const existingResponse = responses.find(
+      (response) =>
+        response.organization_id === organization.id &&
+        response.family_id === activeFamily.id
+    );
+
     if (existingRegistration) {
+      setAttendanceChoice("attending");
       setAdultsCount(existingRegistration.adults_count || 0);
       setChildrenCount(existingRegistration.children_count || 0);
       setUnder3Count(existingRegistration.under3_count || 0);
       setComment(existingRegistration.comment || "");
     } else {
-      setAdultsCount(0);
+      setAttendanceChoice(existingResponse?.response === "no" ? "not_attending" : "attending");
+      setAdultsCount(1);
       setChildrenCount(0);
       setUnder3Count(0);
       setComment("");
     }
-  }, [organization?.id, activeFamily?.id, registrations]);
+  }, [organization?.id, activeFamily?.id, registrations, responses]);
 
   if (!organization) return null;
 
@@ -1075,6 +1177,14 @@ function RegistrationOrganizationModal({
       ? activeFamily
       : null;
 
+  function selectAttendanceChoice(choice) {
+    setAttendanceChoice(choice);
+
+    if (choice === "attending" && Number(adultsCount) < 1) {
+      setAdultsCount(1);
+    }
+  }
+
   function handleFamilyChange(value) {
     setFamilyId(value);
 
@@ -1086,7 +1196,7 @@ function RegistrationOrganizationModal({
       setUnder3Count(existingRegistration.under3_count || 0);
       setComment(existingRegistration.comment || "");
     } else {
-      setAdultsCount(0);
+      setAdultsCount(1);
       setChildrenCount(0);
       setUnder3Count(0);
       setComment("");
@@ -1099,6 +1209,11 @@ function RegistrationOrganizationModal({
     const selectedFamilyId = activeAvailableFamily?.id || Number(familyId);
 
     if (!selectedFamilyId) return;
+
+    if (Number(adultsCount) < 1) {
+      alert("Cal indicar com a mínim 1 adult per guardar la inscripció.");
+      return;
+    }
 
     const saved = await onRegister(
       organization.id,
@@ -1119,6 +1234,31 @@ function RegistrationOrganizationModal({
       setComment("");
     }
 
+    onClose();
+  }
+
+  async function submitNotAttending() {
+    const selectedFamilyId = activeAvailableFamily?.id || Number(familyId);
+
+    if (!selectedFamilyId) return;
+
+    const saved = await onRespond(
+      organization.id,
+      selectedFamilyId,
+      "no",
+      "Resposta guardada correctament."
+    );
+
+    if (!saved) return;
+
+    if (!activeAvailableFamily) {
+      setFamilyId("");
+    }
+
+    setAdultsCount(0);
+    setChildrenCount(0);
+    setUnder3Count(0);
+    setComment("");
     onClose();
   }
 
@@ -1157,57 +1297,100 @@ function RegistrationOrganizationModal({
           <p className="detail-text">{organization.description}</p>
         )}
 
-        <div className="checklist-box">
-          <h3>Inscripció familiar</h3>
+        {activeAvailableFamily && (
+          <div className="identified-family-compact">
+            <span>Família identificada</span>
+            <strong>{activeAvailableFamily.student_name}</strong>
+          </div>
+        )}
+
+        <div className="checklist-box registration-response-box">
+          <h3>Resposta familiar</h3>
 
           <form className="registration-form" onSubmit={submitRegistration}>
-  {activeAvailableFamily ? (
-    <div className="span-all linked-family-box">
-      <span>Família identificada</span>
-      <strong>{activeAvailableFamily.student_name}</strong>
-    </div>
-  ) : (
-    <label className="span-all">
-      Família
-      <select value={familyId} onChange={(event) => handleFamilyChange(event.target.value)}>
-        <option value="">Selecciona alumne</option>
-        {availableFamilies.map((family) => (
-          <option key={family.id} value={family.id}>
-            {registrationByFamily.has(family.id) ? "✓ " : ""}
-            {family.student_name}
-          </option>
-        ))}
-      </select>
-    </label>
-  )}
+            {!activeAvailableFamily && (
+              <label className="span-all">
+                Família
+                <select value={familyId} onChange={(event) => handleFamilyChange(event.target.value)}>
+                  <option value="">Selecciona alumne</option>
+                  {availableFamilies.map((family) => (
+                    <option key={family.id} value={family.id}>
+                      {registrationByFamily.has(family.id) ? "✓ " : ""}
+                      {family.student_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
 
-  <label>
-    Adults
-    <input type="number" min="0" value={adultsCount} onChange={(event) => setAdultsCount(Number(event.target.value))}/>
-  </label>
+            <div className="span-all registration-choice-grid">
+              <button
+                className={`registration-choice-button ${
+                  attendanceChoice === "attending" ? "registration-choice-button-active attending" : ""
+                }`}
+                type="button"
+                onClick={() => selectAttendanceChoice("attending")}
+              >
+                <strong>Vindrem!</strong>
+              </button>
 
-  <label>
-    Infants
-    <input type="number" min="0" value={childrenCount} onChange={(event) => setChildrenCount(Number(event.target.value))} />
-  </label>
+              <button
+                className={`registration-choice-button ${
+                  attendanceChoice === "not_attending" ? "registration-choice-button-active not-attending" : ""
+                }`}
+                type="button"
+                onClick={() => selectAttendanceChoice("not_attending")}
+              >
+                <strong>No podrem venir</strong>
+              </button>
+            </div>
 
-  <label>
-    Menors de 3 anys
-    <input type="number" min="0" value={under3Count} onChange={(event) => setUnder3Count(Number(event.target.value))} />
-  </label>
+            {attendanceChoice === "attending" ? (
+              <>
+                <CountStepper
+                  label="Adults"
+                  value={adultsCount}
+                  onChange={setAdultsCount}
+                  min={1}
+                  max={4}
+                />
 
-  <label className="span-all">
-    Comentari opcional
-    <input
-      type="text"
-      value={comment}
-      onChange={(event) => setComment(event.target.value)}
-      placeholder="Al·lèrgies, dubtes, observacions..."
-    />
-  </label>
+                <CountStepper
+                  label="Infants"
+                  value={childrenCount}
+                  onChange={setChildrenCount}
+                  max={5}
+                />
 
-  <button className="span-all">Guardar inscripció</button>
-</form>
+                <CountStepper
+                  label="Menors de 3 anys"
+                  value={under3Count}
+                  onChange={setUnder3Count}
+                  max={3}
+                />
+
+                <label className="span-all">
+                  Comentari opcional
+                  <input
+                    type="text"
+                    value={comment}
+                    onChange={(event) => setComment(event.target.value)}
+                    placeholder="Al·lèrgies, dubtes, observacions..."
+                  />
+                </label>
+
+                <button className="span-all">Guardar inscripció</button>
+              </>
+            ) : (
+              <div className="span-all not-attending-box">
+                <p>La família no podrà assistir-hi.</p>
+
+                <button type="button" onClick={submitNotAttending}>
+                  Guardar resposta
+                </button>
+              </div>
+            )}
+          </form>
         </div>
 
       </article>
@@ -1619,7 +1802,12 @@ const visibleEvents = showFullCalendar
       showActionStatus("Inscripció guardada correctament.");
       return true;
     }
-  async function handleOrganizationResponse(organizationId, familyId, response) {
+  async function handleOrganizationResponse(
+    organizationId,
+    familyId,
+    response,
+    successMessage = "Confirmació guardada correctament."
+  ) {
     if (!familyAccessPin) {
       alert("Cal accedir amb el PIN familiar per guardar la resposta.");
       return false;
@@ -1640,7 +1828,7 @@ const visibleEvents = showFullCalendar
     }
 
     await loadData({ showLoading: false });
-    showActionStatus("Confirmació guardada correctament.");
+    showActionStatus(successMessage);
     return true;
   }
 
@@ -2005,6 +2193,7 @@ const visibleEvents = showFullCalendar
                     families={families}
                     participants={organizationParticipants}
                     registrations={organizationRegistrations}
+                    responses={organizationResponses}
                     activeFamily={activeFamily}
                     onOpen={setSelectedRegistration}
                     onOpenResults={setSelectedRegistrationResults}
@@ -2136,8 +2325,10 @@ const visibleEvents = showFullCalendar
         families={families}
         participants={organizationParticipants}
         registrations={organizationRegistrations}
+        responses={organizationResponses}
         activeFamily={activeFamily}
         onRegister={handleOrganizationRegistration}
+        onRespond={handleOrganizationResponse}
         onClose={() => setSelectedRegistration(null)}
       />
 
@@ -2146,6 +2337,7 @@ const visibleEvents = showFullCalendar
         families={families}
         participants={organizationParticipants}
         registrations={organizationRegistrations}
+        responses={organizationResponses}
         onClose={() => setSelectedRegistrationResults(null)}
       />
   
