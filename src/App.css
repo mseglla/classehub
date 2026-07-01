@@ -3806,3 +3806,22 @@ body,
 .admin-action-item-school {
   background: #f8fafc;
 }
+
+.action-toast {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: 14px;
+  right: 14px;
+  z-index: 120;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 13px 16px;
+  border: 1px solid #86efac;
+  border-radius: 18px;
+  background: #dcfce7;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
+  color: #14532d;
+  font-size: 0.94rem;
+  font-weight: 900;
+  text-align: center;
+}

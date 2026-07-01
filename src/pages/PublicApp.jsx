@@ -1245,6 +1245,7 @@ export default function PublicApp() {
   const [feedbackType, setFeedbackType] = useState("millora");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackStatus, setFeedbackStatus] = useState("");
+  const [actionStatusMessage, setActionStatusMessage] = useState("");
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [familyAccessPin, setFamilyAccessPin] = useState(() => getFamilyAccessPin(slug));
@@ -1255,8 +1256,11 @@ export default function PublicApp() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
 
-  async function loadData() {
-    setLoading(true);
+  async function loadData({ showLoading = true } = {}) {
+    if (showLoading) {
+      setLoading(true);
+    }
+
     setError("");
 
     const { data: classData, error: classError } = await supabase
@@ -1571,13 +1575,14 @@ const visibleEvents = showFullCalendar
         return false;
       }
     
-      await loadData();
+      await loadData({ showLoading: false });
+      showActionStatus("Inscripció guardada correctament.");
       return true;
     }
   async function handleOrganizationResponse(organizationId, familyId, response) {
     if (!familyAccessPin) {
       alert("Cal accedir amb el PIN familiar per guardar la resposta.");
-      return;
+      return false;
     }
 
     const responseRequest = supabase.rpc("respond_organization_with_pin", {
@@ -1591,10 +1596,11 @@ const visibleEvents = showFullCalendar
     if (responseError) {
       alert("No s'ha pogut guardar la resposta.");
       console.error(responseError);
-      return;
+      return false;
     }
 
-    await loadData();
+    await loadData({ showLoading: false });
+    showActionStatus("Confirmació guardada correctament.");
     return true;
   }
 
@@ -1621,6 +1627,14 @@ const visibleEvents = showFullCalendar
     window.localStorage.setItem("classehub-install-banner-dismissed", "true");
   }
 
+  function showActionStatus(message) {
+    setActionStatusMessage(message);
+
+    window.setTimeout(() => {
+      setActionStatusMessage("");
+    }, 4000);
+  }
+
   async function handleVote(pollId, optionId) {
     if (!familyAccessPin) {
       alert("Cal accedir amb el PIN familiar per votar.");
@@ -1639,7 +1653,8 @@ const visibleEvents = showFullCalendar
       return false;
     }
 
-    await loadData();
+    await loadData({ showLoading: false });
+    showActionStatus("Votació guardada correctament.");
     return true;
   }
 
@@ -1686,6 +1701,12 @@ const visibleEvents = showFullCalendar
   
   return (
     <main className="page">
+      {actionStatusMessage && (
+        <div className="action-toast" role="status" aria-live="polite">
+          {actionStatusMessage}
+        </div>
+      )}
+
       {showInstallBanner && (
         <InstallAppBanner
           onInstall={handleInstallApp}
