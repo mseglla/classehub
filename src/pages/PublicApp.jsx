@@ -33,6 +33,51 @@ function getFamilyAccessPin(slug) {
   return window.localStorage.getItem(storageKey) || "";
 }
 
+
+const birthdayPeriods = [
+  {
+    id: "jan-apr",
+    title: "1r trimestre",
+    startMonth: 1,
+    endMonth: 4,
+  },
+  {
+    id: "may-aug",
+    title: "2n trimestre",
+    startMonth: 5,
+    endMonth: 8,
+  },
+  {
+    id: "sep-dec",
+    title: "3r trimestre",
+    startMonth: 9,
+    endMonth: 12,
+  },
+];
+
+function getBirthdayMonthDay(birthDate) {
+  if (!birthDate) return null;
+
+  const [, month, day] = birthDate.split("-").map(Number);
+
+  if (!month || !day) return null;
+
+  return { month, day };
+}
+
+function formatBirthdayDate(birthDate) {
+  const monthDay = getBirthdayMonthDay(birthDate);
+
+  if (!monthDay) return "";
+
+  const date = new Date(2026, monthDay.month - 1, monthDay.day);
+
+  return date.toLocaleDateString("ca-ES", {
+    day: "numeric",
+    month: "long",
+  });
+}
+
 function saveFamilyAccessPin(slug, pin) {
   const storageKey = `classehub-family-pin-${slug}`;
   window.localStorage.setItem(storageKey, pin);
@@ -1780,6 +1825,42 @@ export default function PublicApp() {
 const visibleEvents = showFullCalendar
   ? futureEvents.slice(1)
   : futureEvents.slice(1, 5);
+
+  const birthdayGroups = useMemo(
+    () =>
+      birthdayPeriods.map((period) => {
+        const periodFamilies = families
+          .filter((family) => {
+            const birthday = getBirthdayMonthDay(family.child_birth_date);
+            return (
+              birthday &&
+              birthday.month >= period.startMonth &&
+              birthday.month <= period.endMonth
+            );
+          })
+          .sort((a, b) => {
+            const birthdayA = getBirthdayMonthDay(a.child_birth_date);
+            const birthdayB = getBirthdayMonthDay(b.child_birth_date);
+
+            return (
+              birthdayA.month - birthdayB.month ||
+              birthdayA.day - birthdayB.day ||
+              a.student_name.localeCompare(b.student_name)
+            );
+          });
+
+        return {
+          ...period,
+          families: periodFamilies,
+        };
+      }),
+    [families]
+  );
+
+  const familiesWithoutBirthday = families
+    .filter((family) => !getBirthdayMonthDay(family.child_birth_date))
+    .sort((a, b) => a.student_name.localeCompare(b.student_name));
+
     async function handleOrganizationRegistration(
       organizationId,
       familyId,
@@ -2274,13 +2355,44 @@ const visibleEvents = showFullCalendar
           <SectionTitle
             icon={<Home size={22} />}
             title="Classe"
-            subtitle="Properament: infants de la classe i aniversaris."
+            subtitle="Infants i aniversaris organitzats per trimestre."
           />
 
-          <p className="public-class-placeholder">
-            Aquí hi podrem consultar els infants de la classe i els aniversaris
-            organitzats per trimestre.
-          </p>
+          <div className="class-birthday-groups">
+            {birthdayGroups.map((group) => (
+              <section className="class-birthday-group" key={group.id}>
+                <h3>{group.title}</h3>
+
+                {group.families.length === 0 ? (
+                  <p className="class-birthday-empty">Cap aniversari informat.</p>
+                ) : (
+                  <div className="class-birthday-list">
+                    {group.families.map((family) => (
+                      <div className="class-birthday-row" key={family.id}>
+                        <strong>{family.student_name}</strong>
+                        <span>{formatBirthdayDate(family.child_birth_date)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+
+            {familiesWithoutBirthday.length > 0 && (
+              <section className="class-birthday-group">
+                <h3>Sense data informada</h3>
+
+                <div className="class-birthday-list">
+                  {familiesWithoutBirthday.map((family) => (
+                    <div className="class-birthday-row" key={family.id}>
+                      <strong>{family.student_name}</strong>
+                      <span>Data pendent</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         </Card>
 
       </section>
