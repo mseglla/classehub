@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppCard, FormField, PrimaryButton, ProgressDots, SecondaryButton } from "../components/ui";
 import { supabase } from "../lib/supabase";
 
@@ -57,6 +57,9 @@ export default function FamilySignupPage() {
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showSecondContact, setShowSecondContact] = useState(false);
+  const [signupClasses, setSignupClasses] = useState([]);
+  const [showClassSwitcher, setShowClassSwitcher] = useState(false);
+  const [classesLoading, setClassesLoading] = useState(false);
   const [formData, setFormData] = useState({
     childName: "",
     birthDate: "",
@@ -68,10 +71,134 @@ export default function FamilySignupPage() {
     secondPhone: "",
   });
 
-  const className = slug === "orenetes" ? "Orenetes" : slug;
+  const selectedClass = signupClasses.find((classItem) => classItem.slug === slug);
+  const className =
+    selectedClass?.name || (slug === "orenetes" ? "Orenetes" : slug);
   const step = steps[currentStep];
   const classUrl = `/classe/${slug}`;
   const todayIso = new Date().toISOString().slice(0, 10);
+
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSignupClasses() {
+      const { data, error } = await supabase.rpc(
+        "get_public_signup_classes_for_class",
+        {
+          p_class_slug: slug,
+        }
+      );
+
+      if (!isMounted) return;
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setSignupClasses(Array.isArray(data) ? data : []);
+    }
+
+    loadSignupClasses();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
+
+  function changeSignupClass(classSlug) {
+    if (!classSlug || classSlug === slug) {
+      setShowClassSwitcher(false);
+      return;
+    }
+
+    window.location.href = `/classe/${classSlug}/alta`;
+  }
+
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSignupClasses() {
+      setClassesLoading(true);
+
+      const { data, error } = await supabase.rpc(
+        "get_public_signup_classes_for_class",
+        {
+          p_class_slug: slug,
+        }
+      );
+
+      if (!isMounted) return;
+
+      setClassesLoading(false);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setSignupClasses(Array.isArray(data) ? data : []);
+    }
+
+    loadSignupClasses();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
+
+  function changeSignupClass(classSlug) {
+    if (!classSlug || classSlug === slug) {
+      setShowClassSwitcher(false);
+      return;
+    }
+
+    window.location.href = `/classe/${classSlug}/alta`;
+  }
+
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSignupClasses() {
+      setClassesLoading(true);
+
+      const { data, error } = await supabase.rpc(
+        "get_public_signup_classes_for_class",
+        {
+          p_class_slug: slug,
+        }
+      );
+
+      if (!isMounted) return;
+
+      setClassesLoading(false);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setSignupClasses(Array.isArray(data) ? data : []);
+    }
+
+    loadSignupClasses();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
+
+  function changeSignupClass(classSlug) {
+    if (!classSlug || classSlug === slug) {
+      setShowClassSwitcher(false);
+      return;
+    }
+
+    window.location.href = `/classe/${classSlug}/alta`;
+  }
 
   const canContinue = useMemo(() => {
     if (step.id === "child") {
@@ -317,6 +444,43 @@ PIN: ${createdAccess.accessPin}`;
             <strong>{className}</strong>
           </div>
         </header>
+
+        {signupClasses.length > 1 && (
+          <div className="ch-signup-class-switcher">
+            <div>
+              <span>Alta a</span>
+              <strong>
+                {className}
+                {selectedClass?.school_year ? ` · ${selectedClass.school_year}` : ""}
+              </strong>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowClassSwitcher((value) => !value)}
+            >
+              {showClassSwitcher ? "Tancar" : "Canviar"}
+            </button>
+
+            {showClassSwitcher && (
+              <div className="ch-signup-class-list">
+                {signupClasses.map((classItem) => (
+                  <button
+                    key={classItem.id}
+                    type="button"
+                    className={classItem.slug === slug ? "is-selected" : ""}
+                    onClick={() => changeSignupClass(classItem.slug)}
+                  >
+                    <strong>{classItem.name}</strong>
+                    <span>
+                      {classItem.slug === slug ? "Actual" : classItem.school_year}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <ProgressDots steps={steps.length} currentStep={currentStep} />
 
@@ -580,6 +744,50 @@ PIN: ${createdAccess.accessPin}`;
           Alta ràpida, privada i pensada per fer-la des del mòbil.
         </p>
       </AppCard>
+
+      {showClassSwitcher && (
+        <div className="modal-backdrop" onClick={() => setShowClassSwitcher(false)}>
+          <article className="modal" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => setShowClassSwitcher(false)}
+            >
+              Tancar
+            </button>
+
+            <h2>Tria la classe</h2>
+
+            <div className="ch-signup-review">
+              <div>
+                <span>Classe actual</span>
+                <strong>
+                  {className}
+                  {selectedClass?.school_year ? ` · ${selectedClass.school_year}` : ""}
+                </strong>
+              </div>
+            </div>
+
+            <p className="modal-intro">
+              Tria una altra classe només si aquesta no és correcta.
+            </p>
+
+            <div className="ch-signup-actions ch-signup-actions-clean">
+              {signupClasses
+                .filter((classItem) => classItem.slug !== slug)
+                .map((classItem) => (
+                  <SecondaryButton
+                    key={classItem.id}
+                    type="button"
+                    onClick={() => changeSignupClass(classItem.slug)}
+                  >
+                    Canviar a {classItem.name} · {classItem.school_year}
+                  </SecondaryButton>
+                ))}
+            </div>
+          </article>
+        </div>
+      )}
     </main>
   );
 }

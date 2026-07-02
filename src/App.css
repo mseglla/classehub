@@ -4311,3 +4311,77 @@ body,
   color: #64748b;
   font-size: 0.9rem;
 }
+
+.ch-signup-class-switcher {
+  display: grid;
+  gap: 8px;
+  margin: -4px 0 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.78);
+}
+
+.ch-signup-class-switcher > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.ch-signup-class-switcher span {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ch-signup-class-switcher strong {
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.ch-signup-class-switcher > button {
+  justify-self: start;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0f172a;
+  box-shadow: none;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ch-signup-class-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ch-signup-class-list button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: auto;
+  padding: 10px 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: none;
+  text-align: left;
+}
+
+.ch-signup-class-list button.is-selected {
+  background: #f1f5f9;
+}
+
+.ch-signup-class-list span {
+  color: #64748b;
+  font-size: 0.78rem;
+}
