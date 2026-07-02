@@ -54,6 +54,7 @@ export default function FamilySignupPage() {
   const [message, setMessage] = useState("");
   const [submitStatus, setSubmitStatus] = useState("");
   const [createdAccess, setCreatedAccess] = useState(null);
+  const [welcomeEmailStatus, setWelcomeEmailStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [showSecondContact, setShowSecondContact] = useState(false);
   const [signupClasses, setSignupClasses] = useState([]);
