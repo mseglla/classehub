@@ -55,7 +55,6 @@ export default function FamilySignupPage() {
   const [submitStatus, setSubmitStatus] = useState("");
   const [createdAccess, setCreatedAccess] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [showSecondContact, setShowSecondContact] = useState(false);
   const [signupClasses, setSignupClasses] = useState([]);
   const [showClassSwitcher, setShowClassSwitcher] = useState(false);
@@ -289,6 +288,41 @@ export default function FamilySignupPage() {
     setCurrentStep((value) => Math.max(value - 1, 0));
   }
 
+  async function sendWelcomeEmail({ familyId, accessPin }) {
+    setWelcomeEmailStatus("");
+
+    try {
+      const response = await fetch("/api/send-welcome-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          familyId,
+          accessPin,
+        }),
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        console.error(result);
+        setWelcomeEmailStatus("error");
+        return;
+      }
+
+      if (result?.sent > 0) {
+        setWelcomeEmailStatus("sent");
+        return;
+      }
+
+      setWelcomeEmailStatus("skipped");
+    } catch (error) {
+      console.error(error);
+      setWelcomeEmailStatus("error");
+    }
+  }
+
   async function submitSignup(event) {
     event.preventDefault();
 
@@ -361,37 +395,18 @@ export default function FamilySignupPage() {
       accessUrl: `${window.location.origin}${classUrl}?pin=${result.access_pin}`,
     });
     setSubmitStatus("created");
+
+    sendWelcomeEmail({
+      familyId: result.family_id,
+      accessPin: result.access_pin,
+    });
   }
 
-  async function copyAccess() {
-    if (!createdAccess) return;
-
-    const accessMessage = `Hola! Per accedir a ClasseHub:
-
-${createdAccess.accessUrl}
-
-Família: ${createdAccess.childName}
-PIN: ${createdAccess.accessPin}`;
-
-    try {
-      await navigator.clipboard.writeText(accessMessage);
-      setCopied(true);
-
-      window.setTimeout(() => {
-        setCopied(false);
-      }, 1800);
-    } catch (error) {
-      console.error(error);
-      setMessage("No s'ha pogut copiar l'accés.");
-    }
-  }
 
   if (submitStatus === "created" && createdAccess) {
     return (
       <main className="ch-signup-screen">
         <AppCard className="ch-signup-card ch-signup-success-card">
-          <div className="ch-signup-success-icon">✅</div>
-
           <div className="ch-signup-copy">
             <p>Alta completada</p>
             <h1>PIN familiar creat</h1>
@@ -406,11 +421,25 @@ PIN: ${createdAccess.accessPin}`;
             <strong>{createdAccess.accessPin}</strong>
           </div>
 
-          <div className="ch-signup-actions">
-            <SecondaryButton type="button" onClick={copyAccess}>
-              {copied ? "Accés copiat!" : "Copiar accés"}
-            </SecondaryButton>
+          {welcomeEmailStatus === "sent" && (
+            <p className="ch-signup-note">
+              Hem enviat un correu de benvinguda amb l’enllaç d’accés i el PIN.
+            </p>
+          )}
 
+          {welcomeEmailStatus === "skipped" && (
+            <p className="ch-signup-note">
+              No hi havia cap correu informat. Guarda aquest PIN per poder tornar a entrar.
+            </p>
+          )}
+
+          {welcomeEmailStatus === "error" && (
+            <p className="ch-signup-message">
+              Alta creada, però no s’ha pogut enviar el correu de benvinguda. Guarda aquest PIN.
+            </p>
+          )}
+
+          <div className="ch-signup-actions">
             <PrimaryButton
               type="button"
               onClick={() => {
