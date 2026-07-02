@@ -1987,7 +1987,7 @@ const visibleEvents = showFullCalendar
   if (loading) {
     return (
       <main className="page">
-        <div className="loading">Carregant l'agenda de les Orenetes...</div>
+        <div className="loading">Carregant l'agenda de {className}...</div>
       </main>
     );
   }
