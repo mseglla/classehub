@@ -4232,3 +4232,25 @@ body,
     margin-bottom: 16px;
   }
 }
+
+.public-empty-state {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px dashed rgba(15, 23, 42, 0.14);
+  border-radius: 20px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.public-empty-state strong {
+  color: #0f172a;
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.public-empty-state p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}

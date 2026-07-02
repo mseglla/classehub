@@ -2179,16 +2179,20 @@ const visibleEvents = showFullCalendar
 </button>
         </Card>
 
-        {visibleOrganizations.length > 0 && (
-          <>
-            <div ref={actionsSectionRef} className="public-section-anchor" />
-            <Card className="span-2 public-section-card public-section-actions">
-              <SectionTitle
-              icon={<PartyPopper size={22} />}
-              title="Accions pendents"
-              subtitle="Confirma, inscriu-te o revisa el que cal fer."
-            />
-    
+        <div ref={actionsSectionRef} className="public-section-anchor" />
+        <Card className="span-2 public-section-card public-section-actions">
+          <SectionTitle
+            icon={<PartyPopper size={22} />}
+            title="Accions pendents"
+            subtitle="Confirma, inscriu-te o revisa el que cal fer."
+          />
+
+          {visibleOrganizations.length === 0 ? (
+            <div className="public-empty-state">
+              <strong>No hi ha accions pendents</strong>
+              <p>Quan calgui confirmar assistència, inscriure’s o revisar alguna acció, apareixerà aquí.</p>
+            </div>
+          ) : (
             <div className="org-list">
               {visibleOrganizations.map((org) =>
                 org.organization_type === "attendance" ? (
@@ -2225,27 +2229,30 @@ const visibleEvents = showFullCalendar
                       <strong>{org.title}</strong>
                       <p>{org.description}</p>
                     </div>
-    
+
                     {org.external_url && <ExternalLink size={18} />}
                   </a>
                 )
               )}
             </div>
-            </Card>
-          </>
-        )}
+          )}
+        </Card>
   
   
-        {polls.length > 0 && (
-          <>
-            <div ref={pollsSectionRef} className="public-section-anchor" />
-            <Card className="span-2 public-section-card public-section-polls">
-              <SectionTitle
-              icon={<Vote size={22} />}
-              title="Votacions obertes"
-              subtitle="Decisions sense perdre's al WhatsApp."
-            />
-    
+        <div ref={pollsSectionRef} className="public-section-anchor" />
+        <Card className="span-2 public-section-card public-section-polls">
+          <SectionTitle
+            icon={<Vote size={22} />}
+            title="Votacions obertes"
+            subtitle="Decisions sense perdre's al WhatsApp."
+          />
+
+          {polls.length === 0 ? (
+            <div className="public-empty-state">
+              <strong>No hi ha votacions obertes</strong>
+              <p>Quan hi hagi alguna decisió o consulta de classe, la podràs votar des d’aquí.</p>
+            </div>
+          ) : (
             <div className="polls">
               {polls.map((poll) => (
                 <PollCard
@@ -2259,9 +2266,8 @@ const visibleEvents = showFullCalendar
                 />
               ))}
             </div>
-            </Card>
-          </>
-        )}
+          )}
+        </Card>
 
         <div ref={classSectionRef} className="public-section-anchor" />
         <Card className="span-2 public-class-card public-section-card public-section-class">
