@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -1433,6 +1433,18 @@ export default function PublicApp() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
 
+  const agendaSectionRef = useRef(null);
+  const actionsSectionRef = useRef(null);
+  const pollsSectionRef = useRef(null);
+  const classSectionRef = useRef(null);
+
+  function scrollToPublicSection(sectionRef) {
+    sectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
   async function loadData({ showLoading = true } = {}) {
     if (showLoading) {
       setLoading(true);
@@ -1971,7 +1983,8 @@ const visibleEvents = showFullCalendar
     
   
       <section className="layout">
-        <Card className="span-2 next-event-card clean-next-event-card">
+        <div ref={agendaSectionRef} className="public-section-anchor" />
+        <Card className="span-2 next-event-card clean-next-event-card public-section-card public-section-agenda">
           <div className="section-title-row">
             <SectionTitle
               icon={<CalendarDays size={22} />}
@@ -2167,8 +2180,10 @@ const visibleEvents = showFullCalendar
         </Card>
 
         {visibleOrganizations.length > 0 && (
-          <Card className="span-2">
-            <SectionTitle
+          <>
+            <div ref={actionsSectionRef} className="public-section-anchor" />
+            <Card className="span-2 public-section-card public-section-actions">
+              <SectionTitle
               icon={<PartyPopper size={22} />}
               title="Accions pendents"
               subtitle="Confirma, inscriu-te o revisa el que cal fer."
@@ -2216,13 +2231,16 @@ const visibleEvents = showFullCalendar
                 )
               )}
             </div>
-          </Card>
+            </Card>
+          </>
         )}
   
   
         {polls.length > 0 && (
-          <Card className="span-2">
-            <SectionTitle
+          <>
+            <div ref={pollsSectionRef} className="public-section-anchor" />
+            <Card className="span-2 public-section-card public-section-polls">
+              <SectionTitle
               icon={<Vote size={22} />}
               title="Votacions obertes"
               subtitle="Decisions sense perdre's al WhatsApp."
@@ -2241,10 +2259,43 @@ const visibleEvents = showFullCalendar
                 />
               ))}
             </div>
-          </Card>
+            </Card>
+          </>
         )}
 
+        <div ref={classSectionRef} className="public-section-anchor" />
+        <Card className="span-2 public-class-card public-section-card public-section-class">
+          <SectionTitle
+            icon={<Home size={22} />}
+            title="Classe"
+            subtitle="Properament: infants de la classe i aniversaris."
+          />
+
+          <p className="public-class-placeholder">
+            Aquí hi podrem consultar els infants de la classe i els aniversaris
+            organitzats per trimestre.
+          </p>
+        </Card>
+
       </section>
+
+      <nav className="public-bottom-nav" aria-label="Navegació pública">
+        <button type="button" onClick={() => scrollToPublicSection(agendaSectionRef)}>
+          Agenda
+        </button>
+
+        <button type="button" onClick={() => scrollToPublicSection(actionsSectionRef)}>
+          Accions
+        </button>
+
+        <button type="button" onClick={() => scrollToPublicSection(pollsSectionRef)}>
+          Votacions
+        </button>
+
+        <button type="button" onClick={() => scrollToPublicSection(classSectionRef)}>
+          Classe
+        </button>
+      </nav>
   
       <footer className="footer">
         <span>
