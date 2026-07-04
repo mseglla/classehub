@@ -1552,10 +1552,38 @@ const visibleEvents = showFullCalendar
     await loadData();
   }
 
-  const selectedChecklist =
+  function checklistHasGroups(items) {
+    return items.some(
+      (item) => Array.isArray(item.target_groups) && item.target_groups.length > 0
+    );
+  }
+
+  function getVisibleChecklistItems(items, gradeLabel) {
+    const hasGroups = checklistHasGroups(items);
+
+    if (!hasGroups) {
+      return items;
+    }
+
+    if (!gradeLabel) {
+      return items;
+    }
+
+    return items.filter((item) => {
+      const groups = item.target_groups || [];
+      return groups.length === 0 || groups.includes(gradeLabel);
+    });
+  }
+
+  const eventChecklist =
     selectedItem?.kind === "event"
       ? checklist.filter((item) => item.event_id === selectedItem.id)
       : [];
+
+  const selectedChecklist = getVisibleChecklistItems(
+    eventChecklist,
+    activeFamily?.grade_label
+  );
 
   if (loading) {
     return (
