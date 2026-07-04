@@ -541,6 +541,35 @@ button, .poll-form button {
   color: #111827;
 }
 
+.detail-meta {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 18px;
+}
+
+.detail-meta p {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  color: #374151;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.detail-meta span {
+  flex: 0 0 auto;
+}
+
+.detail-meta strong {
+  color: #111827;
+  font-weight: 800;
+}
+
+.detail-calendar-button {
+  margin-top: 16px;
+}
+
 .detail-text {
   color: #374151;
   line-height: 1.6;
@@ -578,6 +607,67 @@ button, .poll-form button {
   align-items: center;
   color: #111827;
   font-weight: 750;
+}
+
+.checklist-box li span {
+  min-width: 0;
+}
+
+.checklist-summary {
+  display: grid;
+  gap: 12px;
+}
+
+.checklist-summary p {
+  margin: 0;
+  color: #374151;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.checklist-open-button {
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 14px;
+  background: #111827;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.checklist-full-modal {
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+
+.checklist-full-intro {
+  margin: 0 0 14px;
+  color: #4b5563;
+  font-weight: 650;
+}
+
+.checklist-full-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.checklist-full-list li {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  color: #1f2937;
+  font-size: 0.94rem;
+  line-height: 1.35;
+  font-weight: 550;
+}
+
+.checklist-full-list li svg {
+  flex: 0 0 auto;
+  margin-top: 0.08em;
 }
 
 .attendance-card {

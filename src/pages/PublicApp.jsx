@@ -287,6 +287,80 @@ function PrivacyModal({ onClose }) {
   );
 }
 
+const INLINE_CHECKLIST_LIMIT = 6;
+
+function ChecklistItemsList({ checklist, className = "checklist-list" }) {
+  return (
+    <ul className={className}>
+      {checklist.map((entry) => (
+        <li key={entry.id}>
+          <CheckCircle2 size={18} /> <span>{entry.text}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ChecklistFullModal({ item, checklist, onClose }) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <article
+        className="modal checklist-full-modal"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="modal-close" onClick={onClose}>Tancar</button>
+
+        <p className="eyebrow">Llista</p>
+        <h2>{item.icon} {item.title}</h2>
+        <p className="checklist-full-intro">
+          {checklist.length} punts.
+        </p>
+
+        <ChecklistItemsList checklist={checklist} className="checklist-full-list" />
+      </article>
+    </div>
+  );
+}
+
+function ChecklistSection({ item, checklist }) {
+  const [isFullChecklistOpen, setIsFullChecklistOpen] = useState(false);
+
+  if (!checklist?.length) return null;
+
+  const isLongChecklist = checklist.length > INLINE_CHECKLIST_LIMIT;
+
+  if (!isLongChecklist) {
+    return (
+      <div className="checklist-box">
+        <h3>Què cal tenir en compte?</h3>
+        <ChecklistItemsList checklist={checklist} />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="checklist-box checklist-summary-box">
+        <button
+          className="checklist-open-button"
+          type="button"
+          onClick={() => setIsFullChecklistOpen(true)}
+        >
+          Veure llista ({checklist.length})
+        </button>
+      </div>
+
+      {isFullChecklistOpen && (
+        <ChecklistFullModal
+          item={item}
+          checklist={checklist}
+          onClose={() => setIsFullChecklistOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
 function DetailModal({ item, checklist, onClose }) {
   if (!item) return null;
 
@@ -299,52 +373,41 @@ function DetailModal({ item, checklist, onClose }) {
         <h2>{item.icon} {item.title}</h2>
 
         {item.date && (
-          <div className="detail-grid">
-            <div>
-              <span>Data</span>
+          <div className="detail-meta">
+            <p>
+              <span aria-hidden="true">📅</span>
               <strong>{formatDate(item.date)}</strong>
-            </div>
+            </p>
 
             {item.time && (
-              <div>
-                <span>Hora</span>
+              <p>
+                <span aria-hidden="true">🕘</span>
                 <strong>{item.time}</strong>
-              </div>
+              </p>
             )}
 
             {item.location && (
-              <div>
-                <span>Lloc</span>
+              <p>
+                <span aria-hidden="true">📍</span>
                 <strong>{item.location}</strong>
-              </div>
+              </p>
             )}
           </div>
-        )}
-
-        {item.kind === "event" && item.date && (
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() => downloadCalendarEvent(item)}
-          >
-            Afegir al calendari
-          </button>
         )}
 
         {item.description && <p className="detail-text">{item.description}</p>}
         {item.details && <p className="detail-text preline">{item.details}</p>}
 
-        {checklist?.length > 0 && (
-          <div className="checklist-box">
-            <h3>Què cal tenir en compte?</h3>
-            <ul>
-              {checklist.map((entry) => (
-                <li key={entry.id}>
-                  <CheckCircle2 size={18} /> {entry.text}
-                </li>
-              ))}
-            </ul>
-          </div>
+        <ChecklistSection item={item} checklist={checklist} />
+
+        {item.kind === "event" && item.date && (
+          <button
+            className="secondary-button detail-calendar-button"
+            type="button"
+            onClick={() => downloadCalendarEvent(item)}
+          >
+            Afegir al calendari
+          </button>
         )}
       </article>
     </div>
@@ -1236,7 +1299,12 @@ export default function PublicApp() {
         .select("*")
         .or(`class_id.eq.${classId},and(event_type.eq.escola,class_id.is.null)`)
         .order("start_date"),
-      supabase.from("ch_checklist_items").select("*"),
+      supabase
+        .from("ch_checklist_items")
+        .select("*")
+        .order("event_id", { ascending: true })
+        .order("sort_order", { ascending: true })
+        .order("id", { ascending: true }),
       supabase
         .from("ch_polls")
         .select("*, ch_poll_options(*)")
