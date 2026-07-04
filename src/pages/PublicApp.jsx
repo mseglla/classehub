@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
+  Circle,
   ExternalLink,
   Home,
   MessageCircle,
@@ -332,7 +333,132 @@ function PrivacyModal({ onClose }) {
   );
 }
 
-function DetailModal({ item, checklist, onClose }) {
+const INLINE_CHECKLIST_LIMIT = 6;
+
+function ChecklistItemsList({
+  checklist,
+  completedChecklistItemIds = new Set(),
+  onToggleChecklistItem,
+  className = "checklist-list",
+}) {
+  return (
+    <ul className={className}>
+      {checklist.map((entry) => {
+        const isDone = completedChecklistItemIds.has(entry.id);
+        const canToggle = Boolean(onToggleChecklistItem);
+
+        return (
+          <li className={isDone ? "is-done" : ""} key={entry.id}>
+            {canToggle ? (
+              <button
+                className="checklist-toggle-button"
+                type="button"
+                onClick={() => onToggleChecklistItem(entry.id, !isDone)}
+              >
+                {isDone ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                <span>{entry.text}</span>
+              </button>
+            ) : (
+              <>
+                <CheckCircle2 size={18} /> <span>{entry.text}</span>
+              </>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function ChecklistFullModal({
+  item,
+  checklist,
+  completedChecklistItemIds,
+  onToggleChecklistItem,
+  onClose,
+}) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <article
+        className="modal checklist-full-modal"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="modal-close" onClick={onClose}>Tancar</button>
+
+        <p className="eyebrow">Llista</p>
+        <h2>{item.icon} {item.title}</h2>
+        <p className="checklist-full-intro">
+          {completedChecklistItemIds.size} de {checklist.length} punts completats.
+        </p>
+
+        <ChecklistItemsList
+          checklist={checklist}
+          completedChecklistItemIds={completedChecklistItemIds}
+          onToggleChecklistItem={onToggleChecklistItem}
+          className="checklist-full-list"
+        />
+      </article>
+    </div>
+  );
+}
+
+function ChecklistSection({
+  item,
+  checklist,
+  completedChecklistItemIds,
+  onToggleChecklistItem,
+}) {
+  const [isFullChecklistOpen, setIsFullChecklistOpen] = useState(false);
+
+  if (!checklist?.length) return null;
+
+  const isLongChecklist = checklist.length > INLINE_CHECKLIST_LIMIT;
+
+  if (!isLongChecklist) {
+    return (
+      <div className="checklist-box">
+        <h3>Què cal tenir en compte?</h3>
+        <ChecklistItemsList
+          checklist={checklist}
+          completedChecklistItemIds={completedChecklistItemIds}
+          onToggleChecklistItem={onToggleChecklistItem}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="checklist-box checklist-summary-box">
+        <button
+          className="checklist-open-button"
+          type="button"
+          onClick={() => setIsFullChecklistOpen(true)}
+        >
+          Veure llista ({completedChecklistItemIds.size}/{checklist.length})
+        </button>
+      </div>
+
+      {isFullChecklistOpen && (
+        <ChecklistFullModal
+          item={item}
+          checklist={checklist}
+          completedChecklistItemIds={completedChecklistItemIds}
+          onToggleChecklistItem={onToggleChecklistItem}
+          onClose={() => setIsFullChecklistOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+function DetailModal({
+  item,
+  checklist,
+  completedChecklistItemIds,
+  onToggleChecklistItem,
+  onClose,
+}) {
   if (!item) return null;
 
   return (
@@ -344,52 +470,46 @@ function DetailModal({ item, checklist, onClose }) {
         <h2>{item.icon} {item.title}</h2>
 
         {item.date && (
-          <div className="detail-grid">
-            <div>
-              <span>Data</span>
+          <div className="detail-meta">
+            <p>
+              <span aria-hidden="true">📅</span>
               <strong>{formatDate(item.date)}</strong>
-            </div>
+            </p>
 
             {item.time && (
-              <div>
-                <span>Hora</span>
+              <p>
+                <span aria-hidden="true">🕘</span>
                 <strong>{item.time}</strong>
-              </div>
+              </p>
             )}
 
             {item.location && (
-              <div>
-                <span>Lloc</span>
+              <p>
+                <span aria-hidden="true">📍</span>
                 <strong>{item.location}</strong>
-              </div>
+              </p>
             )}
           </div>
-        )}
-
-        {item.kind === "event" && item.date && (
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() => downloadCalendarEvent(item)}
-          >
-            Afegir al calendari
-          </button>
         )}
 
         {item.description && <p className="detail-text">{item.description}</p>}
         {item.details && <p className="detail-text preline">{item.details}</p>}
 
-        {checklist?.length > 0 && (
-          <div className="checklist-box">
-            <h3>Què cal tenir en compte?</h3>
-            <ul>
-              {checklist.map((entry) => (
-                <li key={entry.id}>
-                  <CheckCircle2 size={18} /> {entry.text}
-                </li>
-              ))}
-            </ul>
-          </div>
+        <ChecklistSection
+          item={item}
+          checklist={checklist}
+          completedChecklistItemIds={completedChecklistItemIds}
+          onToggleChecklistItem={onToggleChecklistItem}
+        />
+
+        {item.kind === "event" && item.date && (
+          <button
+            className="secondary-button detail-calendar-button"
+            type="button"
+            onClick={() => downloadCalendarEvent(item)}
+          >
+            Afegir al calendari
+          </button>
         )}
       </article>
     </div>
@@ -1449,6 +1569,7 @@ export default function PublicApp() {
   const [families, setFamilies] = useState([]);
   const [events, setEvents] = useState([]);
   const [checklist, setChecklist] = useState([]);
+  const [checklistItemStatus, setChecklistItemStatus] = useState([]);
   const [polls, setPolls] = useState([]);
   const [votes, setVotes] = useState([]);
   const [organizations, setOrganizations] = useState([]);
@@ -1524,6 +1645,7 @@ export default function PublicApp() {
       participantsRes,
       responsesRes,
       registrationsRes,
+      checklistStatusRes,
     ] = await Promise.all([
       supabase.rpc("get_public_families_for_class", {
         p_class_id: classId,
@@ -1533,7 +1655,12 @@ export default function PublicApp() {
         .select("*")
         .or(`class_id.eq.${classId},and(event_type.eq.escola,class_id.is.null)`)
         .order("start_date"),
-      supabase.from("ch_checklist_items").select("*"),
+      supabase
+        .from("ch_checklist_items")
+        .select("*")
+        .order("event_id", { ascending: true })
+        .order("sort_order", { ascending: true })
+        .order("id", { ascending: true }),
       supabase
         .from("ch_polls")
         .select("*, ch_poll_options(*)")
@@ -1550,6 +1677,12 @@ export default function PublicApp() {
       supabase.from("ch_organization_participants").select("*"),
       supabase.from("ch_organization_responses").select("*"),
       supabase.from("ch_organization_registrations").select("*"),
+      familyAccessPin
+        ? supabase.rpc("get_checklist_item_status_with_pin", {
+            p_class_id: classId,
+            p_access_pin: familyAccessPin,
+          })
+        : Promise.resolve({ data: [], error: null }),
     ]);
 
     const firstError = [
@@ -1562,6 +1695,7 @@ export default function PublicApp() {
       participantsRes,
       responsesRes,
       registrationsRes,
+      checklistStatusRes,
     ].find((response) => response.error)?.error;
 
     if (firstError) {
@@ -1577,6 +1711,7 @@ export default function PublicApp() {
       setOrganizationParticipants(participantsRes.data || []);
       setOrganizationResponses(responsesRes.data || []);
       setOrganizationRegistrations(registrationsRes.data || []);
+      setChecklistItemStatus(checklistStatusRes.data || []);
     }
 
     setLoading(false);
@@ -1925,6 +2060,52 @@ const visibleEvents = showFullCalendar
     return true;
   }
 
+  async function handleToggleChecklistItem(checklistItemId, isDone) {
+    if (!familyAccessPin || !classInfo?.id) {
+      alert("Cal accedir amb el PIN familiar per guardar la llista.");
+      return;
+    }
+
+    const { error: checklistStatusError } = await supabase.rpc(
+      "set_checklist_item_status_with_pin",
+      {
+        p_class_id: classInfo.id,
+        p_access_pin: familyAccessPin,
+        p_checklist_item_id: checklistItemId,
+        p_is_done: isDone,
+      }
+    );
+
+    if (checklistStatusError) {
+      alert("No s'ha pogut guardar aquest punt de la llista.");
+      console.error(checklistStatusError);
+      return;
+    }
+
+    setChecklistItemStatus((currentStatus) => {
+      const withoutCurrentItem = currentStatus.filter(
+        (status) =>
+          !(
+            status.family_id === activeFamily?.id &&
+            status.checklist_item_id === checklistItemId
+          )
+      );
+
+      if (!isDone || !activeFamily?.id) {
+        return withoutCurrentItem;
+      }
+
+      return [
+        ...withoutCurrentItem,
+        {
+          checklist_item_id: checklistItemId,
+          family_id: activeFamily.id,
+          is_done: true,
+        },
+      ];
+    });
+  }
+
   async function handleInstallApp() {
     if (installPromptEvent) {
       installPromptEvent.prompt();
@@ -1979,10 +2160,44 @@ const visibleEvents = showFullCalendar
     return true;
   }
 
-  const selectedChecklist =
+  function checklistHasGroups(items) {
+    return items.some(
+      (item) => Array.isArray(item.target_groups) && item.target_groups.length > 0
+    );
+  }
+
+  function getVisibleChecklistItems(items, gradeLabel) {
+    const hasGroups = checklistHasGroups(items);
+
+    if (!hasGroups) {
+      return items;
+    }
+
+    if (!gradeLabel) {
+      return items;
+    }
+
+    return items.filter((item) => {
+      const groups = item.target_groups || [];
+      return groups.length === 0 || groups.includes(gradeLabel);
+    });
+  }
+
+  const eventChecklist =
     selectedItem?.kind === "event"
       ? checklist.filter((item) => item.event_id === selectedItem.id)
       : [];
+
+  const selectedChecklist = getVisibleChecklistItems(
+    eventChecklist,
+    activeFamily?.grade_label
+  );
+
+  const completedChecklistItemIds = new Set(
+    checklistItemStatus
+      .filter((status) => status.family_id === activeFamily?.id && status.is_done)
+      .map((status) => status.checklist_item_id)
+  );
 
   if (loading) {
     return (
@@ -2478,6 +2693,8 @@ const visibleEvents = showFullCalendar
       <DetailModal
         item={selectedItem}
         checklist={selectedChecklist}
+        completedChecklistItemIds={completedChecklistItemIds}
+        onToggleChecklistItem={handleToggleChecklistItem}
         onClose={() => setSelectedItem(null)}
       />
   
