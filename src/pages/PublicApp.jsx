@@ -289,19 +289,27 @@ function PrivacyModal({ onClose }) {
 
 const INLINE_CHECKLIST_LIMIT = 6;
 
-function ChecklistItemsList({ checklist, className = "checklist-list" }) {
+function ChecklistItemsList({
+  checklist,
+  completedChecklistItemIds = new Set(),
+  className = "checklist-list",
+}) {
   return (
     <ul className={className}>
-      {checklist.map((entry) => (
-        <li key={entry.id}>
-          <CheckCircle2 size={18} /> <span>{entry.text}</span>
-        </li>
-      ))}
+      {checklist.map((entry) => {
+        const isDone = completedChecklistItemIds.has(entry.id);
+
+        return (
+          <li className={isDone ? "is-done" : ""} key={entry.id}>
+            <CheckCircle2 size={18} /> <span>{entry.text}</span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
 
-function ChecklistFullModal({ item, checklist, onClose }) {
+function ChecklistFullModal({ item, checklist, completedChecklistItemIds, onClose }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <article
@@ -313,16 +321,20 @@ function ChecklistFullModal({ item, checklist, onClose }) {
         <p className="eyebrow">Llista</p>
         <h2>{item.icon} {item.title}</h2>
         <p className="checklist-full-intro">
-          {checklist.length} punts.
+          {completedChecklistItemIds.size} de {checklist.length} punts completats.
         </p>
 
-        <ChecklistItemsList checklist={checklist} className="checklist-full-list" />
+        <ChecklistItemsList
+          checklist={checklist}
+          completedChecklistItemIds={completedChecklistItemIds}
+          className="checklist-full-list"
+        />
       </article>
     </div>
   );
 }
 
-function ChecklistSection({ item, checklist }) {
+function ChecklistSection({ item, checklist, completedChecklistItemIds }) {
   const [isFullChecklistOpen, setIsFullChecklistOpen] = useState(false);
 
   if (!checklist?.length) return null;
@@ -333,7 +345,10 @@ function ChecklistSection({ item, checklist }) {
     return (
       <div className="checklist-box">
         <h3>Què cal tenir en compte?</h3>
-        <ChecklistItemsList checklist={checklist} />
+        <ChecklistItemsList
+          checklist={checklist}
+          completedChecklistItemIds={completedChecklistItemIds}
+        />
       </div>
     );
   }
@@ -346,7 +361,7 @@ function ChecklistSection({ item, checklist }) {
           type="button"
           onClick={() => setIsFullChecklistOpen(true)}
         >
-          Veure llista ({checklist.length})
+          Veure llista ({completedChecklistItemIds.size}/{checklist.length})
         </button>
       </div>
 
@@ -354,6 +369,7 @@ function ChecklistSection({ item, checklist }) {
         <ChecklistFullModal
           item={item}
           checklist={checklist}
+          completedChecklistItemIds={completedChecklistItemIds}
           onClose={() => setIsFullChecklistOpen(false)}
         />
       )}
@@ -361,7 +377,7 @@ function ChecklistSection({ item, checklist }) {
   );
 }
 
-function DetailModal({ item, checklist, onClose }) {
+function DetailModal({ item, checklist, completedChecklistItemIds, onClose }) {
   if (!item) return null;
 
   return (
@@ -398,7 +414,11 @@ function DetailModal({ item, checklist, onClose }) {
         {item.description && <p className="detail-text">{item.description}</p>}
         {item.details && <p className="detail-text preline">{item.details}</p>}
 
-        <ChecklistSection item={item} checklist={checklist} />
+        <ChecklistSection
+          item={item}
+          checklist={checklist}
+          completedChecklistItemIds={completedChecklistItemIds}
+        />
 
         {item.kind === "event" && item.date && (
           <button
@@ -1232,6 +1252,7 @@ export default function PublicApp() {
   const [families, setFamilies] = useState([]);
   const [events, setEvents] = useState([]);
   const [checklist, setChecklist] = useState([]);
+  const [checklistItemStatus, setChecklistItemStatus] = useState([]);
   const [polls, setPolls] = useState([]);
   const [votes, setVotes] = useState([]);
   const [organizations, setOrganizations] = useState([]);
@@ -1290,6 +1311,7 @@ export default function PublicApp() {
       participantsRes,
       responsesRes,
       registrationsRes,
+      checklistStatusRes,
     ] = await Promise.all([
       supabase.rpc("get_public_families_for_class", {
         p_class_id: classId,
@@ -1321,6 +1343,12 @@ export default function PublicApp() {
       supabase.from("ch_organization_participants").select("*"),
       supabase.from("ch_organization_responses").select("*"),
       supabase.from("ch_organization_registrations").select("*"),
+      familyAccessPin
+        ? supabase.rpc("get_checklist_item_status_with_pin", {
+            p_class_id: classId,
+            p_access_pin: familyAccessPin,
+          })
+        : Promise.resolve({ data: [], error: null }),
     ]);
 
     const firstError = [
@@ -1333,6 +1361,7 @@ export default function PublicApp() {
       participantsRes,
       responsesRes,
       registrationsRes,
+      checklistStatusRes,
     ].find((response) => response.error)?.error;
 
     if (firstError) {
@@ -1348,6 +1377,7 @@ export default function PublicApp() {
       setOrganizationParticipants(participantsRes.data || []);
       setOrganizationResponses(responsesRes.data || []);
       setOrganizationRegistrations(registrationsRes.data || []);
+      setChecklistItemStatus(checklistStatusRes.data || []);
     }
 
     setLoading(false);
@@ -1651,6 +1681,12 @@ const visibleEvents = showFullCalendar
   const selectedChecklist = getVisibleChecklistItems(
     eventChecklist,
     activeFamily?.grade_label
+  );
+
+  const completedChecklistItemIds = new Set(
+    checklistItemStatus
+      .filter((status) => status.family_id === activeFamily?.id && status.is_done)
+      .map((status) => status.checklist_item_id)
   );
 
   if (loading) {
@@ -2055,6 +2091,7 @@ const visibleEvents = showFullCalendar
       <DetailModal
         item={selectedItem}
         checklist={selectedChecklist}
+        completedChecklistItemIds={completedChecklistItemIds}
         onClose={() => setSelectedItem(null)}
       />
   
