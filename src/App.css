@@ -3877,3 +3877,44 @@ body,
 .admin-action-item-school {
   background: #f8fafc;
 }
+
+.checklist-toggle-button {
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.checklist-toggle-button span {
+  min-width: 0;
+}
+
+.checklist-list li.is-done,
+.checklist-full-list li.is-done {
+  color: #6b7280;
+}
+
+.checklist-list li.is-done span,
+.checklist-full-list li.is-done span {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.checklist-full-list .checklist-toggle-button {
+  padding: 10px 0;
+}
+
+.checklist-full-list li {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.checklist-full-list li:last-child {
+  border-bottom: 0;
+}

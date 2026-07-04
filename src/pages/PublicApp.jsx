@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
+  Circle,
   ExternalLink,
   Home,
   MessageCircle,
@@ -292,16 +293,31 @@ const INLINE_CHECKLIST_LIMIT = 6;
 function ChecklistItemsList({
   checklist,
   completedChecklistItemIds = new Set(),
+  onToggleChecklistItem,
   className = "checklist-list",
 }) {
   return (
     <ul className={className}>
       {checklist.map((entry) => {
         const isDone = completedChecklistItemIds.has(entry.id);
+        const canToggle = Boolean(onToggleChecklistItem);
 
         return (
           <li className={isDone ? "is-done" : ""} key={entry.id}>
-            <CheckCircle2 size={18} /> <span>{entry.text}</span>
+            {canToggle ? (
+              <button
+                className="checklist-toggle-button"
+                type="button"
+                onClick={() => onToggleChecklistItem(entry.id, !isDone)}
+              >
+                {isDone ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                <span>{entry.text}</span>
+              </button>
+            ) : (
+              <>
+                <CheckCircle2 size={18} /> <span>{entry.text}</span>
+              </>
+            )}
           </li>
         );
       })}
@@ -309,7 +325,13 @@ function ChecklistItemsList({
   );
 }
 
-function ChecklistFullModal({ item, checklist, completedChecklistItemIds, onClose }) {
+function ChecklistFullModal({
+  item,
+  checklist,
+  completedChecklistItemIds,
+  onToggleChecklistItem,
+  onClose,
+}) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <article
@@ -327,6 +349,7 @@ function ChecklistFullModal({ item, checklist, completedChecklistItemIds, onClos
         <ChecklistItemsList
           checklist={checklist}
           completedChecklistItemIds={completedChecklistItemIds}
+          onToggleChecklistItem={onToggleChecklistItem}
           className="checklist-full-list"
         />
       </article>
@@ -334,7 +357,12 @@ function ChecklistFullModal({ item, checklist, completedChecklistItemIds, onClos
   );
 }
 
-function ChecklistSection({ item, checklist, completedChecklistItemIds }) {
+function ChecklistSection({
+  item,
+  checklist,
+  completedChecklistItemIds,
+  onToggleChecklistItem,
+}) {
   const [isFullChecklistOpen, setIsFullChecklistOpen] = useState(false);
 
   if (!checklist?.length) return null;
@@ -348,6 +376,7 @@ function ChecklistSection({ item, checklist, completedChecklistItemIds }) {
         <ChecklistItemsList
           checklist={checklist}
           completedChecklistItemIds={completedChecklistItemIds}
+          onToggleChecklistItem={onToggleChecklistItem}
         />
       </div>
     );
@@ -370,6 +399,7 @@ function ChecklistSection({ item, checklist, completedChecklistItemIds }) {
           item={item}
           checklist={checklist}
           completedChecklistItemIds={completedChecklistItemIds}
+          onToggleChecklistItem={onToggleChecklistItem}
           onClose={() => setIsFullChecklistOpen(false)}
         />
       )}
@@ -377,7 +407,13 @@ function ChecklistSection({ item, checklist, completedChecklistItemIds }) {
   );
 }
 
-function DetailModal({ item, checklist, completedChecklistItemIds, onClose }) {
+function DetailModal({
+  item,
+  checklist,
+  completedChecklistItemIds,
+  onToggleChecklistItem,
+  onClose,
+}) {
   if (!item) return null;
 
   return (
@@ -418,6 +454,7 @@ function DetailModal({ item, checklist, completedChecklistItemIds, onClose }) {
           item={item}
           checklist={checklist}
           completedChecklistItemIds={completedChecklistItemIds}
+          onToggleChecklistItem={onToggleChecklistItem}
         />
 
         {item.kind === "event" && item.date && (
@@ -1606,6 +1643,52 @@ const visibleEvents = showFullCalendar
     await loadData();
   }
 
+  async function handleToggleChecklistItem(checklistItemId, isDone) {
+    if (!familyAccessPin || !classInfo?.id) {
+      alert("Cal accedir amb el PIN familiar per guardar la llista.");
+      return;
+    }
+
+    const { error: checklistStatusError } = await supabase.rpc(
+      "set_checklist_item_status_with_pin",
+      {
+        p_class_id: classInfo.id,
+        p_access_pin: familyAccessPin,
+        p_checklist_item_id: checklistItemId,
+        p_is_done: isDone,
+      }
+    );
+
+    if (checklistStatusError) {
+      alert("No s'ha pogut guardar aquest punt de la llista.");
+      console.error(checklistStatusError);
+      return;
+    }
+
+    setChecklistItemStatus((currentStatus) => {
+      const withoutCurrentItem = currentStatus.filter(
+        (status) =>
+          !(
+            status.family_id === activeFamily?.id &&
+            status.checklist_item_id === checklistItemId
+          )
+      );
+
+      if (!isDone || !activeFamily?.id) {
+        return withoutCurrentItem;
+      }
+
+      return [
+        ...withoutCurrentItem,
+        {
+          checklist_item_id: checklistItemId,
+          family_id: activeFamily.id,
+          is_done: true,
+        },
+      ];
+    });
+  }
+
   async function handleInstallApp() {
     if (installPromptEvent) {
       installPromptEvent.prompt();
@@ -2092,6 +2175,7 @@ const visibleEvents = showFullCalendar
         item={selectedItem}
         checklist={selectedChecklist}
         completedChecklistItemIds={completedChecklistItemIds}
+        onToggleChecklistItem={handleToggleChecklistItem}
         onClose={() => setSelectedItem(null)}
       />
   
