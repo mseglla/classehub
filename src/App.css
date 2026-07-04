@@ -4516,3 +4516,9 @@ body,
 .checklist-full-list li:last-child {
   border-bottom: 0;
 }
+
+@media (max-width: 640px) {
+  .checklist-full-modal {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+  }
+}
