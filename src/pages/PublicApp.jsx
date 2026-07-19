@@ -1611,6 +1611,20 @@ export default function PublicApp() {
     });
   }
 
+  function clearPinScopedData() {
+    setActiveFamilyFromPin(null);
+    setFamilies([]);
+    setEvents([]);
+    setChecklist([]);
+    setChecklistItemStatus([]);
+    setPolls([]);
+    setVotes([]);
+    setOrganizations([]);
+    setOrganizationParticipants([]);
+    setOrganizationResponses([]);
+    setOrganizationRegistrations([]);
+  }
+
   async function loadData({ showLoading = true } = {}) {
     if (showLoading) {
       setLoading(true);
@@ -1633,86 +1647,48 @@ export default function PublicApp() {
 
     setClassInfo(classData);
 
-    const classId = classData.id;
-
-    const [
-      familiesRes,
-      eventsRes,
-      checklistRes,
-      pollsRes,
-      votesRes,
-      orgsRes,
-      participantsRes,
-      responsesRes,
-      registrationsRes,
-      checklistStatusRes,
-    ] = await Promise.all([
-      supabase.rpc("get_public_families_for_class", {
-        p_class_id: classId,
-      }),
-      supabase
-        .from("ch_events")
-        .select("*")
-        .or(`class_id.eq.${classId},and(event_type.eq.escola,class_id.is.null)`)
-        .order("start_date"),
-      supabase
-        .from("ch_checklist_items")
-        .select("*")
-        .order("event_id", { ascending: true })
-        .order("sort_order", { ascending: true })
-        .order("id", { ascending: true }),
-      supabase
-        .from("ch_polls")
-        .select("*, ch_poll_options(*)")
-        .eq("class_id", classId)
-        .eq("is_active", true)
-        .order("close_date"),
-      supabase.from("ch_poll_votes").select("*"),
-      supabase
-        .from("ch_organizations")
-        .select("*")
-        .eq("class_id", classId)
-        .eq("is_active", true)
-        .order("event_date"),
-      supabase.from("ch_organization_participants").select("*"),
-      supabase.from("ch_organization_responses").select("*"),
-      supabase.from("ch_organization_registrations").select("*"),
-      familyAccessPin
-        ? supabase.rpc("get_checklist_item_status_with_pin", {
-            p_class_id: classId,
-            p_access_pin: familyAccessPin,
-          })
-        : Promise.resolve({ data: [], error: null }),
-    ]);
-
-    const firstError = [
-      familiesRes,
-      eventsRes,
-      checklistRes,
-      pollsRes,
-      votesRes,
-      orgsRes,
-      participantsRes,
-      responsesRes,
-      registrationsRes,
-      checklistStatusRes,
-    ].find((response) => response.error)?.error;
-
-    if (firstError) {
-      console.error(firstError);
-      setError("No s'han pogut carregar les dades.");
-    } else {
-      setFamilies(familiesRes.data || []);
-      setEvents(eventsRes.data || []);
-      setChecklist(checklistRes.data || []);
-      setPolls(pollsRes.data || []);
-      setVotes(votesRes.data || []);
-      setOrganizations(orgsRes.data || []);
-      setOrganizationParticipants(participantsRes.data || []);
-      setOrganizationResponses(responsesRes.data || []);
-      setOrganizationRegistrations(registrationsRes.data || []);
-      setChecklistItemStatus(checklistStatusRes.data || []);
+    if (!familyAccessPin) {
+      clearPinScopedData();
+      setLoading(false);
+      return;
     }
+
+    const { data: publicData, error: publicDataError } = await supabase.rpc(
+      "get_public_class_data_with_pin",
+      {
+        p_class_id: classData.id,
+        p_access_pin: familyAccessPin,
+      }
+    );
+
+    if (publicDataError || !publicData?.active_family) {
+      console.error(publicDataError);
+
+      if (publicDataError?.message?.includes("Invalid family PIN")) {
+        window.localStorage.removeItem(`classehub-family-pin-${slug}`);
+        setFamilyAccessPin("");
+        clearPinScopedData();
+        setPinError("El PIN guardat ja no és vàlid per aquesta classe.");
+      } else {
+        setError("No s'han pogut carregar les dades.");
+      }
+
+      setLoading(false);
+      return;
+    }
+
+    setActiveFamilyFromPin(publicData.active_family);
+    setFamilies(publicData.families || []);
+    setEvents(publicData.events || []);
+    setChecklist(publicData.checklist_items || []);
+    setChecklistItemStatus(publicData.checklist_status || []);
+    setPolls(publicData.polls || []);
+    setVotes(publicData.poll_votes || []);
+    setOrganizations(publicData.organizations || []);
+    setOrganizationParticipants(publicData.organization_participants || []);
+    setOrganizationResponses(publicData.organization_responses || []);
+    setOrganizationRegistrations(publicData.organization_registrations || []);
+    setPinError("");
 
     setLoading(false);
   }
@@ -1743,33 +1719,7 @@ export default function PublicApp() {
 
   useEffect(() => {
     loadData();
-  }, [slug]);
-
-  useEffect(() => {
-    async function loadFamilyFromSavedPin() {
-      if (!classInfo?.id || !familyAccessPin || activeFamilyFromPin) return;
-
-      const { data, error } = await supabase.rpc("get_family_by_pin", {
-        p_class_id: classInfo.id,
-        p_access_pin: familyAccessPin,
-      });
-
-      const matchedFamily = data?.[0] || null;
-
-      if (error || !matchedFamily) {
-        window.localStorage.removeItem(`classehub-family-pin-${slug}`);
-        setFamilyAccessPin("");
-        setActiveFamilyFromPin(null);
-        setPinError("");
-        return;
-      }
-
-      setActiveFamilyFromPin(matchedFamily);
-      setPinError("");
-    }
-
-    loadFamilyFromSavedPin();
-  }, [classInfo?.id, familyAccessPin, activeFamilyFromPin]);
+  }, [slug, familyAccessPin]);
 
   useEffect(() => {
     const isStandalone =
@@ -1873,7 +1823,7 @@ export default function PublicApp() {
       return;
     }
 
-    setActiveFamilyFromPin(matchedFamily);
+    setLoading(true);
     saveFamilyAccessPin(slug, cleanPin);
     setFamilyAccessPin(cleanPin);
     setPinInput("");
