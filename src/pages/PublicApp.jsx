@@ -37,22 +37,22 @@ function getFamilyAccessPin(slug) {
 
 const birthdayPeriods = [
   {
-    id: "jan-apr",
-    title: "1r trimestre",
-    startMonth: 1,
-    endMonth: 4,
-  },
-  {
-    id: "may-aug",
-    title: "2n trimestre",
-    startMonth: 5,
-    endMonth: 8,
-  },
-  {
     id: "sep-dec",
-    title: "3r trimestre",
+    title: "1r trimestre",
     startMonth: 9,
     endMonth: 12,
+  },
+  {
+    id: "jan-mar",
+    title: "2n trimestre",
+    startMonth: 1,
+    endMonth: 3,
+  },
+  {
+    id: "apr-aug",
+    title: "3r trimestre",
+    startMonth: 4,
+    endMonth: 8,
   },
 ];
 
