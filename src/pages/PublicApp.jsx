@@ -663,74 +663,204 @@ function PollVoteModal({ poll, activeFamily, onVote, onClose }) {
 }
 
 function PollResultsModal({ poll, families, votes, onClose }) {
+  const [expandedOptionIds, setExpandedOptionIds] = useState([]);
+
   if (!poll) return null;
 
-  const pollVotes = votes.filter((vote) => vote.poll_id === poll.id);
-  const votedFamilies = new Set(pollVotes.map((vote) => vote.family_id));
-
-  const pendingFamilies = families.filter(
-    (family) => !votedFamilies.has(family.id)
+  const pollOptions = [...(poll.ch_poll_options || [])].sort(
+    (a, b) => (a.sort_order || 0) - (b.sort_order || 0)
   );
+
+  const pollVotes = votes.filter((vote) => vote.poll_id === poll.id);
+  const votedFamilyIds = new Set(pollVotes.map((vote) => vote.family_id));
+  const votedFamiliesCount = votedFamilyIds.size;
+  const totalFamilies = families.length;
+  const pendingFamilies = families.filter(
+    (family) => !votedFamilyIds.has(family.id)
+  );
+
+  const allowsMultipleVotes = poll.allows_multiple_votes === true;
+  const maxVotes = Math.max(
+    1,
+    ...pollOptions.map(
+      (option) =>
+        pollVotes.filter((vote) => vote.option_id === option.id).length
+    )
+  );
+
+  const closeDateText = poll.close_date
+    ? new Date(`${poll.close_date}T00:00:00`).toLocaleDateString("ca-ES", {
+        day: "numeric",
+        month: "short",
+      })
+    : "Sense data";
+
+  const resultRows = pollOptions
+    .map((option) => {
+      const optionVotes = pollVotes.filter(
+        (vote) => vote.option_id === option.id
+      );
+
+      const optionFamilies = optionVotes
+        .map((vote) => families.find((family) => family.id === vote.family_id))
+        .filter(Boolean)
+        .sort((a, b) => a.student_name.localeCompare(b.student_name, "ca"));
+
+      const votedPercentage =
+        votedFamiliesCount === 0
+          ? 0
+          : Math.round((optionVotes.length / votedFamiliesCount) * 100);
+
+      const barPercentage = Math.round((optionVotes.length / maxVotes) * 100);
+
+      return {
+        ...option,
+        optionVotes,
+        optionFamilies,
+        votedPercentage,
+        barPercentage,
+      };
+    })
+    .sort((a, b) => {
+      if (b.optionVotes.length !== a.optionVotes.length) {
+        return b.optionVotes.length - a.optionVotes.length;
+      }
+
+      return (a.sort_order || 0) - (b.sort_order || 0);
+    });
+
+  function toggleExpandedOption(optionId) {
+    setExpandedOptionIds((currentOptionIds) => {
+      if (currentOptionIds.includes(optionId)) {
+        return currentOptionIds.filter(
+          (currentOptionId) => currentOptionId !== optionId
+        );
+      }
+
+      return [...currentOptionIds, optionId];
+    });
+  }
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <article className="modal" onClick={(event) => event.stopPropagation()}>
+      <article className="modal poll-results-modal" onClick={(event) => event.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>
           Tancar
         </button>
 
         <p className="eyebrow">Resultats de la votació</p>
 
-        <h3 className="poll-results-title">
-  🗳️ Resultats
-</h3>
-
-<p className="poll-question">
-  {poll.question}
-</p>
+        <h2 className="poll-results-heading">🗳️ {poll.question}</h2>
 
         {poll.description && <p className="detail-text">{poll.description}</p>}
 
-        <div className="organization-results">
-          {poll.ch_poll_options?.map((option) => {
-            const optionVotes = pollVotes.filter(
-              (vote) => vote.option_id === option.id
-            );
+        <section className="poll-results-summary" aria-label="Resum de la votació">
+          <div>
+            <span>Participació</span>
+            <strong>
+              {votedFamiliesCount}/{totalFamilies}
+            </strong>
+          </div>
+
+          <div>
+            <span>Tancament</span>
+            <strong>{closeDateText}</strong>
+          </div>
+
+          <div>
+            <span>Tipus</span>
+            <strong>{allowsMultipleVotes ? "Vot múltiple" : "Vot únic"}</strong>
+          </div>
+        </section>
+
+        {allowsMultipleVotes && (
+          <p className="poll-results-note">
+            Cada família pot marcar més d’una opció. Els percentatges són sobre
+            les famílies que ja han votat.
+          </p>
+        )}
+
+        <section className="poll-results-list" aria-label="Opcions més votades">
+          {resultRows.map((option, index) => {
+            const isExpanded = expandedOptionIds.includes(option.id);
+            const isTopOption =
+              option.optionVotes.length > 0 &&
+              option.optionVotes.length === resultRows[0]?.optionVotes.length;
 
             return (
-              <div className="result-column" key={option.id}>
-                <strong>
-                  {option.text} ({optionVotes.length})
-                </strong>
+              <article
+                className={`poll-result-row ${isTopOption ? "poll-result-row-leading" : ""}`}
+                key={option.id}
+              >
+                <div className="poll-result-row-header">
+                  <div className="poll-result-option-title">
+                    <span className="poll-result-rank">{index + 1}</span>
+                    <strong>{option.text}</strong>
+                  </div>
 
-                <div className="people-grid">
-                  {optionVotes.length === 0 ? (
-                    <span className="empty-result">Cap vot encara</span>
-                  ) : (
-                    optionVotes.map((vote) => {
-                      const family = families.find(
-                        (entry) => entry.id === vote.family_id
-                      );
-
-                      return (
-                        <span className="person-card" key={vote.id}>
-                          {family?.student_name || "Família"}
-                        </span>
-                      );
-                    })
-                  )}
+                  <div className="poll-result-count">
+                    <strong>{option.optionVotes.length}</strong>
+                    <span>
+                      {option.optionVotes.length === 1 ? "vot" : "vots"}
+                    </span>
+                  </div>
                 </div>
-              </div>
+
+                <div className="poll-result-bar-track" aria-hidden="true">
+                  <div
+                    className="poll-result-bar"
+                    style={{ width: `${option.barPercentage}%` }}
+                  />
+                </div>
+
+                <div className="poll-result-row-footer">
+                  <span>{option.votedPercentage}% de famílies votants</span>
+
+                  <button
+                    type="button"
+                    className="poll-result-toggle"
+                    onClick={() => toggleExpandedOption(option.id)}
+                  >
+                    {isExpanded ? "Amagar famílies" : `Veure famílies (${option.optionFamilies.length})`}
+                  </button>
+                </div>
+
+                {isExpanded && (
+                  <div className="poll-result-families">
+                    {option.optionFamilies.length === 0 ? (
+                      <span className="poll-result-empty">Cap vot encara</span>
+                    ) : (
+                      option.optionFamilies.map((family) => (
+                        <span className="person-card" key={family.id}>
+                          {family.student_name}
+                        </span>
+                      ))
+                    )}
+                  </div>
+                )}
+              </article>
             );
           })}
+        </section>
 
-          <div className="result-column pending">
-            <strong>Pendents ({pendingFamilies.length})</strong>
-            <span className="empty-result">
-              {pendingFamilies.length} famílies encara no han votat
-            </span>
+        <section className="poll-results-pending">
+          <div className="poll-results-pending-header">
+            <strong>Famílies pendents</strong>
+            <span>{pendingFamilies.length}</span>
           </div>
-        </div>
+
+          {pendingFamilies.length === 0 ? (
+            <p>Totes les famílies ja han votat.</p>
+          ) : (
+            <div className="poll-result-families">
+              {pendingFamilies.map((family) => (
+                <span className="person-card" key={family.id}>
+                  {family.student_name}
+                </span>
+              ))}
+            </div>
+          )}
+        </section>
       </article>
     </div>
   );
