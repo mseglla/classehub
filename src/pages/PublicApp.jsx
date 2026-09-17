@@ -564,18 +564,38 @@ function PollCard({ poll, families, votes, activeFamily, onOpenVote, onOpenResul
 }
 function PollVoteModal({ poll, activeFamily, onVote, onClose }) {
   const [optionId, setOptionId] = useState("");
+  const [selectedOptionIds, setSelectedOptionIds] = useState([]);
 
   if (!poll) return null;
+
+  const allowsMultipleVotes = poll.allows_multiple_votes === true;
+
+  function toggleSelectedOption(optionId) {
+    setSelectedOptionIds((currentOptionIds) => {
+      if (currentOptionIds.includes(optionId)) {
+        return currentOptionIds.filter((currentOptionId) => currentOptionId !== optionId);
+      }
+
+      return [...currentOptionIds, optionId];
+    });
+  }
 
   async function submitVote(event) {
     event.preventDefault();
 
-    if (!optionId) return;
+    const selectedVotes = allowsMultipleVotes
+      ? selectedOptionIds
+      : optionId
+        ? [Number(optionId)]
+        : [];
 
-    const saved = await onVote(poll.id, Number(optionId));
+    if (selectedVotes.length === 0) return;
+
+    const saved = await onVote(poll.id, selectedVotes);
 
     if (saved) {
       setOptionId("");
+      setSelectedOptionIds([]);
       onClose();
     }
   }
@@ -595,7 +615,7 @@ function PollVoteModal({ poll, activeFamily, onVote, onClose }) {
         )}
 
         <div className="checklist-box">
-          <h3>Tria una opció</h3>
+          <h3>{allowsMultipleVotes ? "Pots triar més d’una opció" : "Tria una opció"}</h3>
 
           <form className="registration-form" onSubmit={submitVote}>
             {activeFamily && (
@@ -605,17 +625,32 @@ function PollVoteModal({ poll, activeFamily, onVote, onClose }) {
               </div>
             )}
 
-            <label className="span-all">
-              Resposta
-              <select value={optionId} onChange={(event) => setOptionId(event.target.value)}>
-                <option value="">Tria opció</option>
+            {allowsMultipleVotes ? (
+              <div className="span-all checkbox-options">
                 {poll.ch_poll_options?.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.text}
-                  </option>
+                  <label className="checkbox-row" key={option.id}>
+                    <input
+                      type="checkbox"
+                      checked={selectedOptionIds.includes(option.id)}
+                      onChange={() => toggleSelectedOption(option.id)}
+                    />
+                    <span>{option.text}</span>
+                  </label>
                 ))}
-              </select>
-            </label>
+              </div>
+            ) : (
+              <label className="span-all">
+                Resposta
+                <select value={optionId} onChange={(event) => setOptionId(event.target.value)}>
+                  <option value="">Tria opció</option>
+                  {poll.ch_poll_options?.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.text}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
 
             <button className="span-all">
               Guardar vot
@@ -2137,15 +2172,17 @@ const visibleEvents = showFullCalendar
     }, 4000);
   }
 
-  async function handleVote(pollId, optionId) {
+  async function handleVote(pollId, optionIds) {
     if (!familyAccessPin) {
       alert("Cal accedir amb el PIN familiar per votar.");
       return false;
     }
 
-    const { error: voteError } = await supabase.rpc("vote_poll_with_pin", {
+    const selectedOptionIds = Array.isArray(optionIds) ? optionIds : [optionIds];
+
+    const { error: voteError } = await supabase.rpc("vote_poll_with_pin_options", {
       p_poll_id: pollId,
-      p_option_id: optionId,
+      p_option_ids: selectedOptionIds,
       p_access_pin: familyAccessPin,
     });
 
