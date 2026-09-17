@@ -1633,13 +1633,16 @@ export default function PublicApp() {
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
+  const [activePublicSection, setActivePublicSection] = useState("agenda");
 
   const agendaSectionRef = useRef(null);
   const actionsSectionRef = useRef(null);
   const pollsSectionRef = useRef(null);
   const classSectionRef = useRef(null);
 
-  function scrollToPublicSection(sectionRef) {
+  function scrollToPublicSection(sectionRef, sectionId) {
+    setActivePublicSection(sectionId);
+
     sectionRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -1775,6 +1778,38 @@ export default function PublicApp() {
     setFeedbackType("millora");
     setFeedbackStatus("Gràcies! Hem rebut el teu missatge.");
   }
+
+  useEffect(() => {
+    function updateActivePublicSection() {
+      const sections = [
+        { id: "agenda", ref: agendaSectionRef },
+        { id: "actions", ref: actionsSectionRef },
+        { id: "polls", ref: pollsSectionRef },
+        { id: "class", ref: classSectionRef },
+      ];
+
+      const currentSection = sections
+        .map((section) => ({
+          id: section.id,
+          top: section.ref.current?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY,
+        }))
+        .filter((section) => section.top <= 160)
+        .sort((a, b) => b.top - a.top)[0];
+
+      if (currentSection) {
+        setActivePublicSection(currentSection.id);
+      }
+    }
+
+    updateActivePublicSection();
+    window.addEventListener("scroll", updateActivePublicSection, { passive: true });
+    window.addEventListener("resize", updateActivePublicSection);
+
+    return () => {
+      window.removeEventListener("scroll", updateActivePublicSection);
+      window.removeEventListener("resize", updateActivePublicSection);
+    };
+  }, [loading]);
 
   useEffect(() => {
     loadData();
@@ -2652,19 +2687,35 @@ const visibleEvents = showFullCalendar
       </section>
 
       <nav className="public-bottom-nav" aria-label="Navegació pública">
-        <button type="button" onClick={() => scrollToPublicSection(agendaSectionRef)}>
+        <button
+          type="button"
+          className={activePublicSection === "agenda" ? "public-bottom-nav-active" : ""}
+          onClick={() => scrollToPublicSection(agendaSectionRef, "agenda")}
+        >
           Agenda
         </button>
 
-        <button type="button" onClick={() => scrollToPublicSection(actionsSectionRef)}>
+        <button
+          type="button"
+          className={activePublicSection === "actions" ? "public-bottom-nav-active" : ""}
+          onClick={() => scrollToPublicSection(actionsSectionRef, "actions")}
+        >
           Accions
         </button>
 
-        <button type="button" onClick={() => scrollToPublicSection(pollsSectionRef)}>
+        <button
+          type="button"
+          className={activePublicSection === "polls" ? "public-bottom-nav-active" : ""}
+          onClick={() => scrollToPublicSection(pollsSectionRef, "polls")}
+        >
           Votacions
         </button>
 
-        <button type="button" onClick={() => scrollToPublicSection(classSectionRef)}>
+        <button
+          type="button"
+          className={activePublicSection === "class" ? "public-bottom-nav-active" : ""}
+          onClick={() => scrollToPublicSection(classSectionRef, "class")}
+        >
           Classe
         </button>
       </nav>

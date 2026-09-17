@@ -4246,7 +4246,8 @@ body,
     white-space: nowrap;
   }
 
-  .public-bottom-nav button:active {
+  .public-bottom-nav button:active,
+  .public-bottom-nav button.public-bottom-nav-active {
     background: #0f172a;
     color: #ffffff;
   }
