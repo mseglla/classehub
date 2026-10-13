@@ -83,6 +83,23 @@ export default function AdminPage({ session }) {
   const selectedClassRole = selectedClassPermission?.role || "delegate";
   const canCreateSchoolEvents = selectedClassRole === "admin";
 
+  async function copyPollPublicLink(poll) {
+    if (!selectedClass?.slug) {
+      setMessage("No s'ha pogut generar l'enllaç de la votació.");
+      return;
+    }
+
+    const pollUrl = `${window.location.origin}/classe/${selectedClass.slug}?poll=${poll.id}`;
+
+    try {
+      await navigator.clipboard.writeText(pollUrl);
+      setMessage("Enllaç de la votació copiat.");
+    } catch (error) {
+      console.error(error);
+      setMessage(pollUrl);
+    }
+  }
+
   useEffect(() => {
     if (!canCreateSchoolEvents && eventType === "escola") {
       setEventType("classe");
@@ -2115,6 +2132,14 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                     </div>
 
                     <div className="admin-row-actions">
+                      <button
+                        type="button"
+                        className="secondary-action"
+                        onClick={() => copyPollPublicLink(poll)}
+                      >
+                        Copiar enllaç
+                      </button>
+
                       <button
                         type="button"
                         className="secondary-action"
