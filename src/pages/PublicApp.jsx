@@ -155,6 +155,13 @@ function FamilyPinAccessScreen({
   setPinInput,
   pinError,
   onSubmit,
+  accessEmail,
+  setAccessEmail,
+  accessEmailStatus,
+  accessEmailSending,
+  showAccessEmailForm,
+  setShowAccessEmailForm,
+  onRequestAccessLink,
   showInstallBanner,
   onInstallApp,
   onDismissInstallBanner,
@@ -199,6 +206,38 @@ function FamilyPinAccessScreen({
 
           <button type="submit">Entrar a ClasseHub</button>
         </form>
+
+        <div className="family-access-recovery">
+          <button
+            type="button"
+            className="family-access-recovery-toggle"
+            onClick={() => setShowAccessEmailForm(!showAccessEmailForm)}
+          >
+            No recordo el PIN
+          </button>
+
+          {showAccessEmailForm && (
+            <form className="family-access-email-form" onSubmit={onRequestAccessLink}>
+              <label>
+                Email familiar
+                <input
+                  type="email"
+                  value={accessEmail}
+                  onChange={(event) => setAccessEmail(event.target.value)}
+                  placeholder="el.teu@email.com"
+                />
+              </label>
+
+              <button type="submit" disabled={accessEmailSending}>
+                {accessEmailSending ? "Enviant..." : "Enviar-me l'enllaç"}
+              </button>
+
+              {accessEmailStatus && (
+                <p className="family-access-email-status">{accessEmailStatus}</p>
+              )}
+            </form>
+          )}
+        </div>
 
         <div className="family-login-secondary">
           <p>Encara no tens accés?</p>
@@ -1770,6 +1809,10 @@ export default function PublicApp() {
   const [activeFamilyFromPin, setActiveFamilyFromPin] = useState(null);
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
+  const [accessEmail, setAccessEmail] = useState("");
+  const [accessEmailStatus, setAccessEmailStatus] = useState("");
+  const [accessEmailSending, setAccessEmailSending] = useState(false);
+  const [showAccessEmailForm, setShowAccessEmailForm] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
@@ -2111,6 +2154,48 @@ export default function PublicApp() {
     setFamilyAccessPin(cleanPin);
     setPinInput("");
     setPinError("");
+  }
+
+  async function requestFamilyAccessLink(event) {
+    event.preventDefault();
+
+    const cleanEmail = accessEmail.trim().toLowerCase();
+
+    if (!cleanEmail) {
+      setAccessEmailStatus("Escriu el teu email.");
+      return;
+    }
+
+    setAccessEmailSending(true);
+    setAccessEmailStatus("");
+
+    const pollParam = new URLSearchParams(window.location.search).get("poll");
+
+    try {
+      await fetch("/api/send-family-access-link", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          classSlug: slug,
+          email: cleanEmail,
+          pollId: pollParam ? Number(pollParam) : null,
+        }),
+      });
+
+      setAccessEmail("");
+      setAccessEmailStatus(
+        "Si aquest correu està registrat, rebràs un enllaç d'accés en uns minuts."
+      );
+    } catch (error) {
+      console.error(error);
+      setAccessEmailStatus(
+        "No s'ha pogut enviar l'enllaç ara mateix. Torna-ho a provar."
+      );
+    } finally {
+      setAccessEmailSending(false);
+    }
   }
 
   const futureEvents = useMemo(() => {
@@ -2465,6 +2550,13 @@ const visibleEvents = showFullCalendar
             : pinError
         }
         onSubmit={submitFamilyPin}
+        accessEmail={accessEmail}
+        setAccessEmail={setAccessEmail}
+        accessEmailStatus={accessEmailStatus}
+        accessEmailSending={accessEmailSending}
+        showAccessEmailForm={showAccessEmailForm}
+        setShowAccessEmailForm={setShowAccessEmailForm}
+        onRequestAccessLink={requestFamilyAccessLink}
         showInstallBanner={showInstallBanner}
         onInstallApp={handleInstallApp}
         onDismissInstallBanner={dismissInstallBanner}
