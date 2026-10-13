@@ -1767,6 +1767,69 @@ function RegistrationOrganizationModal({
   );
 }
 
+function FamilyPinChangeModal({
+  currentFamilyName,
+  newFamilyPin,
+  setNewFamilyPin,
+  repeatFamilyPin,
+  setRepeatFamilyPin,
+  pinChangeStatus,
+  pinChangeLoading,
+  onSubmit,
+  onClose,
+}) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <article className="modal family-pin-change-modal" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="modal-close" onClick={onClose}>
+          Tancar
+        </button>
+
+        <p className="eyebrow">Accés familiar</p>
+        <h2>Canviar PIN</h2>
+
+        <p className="modal-intro">
+          Família de <strong>{currentFamilyName}</strong>. El nou PIN ha de tenir 4 números.
+        </p>
+
+        <form className="family-pin-change-form" onSubmit={onSubmit}>
+          <label>
+            Nou PIN
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={newFamilyPin}
+              onChange={(event) => setNewFamilyPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="1234"
+            />
+          </label>
+
+          <label>
+            Repeteix el nou PIN
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={repeatFamilyPin}
+              onChange={(event) => setRepeatFamilyPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="1234"
+            />
+          </label>
+
+          {pinChangeStatus && (
+            <p className="family-pin-change-status">{pinChangeStatus}</p>
+          )}
+
+          <button type="submit" disabled={pinChangeLoading}>
+            {pinChangeLoading ? "Guardant..." : "Guardar nou PIN"}
+          </button>
+        </form>
+      </article>
+    </div>
+  );
+}
+
 export default function PublicApp() {
   const [slug] = useState(getSlug());
   const [classInfo, setClassInfo] = useState(null);
@@ -1825,6 +1888,11 @@ export default function PublicApp() {
   const [accessEmailStatus, setAccessEmailStatus] = useState("");
   const [accessEmailSending, setAccessEmailSending] = useState(false);
   const [showAccessEmailForm, setShowAccessEmailForm] = useState(false);
+  const [showPinChangeModal, setShowPinChangeModal] = useState(false);
+  const [newFamilyPin, setNewFamilyPin] = useState("");
+  const [repeatFamilyPin, setRepeatFamilyPin] = useState("");
+  const [pinChangeStatus, setPinChangeStatus] = useState("");
+  const [pinChangeLoading, setPinChangeLoading] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
@@ -2251,6 +2319,72 @@ export default function PublicApp() {
     } finally {
       setAccessEmailSending(false);
     }
+  }
+
+  async function changeFamilyPin(event) {
+    event.preventDefault();
+
+    const cleanNewPin = newFamilyPin.trim();
+    const cleanRepeatPin = repeatFamilyPin.trim();
+
+    if (!/^\d{4}$/.test(cleanNewPin)) {
+      setPinChangeStatus("El nou PIN ha de tenir exactament 4 números.");
+      return;
+    }
+
+    if (cleanNewPin !== cleanRepeatPin) {
+      setPinChangeStatus("Els dos PIN no coincideixen.");
+      return;
+    }
+
+    if (cleanNewPin === familyAccessPin) {
+      setPinChangeStatus("El nou PIN ha de ser diferent de l'actual.");
+      return;
+    }
+
+    if (!classInfo?.id || !familyAccessPin) {
+      setPinChangeStatus("No s'ha pogut validar l'accés familiar.");
+      return;
+    }
+
+    setPinChangeLoading(true);
+    setPinChangeStatus("");
+
+    const { data, error } = await supabase.rpc("change_family_access_pin", {
+      p_class_id: classInfo.id,
+      p_current_pin: familyAccessPin,
+      p_new_pin: cleanNewPin,
+    });
+
+    const result = data?.[0];
+
+    if (error || !result?.success) {
+      const errorMessages = {
+        CURRENT_PIN_NOT_FOUND: "El PIN actual ja no és vàlid. Torna a entrar.",
+        NEW_PIN_INVALID: "El nou PIN ha de tenir exactament 4 números.",
+        PIN_UNCHANGED: "El nou PIN ha de ser diferent de l'actual.",
+        NEW_PIN_ALREADY_USED: "Aquest PIN ja l'està fent servir una altra família de la classe.",
+      };
+
+      setPinChangeStatus(
+        errorMessages[result?.message] || "No s'ha pogut canviar el PIN."
+      );
+      setPinChangeLoading(false);
+      return;
+    }
+
+    saveFamilyAccessPin(slug, cleanNewPin);
+    setFamilyAccessPin(cleanNewPin);
+    setNewFamilyPin("");
+    setRepeatFamilyPin("");
+    setPinChangeStatus("PIN actualitzat correctament.");
+
+    window.setTimeout(() => {
+      setShowPinChangeModal(false);
+      setPinChangeStatus("");
+    }, 900);
+
+    setPinChangeLoading(false);
   }
 
   const futureEvents = useMemo(() => {
@@ -3038,12 +3172,39 @@ const visibleEvents = showFullCalendar
         <button
           type="button"
           className="footer-link"
+          onClick={() => setShowPinChangeModal(true)}
+        >
+          Canviar PIN
+        </button>
+
+        <button
+          type="button"
+          className="footer-link"
           onClick={() => setShowPrivacyModal(true)}
         >
           Privacitat
         </button>
       </footer>
   
+      {showPinChangeModal && activeFamily && (
+        <FamilyPinChangeModal
+          currentFamilyName={activeFamily.student_name}
+          newFamilyPin={newFamilyPin}
+          setNewFamilyPin={setNewFamilyPin}
+          repeatFamilyPin={repeatFamilyPin}
+          setRepeatFamilyPin={setRepeatFamilyPin}
+          pinChangeStatus={pinChangeStatus}
+          pinChangeLoading={pinChangeLoading}
+          onSubmit={changeFamilyPin}
+          onClose={() => {
+            setShowPinChangeModal(false);
+            setNewFamilyPin("");
+            setRepeatFamilyPin("");
+            setPinChangeStatus("");
+          }}
+        />
+      )}
+
       {showFeedbackModal && (
         <FeedbackModal
           feedbackType={feedbackType}
