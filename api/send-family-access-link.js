@@ -19,12 +19,16 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function buildAccessUrl({ classSlug, accessPin, pollId }) {
+function buildAccessUrl({ classSlug, accessPin, pollId, organizationId }) {
   const url = new URL(`/classe/${classSlug}`, publicAppUrl);
   url.searchParams.set("pin", accessPin);
 
   if (pollId) {
     url.searchParams.set("poll", String(pollId));
+  }
+
+  if (organizationId) {
+    url.searchParams.set("org", String(organizationId));
   }
 
   return url.toString();
@@ -107,10 +111,11 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const { classSlug, email, pollId } = req.body || {};
+  const { classSlug, email, pollId, organizationId } = req.body || {};
   const cleanClassSlug = String(classSlug || "").trim().toLowerCase();
   const cleanEmail = String(email || "").trim().toLowerCase();
   const cleanPollId = pollId ? Number(pollId) : null;
+  const cleanOrganizationId = organizationId ? Number(organizationId) : null;
 
   if (!cleanClassSlug || !cleanEmail) {
     return res.status(400).json({ error: "MISSING_REQUIRED_FIELDS" });
@@ -179,6 +184,7 @@ module.exports = async function handler(req, res) {
         classSlug: classData.slug,
         accessPin: family.access_pin,
         pollId: cleanPollId,
+        organizationId: cleanOrganizationId,
       }),
     }));
 

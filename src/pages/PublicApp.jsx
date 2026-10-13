@@ -1787,13 +1787,25 @@ export default function PublicApp() {
   const [selectedPoll, setSelectedPoll] = useState(null);
   const [selectedPollVote, setSelectedPollVote] = useState(null);
   const [directPollHandled, setDirectPollHandled] = useState(false);
+  const [directOrganizationHandled, setDirectOrganizationHandled] = useState(false);
 
   const directPollId = useMemo(() => {
-    const pollParam = new URLSearchParams(window.location.search).get("poll");
+    const params = new URLSearchParams(window.location.search);
+    const pollParam = params.get("poll");
+    const orgParam = params.get("org");
     const parsedPollId = Number(pollParam);
 
     return Number.isFinite(parsedPollId) && parsedPollId > 0
       ? parsedPollId
+      : null;
+  }, [slug]);
+
+  const directOrganizationId = useMemo(() => {
+    const orgParam = new URLSearchParams(window.location.search).get("org");
+    const parsedOrganizationId = Number(orgParam);
+
+    return Number.isFinite(parsedOrganizationId) && parsedOrganizationId > 0
+      ? parsedOrganizationId
       : null;
   }, [slug]);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
@@ -1999,6 +2011,10 @@ export default function PublicApp() {
   }, [slug, directPollId]);
 
   useEffect(() => {
+    setDirectOrganizationHandled(false);
+  }, [slug, directOrganizationId]);
+
+  useEffect(() => {
     if (!directPollId || directPollHandled || loading || polls.length === 0) {
       return;
     }
@@ -2016,6 +2032,44 @@ export default function PublicApp() {
       scrollToPublicSection(pollsSectionRef, "polls");
     }, 100);
   }, [directPollId, directPollHandled, loading, polls]);
+
+  useEffect(() => {
+    if (
+      !directOrganizationId ||
+      directOrganizationHandled ||
+      loading ||
+      organizations.length === 0
+    ) {
+      return;
+    }
+
+    const directOrganization = organizations.find(
+      (organization) => organization.id === directOrganizationId
+    );
+
+    if (!directOrganization) {
+      return;
+    }
+
+    if (directOrganization.organization_type === "attendance") {
+      setSelectedOrganization(directOrganization);
+    } else if (directOrganization.organization_type === "registration") {
+      setSelectedRegistration(directOrganization);
+    } else {
+      return;
+    }
+
+    setDirectOrganizationHandled(true);
+
+    window.setTimeout(() => {
+      scrollToPublicSection(actionsSectionRef, "actions");
+    }, 100);
+  }, [
+    directOrganizationId,
+    directOrganizationHandled,
+    loading,
+    organizations,
+  ]);
 
   useEffect(() => {
     loadData();
@@ -2181,6 +2235,7 @@ export default function PublicApp() {
           classSlug: slug,
           email: cleanEmail,
           pollId: pollParam ? Number(pollParam) : null,
+          organizationId: orgParam ? Number(orgParam) : null,
         }),
       });
 
