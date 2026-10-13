@@ -1747,6 +1747,16 @@ export default function PublicApp() {
   const [selectedRegistrationResults, setSelectedRegistrationResults] = useState(null);
   const [selectedPoll, setSelectedPoll] = useState(null);
   const [selectedPollVote, setSelectedPollVote] = useState(null);
+  const [directPollHandled, setDirectPollHandled] = useState(false);
+
+  const directPollId = useMemo(() => {
+    const pollParam = new URLSearchParams(window.location.search).get("poll");
+    const parsedPollId = Number(pollParam);
+
+    return Number.isFinite(parsedPollId) && parsedPollId > 0
+      ? parsedPollId
+      : null;
+  }, [slug]);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -1940,6 +1950,29 @@ export default function PublicApp() {
       window.removeEventListener("resize", updateActivePublicSection);
     };
   }, [loading]);
+
+  useEffect(() => {
+    setDirectPollHandled(false);
+  }, [slug, directPollId]);
+
+  useEffect(() => {
+    if (!directPollId || directPollHandled || loading || polls.length === 0) {
+      return;
+    }
+
+    const directPoll = polls.find((poll) => poll.id === directPollId);
+
+    if (!directPoll) {
+      return;
+    }
+
+    setSelectedPollVote(directPoll);
+    setDirectPollHandled(true);
+
+    window.setTimeout(() => {
+      scrollToPublicSection(pollsSectionRef, "polls");
+    }, 100);
+  }, [directPollId, directPollHandled, loading, polls]);
 
   useEffect(() => {
     loadData();
