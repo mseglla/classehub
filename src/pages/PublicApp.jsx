@@ -1769,6 +1769,8 @@ function RegistrationOrganizationModal({
 
 function FamilyPinChangeModal({
   currentFamilyName,
+  currentFamilyPin,
+  setCurrentFamilyPin,
   newFamilyPin,
   setNewFamilyPin,
   repeatFamilyPin,
@@ -1793,6 +1795,18 @@ function FamilyPinChangeModal({
         </p>
 
         <form className="family-pin-change-form" onSubmit={onSubmit}>
+          <label>
+            PIN actual
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={currentFamilyPin}
+              onChange={(event) => setCurrentFamilyPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="PIN actual"
+            />
+          </label>
+
           <label>
             Nou PIN
             <input
@@ -1889,6 +1903,7 @@ export default function PublicApp() {
   const [accessEmailSending, setAccessEmailSending] = useState(false);
   const [showAccessEmailForm, setShowAccessEmailForm] = useState(false);
   const [showPinChangeModal, setShowPinChangeModal] = useState(false);
+  const [currentFamilyPin, setCurrentFamilyPin] = useState("");
   const [newFamilyPin, setNewFamilyPin] = useState("");
   const [repeatFamilyPin, setRepeatFamilyPin] = useState("");
   const [pinChangeStatus, setPinChangeStatus] = useState("");
@@ -2324,8 +2339,14 @@ export default function PublicApp() {
   async function changeFamilyPin(event) {
     event.preventDefault();
 
+    const cleanCurrentPin = currentFamilyPin.trim();
     const cleanNewPin = newFamilyPin.trim();
     const cleanRepeatPin = repeatFamilyPin.trim();
+
+    if (!/^\d{4}$/.test(cleanCurrentPin)) {
+      setPinChangeStatus("Escriu el PIN actual de 4 números.");
+      return;
+    }
 
     if (!/^\d{4}$/.test(cleanNewPin)) {
       setPinChangeStatus("El nou PIN ha de tenir exactament 4 números.");
@@ -2337,7 +2358,7 @@ export default function PublicApp() {
       return;
     }
 
-    if (cleanNewPin === familyAccessPin) {
+    if (cleanNewPin === cleanCurrentPin) {
       setPinChangeStatus("El nou PIN ha de ser diferent de l'actual.");
       return;
     }
@@ -2352,7 +2373,7 @@ export default function PublicApp() {
 
     const { data, error } = await supabase.rpc("change_family_access_pin", {
       p_class_id: classInfo.id,
-      p_current_pin: familyAccessPin,
+      p_current_pin: cleanCurrentPin,
       p_new_pin: cleanNewPin,
     });
 
@@ -2375,6 +2396,7 @@ export default function PublicApp() {
 
     saveFamilyAccessPin(slug, cleanNewPin);
     setFamilyAccessPin(cleanNewPin);
+    setCurrentFamilyPin("");
     setNewFamilyPin("");
     setRepeatFamilyPin("");
     setPinChangeStatus("PIN actualitzat correctament.");
@@ -3189,6 +3211,8 @@ const visibleEvents = showFullCalendar
       {showPinChangeModal && activeFamily && (
         <FamilyPinChangeModal
           currentFamilyName={activeFamily.student_name}
+          currentFamilyPin={currentFamilyPin}
+          setCurrentFamilyPin={setCurrentFamilyPin}
           newFamilyPin={newFamilyPin}
           setNewFamilyPin={setNewFamilyPin}
           repeatFamilyPin={repeatFamilyPin}
@@ -3198,6 +3222,7 @@ const visibleEvents = showFullCalendar
           onSubmit={changeFamilyPin}
           onClose={() => {
             setShowPinChangeModal(false);
+            setCurrentFamilyPin("");
             setNewFamilyPin("");
             setRepeatFamilyPin("");
             setPinChangeStatus("");
