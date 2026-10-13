@@ -136,6 +136,23 @@ export default function AdminPage({ session }) {
     ? adminEvents.find((eventItem) => eventItem.id === detailEventId)
     : null;
 
+  async function copyOrganizationPublicLink(organization) {
+    if (!selectedClass?.slug || !organization?.id) {
+      setMessage("No s'ha pogut generar l'enllaç de l'acció.");
+      return;
+    }
+
+    const organizationUrl = `${window.location.origin}/classe/${selectedClass.slug}?org=${organization.id}`;
+
+    try {
+      await navigator.clipboard.writeText(organizationUrl);
+      setMessage("Enllaç de l'acció copiat.");
+    } catch (error) {
+      console.error(error);
+      setMessage("No s'ha pogut copiar l'enllaç.");
+    }
+  }
+
   const detailOrganization = detailEvent
     ? adminOrganizations.find(
         (organization) => organization.event_id === detailEvent.id
@@ -2810,6 +2827,16 @@ console.log("Resultat guardar esdeveniment:", { data, error });
             </p>
 
             <h2>{detailEvent.title}</h2>
+
+            <div className="action-detail-actions">
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() => copyOrganizationPublicLink(detailOrganization)}
+              >
+                Copiar enllaç
+              </button>
+            </div>
 
             {reminderStatusMessage && (
               <div className="pending-reminder-status">

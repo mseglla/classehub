@@ -4813,3 +4813,9 @@ body,
   line-height: 1.45;
   font-weight: 700;
 }
+
+.action-detail-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin: 12px 0 16px;
+}
