@@ -233,7 +233,7 @@ module.exports = async function handler(req, res) {
       continue;
     }
 
-    const accessUrl = `${publicAppUrl}/classe/${classData.slug}?pin=${family.access_pin}`;
+    const accessUrl = `${publicAppUrl}/classe/${classData.slug}?pin=${family.access_pin}&org=${organization.id}`;
     const { subject, text, html } = buildReminderCopy({
       organizationType: normalizeResponseValue(organization.organization_type),
       title: eventTitle,
