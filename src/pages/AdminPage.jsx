@@ -2043,7 +2043,7 @@ PIN: ${family.access_pin}`;
                   <span>Famílies actives</span>
                 </div>
                 <div>
-                  <strong>—</strong>
+                  <strong>{classAdoption.familiesWithPwa ?? "—"}</strong>
                   <span>PWA utilitzada</span>
                 </div>
                 <div>
@@ -2103,6 +2103,30 @@ PIN: ${family.access_pin}`;
                           </div>
                         );
                       })()}
+
+                    {family.is_active !== false &&
+                      classAdoption?.classId === String(selectedClassId) && (
+                        <div className="family-adoption-line">
+                          <span>📱 Aplicació</span>
+                          <strong className={
+                            classAdoption.families?.some(
+                              (item) =>
+                                String(item.familyId) === String(family.id) &&
+                                item.pwaUsed
+                            )
+                              ? "family-adoption-active"
+                              : ""
+                          }>
+                            {classAdoption.families?.some(
+                              (item) =>
+                                String(item.familyId) === String(family.id) &&
+                                item.pwaUsed
+                            )
+                              ? "Utilitzada"
+                              : "Sense constància"}
+                          </strong>
+                        </div>
+                      )}
 
                     <div className="family-access-line">
                       <div className="family-pin-lean">

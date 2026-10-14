@@ -82,6 +82,20 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: "SUBSCRIPTIONS_LOAD_FAILED" });
     }
 
+    const { data: pwaUsage, error: pwaError } = await supabase
+      .from("ch_family_pwa_usage")
+      .select("family_id")
+      .eq("class_id", classId);
+
+    if (pwaError) {
+      console.error("Adoption PWA error:", pwaError);
+      return res.status(500).json({ error: "PWA_LOAD_FAILED" });
+    }
+
+    const pwaFamilyIds = new Set(
+      (pwaUsage || []).map((item) => String(item.family_id))
+    );
+
     const devicesByFamily = new Map();
 
     for (const subscription of subscriptions || []) {
@@ -95,12 +109,14 @@ module.exports = async function handler(req, res) {
     const result = (families || []).map((family) => ({
       familyId: family.id,
       pushDevices: devicesByFamily.get(String(family.id)) || 0,
+      pwaUsed: pwaFamilyIds.has(String(family.id)),
     }));
 
     return res.status(200).json({
       success: true,
       totalFamilies: result.length,
       familiesWithPush: result.filter((family) => family.pushDevices > 0).length,
+      familiesWithPwa: result.filter((family) => family.pwaUsed).length,
       families: result,
     });
   } catch (error) {

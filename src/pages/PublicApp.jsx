@@ -1952,6 +1952,51 @@ export default function PublicApp() {
     return () => window.removeEventListener("appinstalled", handleAppInstalled);
   }, []);
 
+  useEffect(() => {
+    if (!classInfo?.id || !familyAccessPin || !activeFamilyFromPin?.id) {
+      return;
+    }
+
+    const isInstalledApp =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    if (!isInstalledApp) return;
+
+    const storageKey = `classehub-pwa-registered-${classInfo.id}-${activeFamilyFromPin.id}`;
+
+    if (window.localStorage.getItem(storageKey) === "true") return;
+
+    let cancelled = false;
+
+    async function registerPwaUsage() {
+      try {
+        const response = await fetch("/api/register-pwa-usage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            classId: classInfo.id,
+            accessPin: familyAccessPin,
+          }),
+        });
+
+        if (response.ok && !cancelled) {
+          window.localStorage.setItem(storageKey, "true");
+        }
+      } catch (error) {
+        console.error("PWA usage registration error:", error);
+      }
+    }
+
+    registerPwaUsage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [classInfo?.id, familyAccessPin, activeFamilyFromPin?.id]);
+
   const activeFamily = activeFamilyFromPin;
 
   const pushStatusLabel = {
