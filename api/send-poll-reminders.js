@@ -73,7 +73,8 @@ module.exports = async function handler(req, res) {
     return res.status(401).json({ error: "INVALID_AUTH_TOKEN" });
   }
 
-  const { pollId } = req.body || {};
+  const { pollId, testEmail } = req.body || {};
+  const cleanTestEmail = String(testEmail || "").trim().toLowerCase();
 
   if (!pollId) {
     return res.status(400).json({ error: "MISSING_POLL_ID" });
@@ -150,6 +151,34 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: "CONTACTS_LOAD_FAILED" });
   }
 
+  let reminderContacts = contacts || [];
+
+  if (cleanTestEmail) {
+    const testFamily = pendingFamilies.find((family) => family.access_pin);
+
+    if (!testFamily) {
+      return res.status(200).json({
+        sent: 0,
+        skipped: 0,
+        pendingFamilies: pendingFamilies.length,
+        contacts: 0,
+        sentFamilies: 0,
+        testMode: true,
+        message: "No pending family with access PIN found for test.",
+      });
+    }
+
+    reminderContacts = [
+      {
+        id: null,
+        family_id: testFamily.id,
+        contact_name: "Test",
+        email: cleanTestEmail,
+        wants_email_reminders: true,
+      },
+    ];
+  }
+
   const familyById = new Map(pendingFamilies.map((family) => [family.id, family]));
   const resend = new Resend(resendApiKey);
 
@@ -159,7 +188,7 @@ module.exports = async function handler(req, res) {
   const providerMessageIds = [];
   const errors = [];
 
-  for (const contact of contacts || []) {
+  for (const contact of reminderContacts || []) {
     const family = familyById.get(contact.family_id);
 
     if (!family?.access_pin || !contact.email) {
