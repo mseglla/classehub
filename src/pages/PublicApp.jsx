@@ -10,6 +10,7 @@ import {
   Vote,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import InlineProgressSummary from "../components/public/InlineProgressSummary";
 import { Card, SectionTitle } from "../components/LayoutComponents";
 import { daysUntil, formatDate, shortDate } from "../utils/dateHelpers";
 import { eventToDetail, typeMeta } from "../utils/eventHelpers";
@@ -551,35 +552,6 @@ function DetailModal({
           </button>
         )}
       </article>
-    </div>
-  );
-}
-
-function InlineProgressSummary({
-  answeredCount,
-  totalCount,
-  label = "famílies han respost",
-  detailText = "",
-}) {
-  const progress =
-    totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
-
-  return (
-    <div className="inline-progress-summary">
-      <p className="inline-progress-copy">
-        <strong>{answeredCount}/{totalCount}</strong> {label}
-      </p>
-
-      <div className="inline-progress-track">
-        <div
-          className="inline-progress-fill"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      {detailText && (
-        <p className="inline-progress-detail">{detailText}</p>
-      )}
     </div>
   );
 }
