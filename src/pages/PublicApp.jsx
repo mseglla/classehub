@@ -15,6 +15,7 @@ import RegistrationOrganizationCard from "../components/public/RegistrationOrgan
 import FamilyPinChangeModal from "../components/public/FamilyPinChangeModal";
 import FamilyPinAccessScreen from "../components/public/FamilyPinAccessScreen";
 import InstallAppBanner from "../components/public/InstallAppBanner";
+import ClasseHubSetupGuide from "../components/public/ClasseHubSetupGuide";
 import { Card, SectionTitle } from "../components/LayoutComponents";
 import { daysUntil, formatDate, shortDate } from "../utils/dateHelpers";
 import { eventToDetail, typeMeta } from "../utils/eventHelpers";
@@ -1551,7 +1552,13 @@ export default function PublicApp() {
   const [pinChangeLoading, setPinChangeLoading] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
-  const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
+  const [showSetupGuide, setShowSetupGuide] = useState(false);
+  const [isStandaloneApp, setIsStandaloneApp] = useState(() =>
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+
   const [pushStatus, setPushStatus] = useState(() => getNotificationPermission());
   const [pushLoading, setPushLoading] = useState(false);
   const [activePublicSection, setActivePublicSection] = useState("agenda");
@@ -1855,6 +1862,97 @@ export default function PublicApp() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!activeFamilyFromPin?.id) return;
+
+    let cancelled = false;
+
+    async function checkPushSubscription() {
+      if (!isPushSupported() || Notification.permission !== "granted") {
+        if (!cancelled) setPushSubscribed(false);
+        return;
+      }
+
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        if (!cancelled) setPushSubscribed(Boolean(subscription));
+      } catch (error) {
+        console.error("Push status check error:", error);
+        if (!cancelled) setPushSubscribed(false);
+      }
+    }
+
+    checkPushSubscription();
+
+    const dismissed = window.localStorage.getItem(
+      "classehub-setup-guide-seen-v1"
+    ) === "true";
+
+    if (!dismissed) {
+      setShowSetupGuide(true);
+      setShowInstallBanner(false);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeFamilyFromPin?.id]);
+
+  useEffect(() => {
+    if (!showSetupGuide || !activeFamilyFromPin?.id) return;
+
+    let cancelled = false;
+
+    async function refreshSetupStatus() {
+      const standalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true;
+
+      if (!cancelled) {
+        setIsStandaloneApp(standalone);
+        setPushSubscribed(false);
+      }
+
+      if (!isPushSupported() || Notification.permission !== "granted") return;
+
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+
+        if (!cancelled) setPushSubscribed(Boolean(subscription));
+      } catch (error) {
+        console.error("Setup status refresh error:", error);
+      }
+    }
+
+    refreshSetupStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showSetupGuide, activeFamilyFromPin?.id]);
+
+  function closeSetupGuide() {
+    window.localStorage.setItem("classehub-setup-guide-seen-v1", "true");
+    setShowSetupGuide(false);
+    setShowInstallBanner(false);
+    window.localStorage.setItem("classehub-install-banner-dismissed", "true");
+  }
+
+  useEffect(() => {
+    function handleAppInstalled() {
+      setIsStandaloneApp(
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true
+      );
+      setShowInstallBanner(false);
+    }
+
+    window.addEventListener("appinstalled", handleAppInstalled);
+    return () => window.removeEventListener("appinstalled", handleAppInstalled);
+  }, []);
+
   const activeFamily = activeFamilyFromPin;
 
   const pushStatusLabel = {
@@ -1947,6 +2045,7 @@ export default function PublicApp() {
 
       if (result.success) {
         setPushStatus("granted");
+        setPushSubscribed(true);
       } else {
         setPushStatus(result.error || "error");
       }
@@ -2399,7 +2498,7 @@ const visibleEvents = showFullCalendar
       return;
     }
 
-    setShowIosInstallHelp(true);
+    setShowSetupGuide(true);
   }
 
   function dismissInstallBanner() {
@@ -2532,12 +2631,7 @@ const visibleEvents = showFullCalendar
         </div>
       )}
 
-      {showInstallBanner && (
-        <InstallAppBanner
-          onInstall={handleInstallApp}
-          onDismiss={dismissInstallBanner}
-        />
-      )}
+
 
       <header className="hero class-hero">
         <div className="hero-main class-hero-main">
@@ -2983,6 +3077,14 @@ const visibleEvents = showFullCalendar
         <button
           type="button"
           className="footer-link"
+          onClick={() => setShowSetupGuide(true)}
+        >
+          Instal·lació i notificacions
+        </button>
+
+        <button
+          type="button"
+          className="footer-link"
           onClick={() => setShowPinChangeModal(true)}
         >
           Canviar PIN
@@ -2997,6 +3099,21 @@ const visibleEvents = showFullCalendar
         </button>
       </footer>
   
+      {showSetupGuide && activeFamily && (
+        <ClasseHubSetupGuide
+          onClose={closeSetupGuide}
+          onInstall={handleInstallApp}
+          onEnableNotifications={handleEnablePushNotifications}
+          canPromptInstall={Boolean(installPromptEvent)}
+          isStandalone={isStandaloneApp}
+          notificationsActive={pushSubscribed}
+          notificationsSupported={isPushSupported()}
+          notificationsDenied={getNotificationPermission() === "denied"}
+          loading={pushLoading}
+          statusMessage={pushStatusLabel || ""}
+        />
+      )}
+
       {showPinChangeModal && activeFamily && (
         <FamilyPinChangeModal
           currentFamilyName={activeFamily.student_name}
@@ -3033,34 +3150,6 @@ const visibleEvents = showFullCalendar
 
       {showPrivacyModal && (
         <PrivacyModal onClose={() => setShowPrivacyModal(false)} />
-      )}
-
-      {showIosInstallHelp && (
-        <div className="modal-backdrop" onClick={() => setShowIosInstallHelp(false)}>
-          <article className="modal install-help-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowIosInstallHelp(false)}>
-              Tancar
-            </button>
-
-            <p className="eyebrow">Instal·lar ClasseHub</p>
-            <h2>📲 Afegeix ClasseHub a la pantalla d'inici</h2>
-
-            <div className="install-help-steps">
-              <p><strong>iPhone / Safari</strong></p>
-              <ol>
-                <li>Prem el botó de compartir.</li>
-                <li>Tria “Afegir a pantalla d'inici”.</li>
-                <li>Confirma amb “Afegir”.</li>
-              </ol>
-
-              <p><strong>Android / Chrome</strong></p>
-              <ol>
-                <li>Obre el menú del navegador.</li>
-                <li>Tria “Instal·lar app” o “Afegir a pantalla d'inici”.</li>
-              </ol>
-            </div>
-          </article>
-        </div>
       )}
 
       <DetailModal
