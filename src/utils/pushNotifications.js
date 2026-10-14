@@ -27,7 +27,7 @@ export function getNotificationPermission() {
   return Notification.permission;
 }
 
-export async function subscribeToPushNotifications({ familyId, classId }) {
+export async function subscribeToPushNotifications({ classId, accessPin }) {
   if (!isPushSupported()) {
     return {
       success: false,
@@ -70,8 +70,8 @@ export async function subscribeToPushNotifications({ familyId, classId }) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      familyId,
       classId,
+      accessPin,
       subscription,
     }),
   });

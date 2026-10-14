@@ -1867,6 +1867,13 @@ export default function PublicApp() {
     MISSING_VAPID_PUBLIC_KEY: "Falta configurar la clau pública de notificacions",
     SAVE_FAILED: "No s'han pogut guardar les notificacions",
     NO_ACTIVE_SUBSCRIPTIONS: "No hi ha cap dispositiu subscrit",
+    NO_ACTIVE_SUBSCRIPTION: "Activa les notificacions en aquest dispositiu",
+    RATE_LIMITED: "Massa intents. Torna-ho a provar d'aquí a 10 minuts",
+    RATE_LIMIT_UNAVAILABLE: "No es pot verificar el límit d'intents",
+    INVALID_FAMILY_ACCESS: "No s'ha pogut validar el PIN familiar",
+    ENDPOINT_ALREADY_REGISTERED: "Aquest dispositiu ja està vinculat a una altra família",
+    SUBSCRIPTION_EXPIRED: "La subscripció ha caducat. Torna a activar les notificacions",
+    PUSH_DELIVERY_FAILED: "No s'ha pogut lliurar la notificació",
     MISSING_VAPID_KEYS: "Falten claus VAPID al servidor",
     TEST_PUSH_FAILED: "No s'ha pogut enviar la push de prova",
     "missing-family": "Cal entrar amb el PIN familiar",
@@ -1934,8 +1941,8 @@ export default function PublicApp() {
 
     try {
       const result = await subscribeToPushNotifications({
-        familyId: activeFamily.id,
         classId: classInfo.id,
+        accessPin: familyAccessPin,
       });
 
       if (result.success) {
@@ -1952,8 +1959,13 @@ export default function PublicApp() {
   }
 
   async function handleSendTestPushNotification() {
-    if (!activeFamily) {
+    if (!activeFamily || !classInfo?.id || !familyAccessPin) {
       setPushStatus("missing-family");
+      return;
+    }
+
+    if (!isPushSupported()) {
+      setPushStatus("unsupported");
       return;
     }
 
@@ -1961,13 +1973,23 @@ export default function PublicApp() {
     setPushStatus("");
 
     try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+
+      if (!subscription) {
+        setPushStatus("NO_ACTIVE_SUBSCRIPTION");
+        return;
+      }
+
       const response = await fetch("/api/send-test-push", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          familyId: activeFamily.id,
+          classId: classInfo.id,
+          accessPin: familyAccessPin,
+          endpoint: subscription.endpoint,
         }),
       });
 
