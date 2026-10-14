@@ -500,9 +500,14 @@ button, .poll-form button {
 
 .modal-close {
   float: right;
+  min-height: auto;
+  padding: 8px 12px;
+  border-radius: 14px;
   background: #f3f4f6;
   color: #111827;
   box-shadow: none;
+  font-size: 0.82rem;
+  font-weight: 850;
 }
 
 .modal h2 {
@@ -4946,4 +4951,10 @@ body,
 
 .confirmed-family-title strong {
   min-width: 0;
+}
+
+.modal-close:hover {
+  transform: none;
+  background: #e5e7eb;
+  box-shadow: none;
 }
