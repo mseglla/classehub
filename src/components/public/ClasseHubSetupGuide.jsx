@@ -112,6 +112,7 @@ export default function ClasseHubSetupGuide({
                   <p>
                     Torna a la pantalla d'inici de l'iPhone i toca la icona
                     de ClasseHub per continuar amb les notificacions.
+                    És possible que hagis d'introduir el PIN familiar una última vegada.
                   </p>
                 </div>
               </>
@@ -125,6 +126,7 @@ export default function ClasseHubSetupGuide({
                   <p>
                     Torna a la pantalla d'inici i toca la icona de ClasseHub
                     per continuar amb les notificacions.
+                    És possible que hagis d'introduir el PIN familiar una última vegada.
                   </p>
                 </div>
               </>

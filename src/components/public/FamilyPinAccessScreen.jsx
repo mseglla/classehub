@@ -1,4 +1,3 @@
-import InstallAppBanner from "./InstallAppBanner";
 
 const familyHelpWhatsappUrl = [
   "https://",
@@ -22,20 +21,10 @@ export default function FamilyPinAccessScreen({
   showAccessEmailForm,
   setShowAccessEmailForm,
   onRequestAccessLink,
-  showInstallBanner,
-  onInstallApp,
-  onDismissInstallBanner,
   signupUrl = "/classe/orenetes/alta",
 }) {
   return (
     <main className="family-access-page">
-      {showInstallBanner && (
-        <InstallAppBanner
-          onInstall={onInstallApp}
-          onDismiss={onDismissInstallBanner}
-        />
-      )}
-
       <section className="family-access-card">
         <div className="family-access-logo-row">
           <img src="/icons/logo-base.png" alt="ClasseHub" />
