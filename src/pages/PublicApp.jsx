@@ -15,27 +15,12 @@ import RegistrationOrganizationCard from "../components/public/RegistrationOrgan
 import { Card, SectionTitle } from "../components/LayoutComponents";
 import { daysUntil, formatDate, shortDate } from "../utils/dateHelpers";
 import { eventToDetail, typeMeta } from "../utils/eventHelpers";
-
-function getSlug() {
-  const parts = window.location.pathname.split("/").filter(Boolean);
-  const classIndex = parts.indexOf("classe");
-  if (classIndex >= 0 && parts[classIndex + 1]) return parts[classIndex + 1];
-  return "orenetes";
-}
-
-function getFamilyAccessPin(slug) {
-  const storageKey = `classehub-family-pin-${slug}`;
-  const params = new URLSearchParams(window.location.search);
-  const urlPin = params.get("pin")?.trim();
-
-  if (urlPin) {
-    window.localStorage.setItem(storageKey, urlPin);
-    return urlPin;
-  }
-
-  return window.localStorage.getItem(storageKey) || "";
-}
-
+import {
+  clearFamilyAccessPin,
+  getFamilyAccessPin,
+  getPublicClassSlug,
+  saveFamilyAccessPin,
+} from "../utils/familyAccess";
 
 const birthdayPeriods = [
   {
@@ -79,11 +64,6 @@ function formatBirthdayDate(birthDate) {
     day: "numeric",
     month: "long",
   });
-}
-
-function saveFamilyAccessPin(slug, pin) {
-  const storageKey = `classehub-family-pin-${slug}`;
-  window.localStorage.setItem(storageKey, pin);
 }
 
 function formatCalendarDate(date, time) {
@@ -1755,7 +1735,7 @@ function FamilyPinChangeModal({
 }
 
 export default function PublicApp() {
-  const [slug] = useState(getSlug());
+  const [slug] = useState(getPublicClassSlug());
   const [classInfo, setClassInfo] = useState(null);
   const [families, setFamilies] = useState([]);
   const [events, setEvents] = useState([]);
@@ -2080,7 +2060,7 @@ export default function PublicApp() {
       const matchedFamily = data?.[0] || null;
 
       if (error || !matchedFamily) {
-        window.localStorage.removeItem(`classehub-family-pin-${slug}`);
+        clearFamilyAccessPin(slug);
         setFamilyAccessPin("");
         setActiveFamilyFromPin(null);
         setPinError("");
