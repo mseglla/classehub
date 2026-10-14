@@ -1318,6 +1318,11 @@ function RegistrationResultsModal({
     0
   );
 
+  const totalFamilies = availableFamilies.length;
+  const pendingCount = pendingFamilies.length;
+  const responseProgress =
+    totalFamilies > 0 ? Math.round((totalResponses / totalFamilies) * 100) : 0;
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <article className="modal" onClick={(event) => event.stopPropagation()}>
@@ -1326,27 +1331,67 @@ function RegistrationResultsModal({
         <p className="eyebrow">Respostes</p>
         <h2>🎉 {organization.title}</h2>
 
-        <div className="registration-results-overview">
-          <p>
-            <strong>{totalResponses}/{availableFamilies.length}</strong>{" "}
-            famílies han respost
-          </p>
+        <div className="registration-results-dashboard">
+          <section className="registration-progress-card">
+            <div className="registration-progress-header">
+              <div>
+                <strong>
+                  {totalResponses} de {totalFamilies} famílies han respost
+                </strong>
+                <span>{pendingCount} famílies pendents</span>
+              </div>
 
-          <div className="registration-results-chips">
-            <span>
-              <strong>{confirmedRegistrations.length}</strong> inscrites
-            </span>
-            <span>
-              <strong>{notAttendingFamilies.length}</strong> no vindran
-            </span>
-          </div>
+              <strong className="registration-progress-percent">
+                {responseProgress}%
+              </strong>
+            </div>
 
-          <div className="registration-people-summary">
-            <span>Persones inscrites</span>
-            <strong>
-              {totalAdults} adults · {totalChildren} infants · {totalUnder3} menors de 3
-            </strong>
-          </div>
+            <div className="registration-progress-track">
+              <div
+                className="registration-progress-fill"
+                style={{ width: `${responseProgress}%` }}
+              />
+            </div>
+          </section>
+
+          <section className="registration-kpi-grid">
+            <div className="registration-kpi-card">
+              <span>Respostes</span>
+              <strong>{totalResponses}</strong>
+            </div>
+
+            <div className="registration-kpi-card">
+              <span>Pendents</span>
+              <strong>{pendingCount}</strong>
+            </div>
+
+            <div className="registration-kpi-card">
+              <span>Vindran</span>
+              <strong>{confirmedRegistrations.length}</strong>
+            </div>
+
+            <div className="registration-kpi-card">
+              <span>No vindran</span>
+              <strong>{notAttendingFamilies.length}</strong>
+            </div>
+          </section>
+
+          <section className="registration-attendance-grid">
+            <div className="registration-kpi-card registration-attendance-card">
+              <span>Adults</span>
+              <strong>{totalAdults}</strong>
+            </div>
+
+            <div className="registration-kpi-card registration-attendance-card">
+              <span>Infants</span>
+              <strong>{totalChildren}</strong>
+            </div>
+
+            <div className="registration-kpi-card registration-attendance-card">
+              <span>Menors de 3</span>
+              <strong>{totalUnder3}</strong>
+            </div>
+          </section>
         </div>
 
         {confirmedRegistrations.length > 0 && (
@@ -1359,7 +1404,14 @@ function RegistrationResultsModal({
             <div className="confirmed-families-list">
               {confirmedRegistrations.map((registration) => (
                 <div className="confirmed-family-row" key={registration.id}>
-                  <strong>{registration.family.student_name}</strong>
+                  <div className="confirmed-family-title">
+                    <strong>{registration.family.student_name}</strong>
+                    {registration.family.grade_label && (
+                      <span className="class-birthday-badge">
+                        {registration.family.grade_label}
+                      </span>
+                    )}
+                  </div>
 
                   <span>
                     {registration.adults_count || 0} adults ·{" "}
@@ -1386,7 +1438,14 @@ function RegistrationResultsModal({
             <div className="confirmed-families-list">
               {notAttendingFamilies.map((family) => (
                 <div className="confirmed-family-row" key={family.id}>
-                  <strong>{family.student_name}</strong>
+                  <div className="confirmed-family-title">
+                    <strong>{family.student_name}</strong>
+                    {family.grade_label && (
+                      <span className="class-birthday-badge">
+                        {family.grade_label}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1403,8 +1462,14 @@ function RegistrationResultsModal({
             <div className="confirmed-families-list">
               {pendingFamilies.map((family) => (
                 <div className="confirmed-family-row" key={family.id}>
-                  <strong>{family.student_name}</strong>
-                  <span>Pendent de resposta</span>
+                  <div className="confirmed-family-title">
+                    <strong>{family.student_name}</strong>
+                    {family.grade_label && (
+                      <span className="class-birthday-badge">
+                        {family.grade_label}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

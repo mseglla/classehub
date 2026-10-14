@@ -4085,69 +4085,120 @@ body,
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.registration-results-overview {
+.registration-results-dashboard {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.registration-progress-card {
   display: grid;
   gap: 12px;
-  margin: 18px 0;
-  padding: 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  background: #f9fafb;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  background: rgba(248, 250, 252, 0.78);
 }
 
-.registration-results-overview p {
-  margin: 0;
-  color: #111827;
-  font-size: 1rem;
-  font-weight: 750;
+.registration-progress-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
 }
 
-.registration-results-overview p strong {
-  font-size: 1.25rem;
+.registration-progress-header div {
+  display: grid;
+  gap: 4px;
+}
+
+.registration-progress-header strong {
+  color: #0f172a;
+  font-size: 1.1rem;
   font-weight: 950;
 }
 
-.registration-results-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.registration-results-chips span {
-  padding: 7px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #4b5563;
-  font-size: 0.82rem;
+.registration-progress-header span {
+  color: #64748b;
+  font-size: 0.9rem;
   font-weight: 800;
 }
 
-.registration-results-chips strong {
-  color: #111827;
-  font-weight: 950;
+.registration-progress-percent {
+  flex: 0 0 auto;
+  font-size: 1.25rem !important;
 }
 
-.registration-people-summary {
+.registration-progress-track {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.registration-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0f172a 0%, #2563eb 100%);
+}
+
+.registration-kpi-grid,
+.registration-attendance-grid {
   display: grid;
-  gap: 3px;
-  padding-top: 10px;
-  border-top: 1px solid #e5e7eb;
+  gap: 10px;
 }
 
-.registration-people-summary span {
-  color: #6b7280;
+.registration-kpi-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.registration-attendance-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.registration-kpi-card {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.registration-kpi-card span {
+  color: #64748b;
   font-size: 0.72rem;
-  font-weight: 850;
+  font-weight: 950;
   letter-spacing: 0.08em;
+  line-height: 1.15;
   text-transform: uppercase;
 }
 
-.registration-people-summary strong {
-  color: #111827;
-  font-size: 0.92rem;
-  font-weight: 850;
-  line-height: 1.35;
+.registration-kpi-card strong {
+  color: #0f172a;
+  font-size: 1.75rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .registration-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .registration-attendance-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .registration-kpi-card {
+    padding: 12px;
+  }
+
+  .registration-kpi-card strong {
+    font-size: 1.55rem;
+  }
 }
 
 .ch-signup-inline-action {
@@ -4866,4 +4917,15 @@ body,
   font-size: 0.9rem;
   line-height: 1.45;
   font-weight: 700;
+}
+
+.confirmed-family-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.confirmed-family-title strong {
+  min-width: 0;
 }
