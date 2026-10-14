@@ -14,6 +14,7 @@ import PollCard from "../components/public/PollCard";
 import RegistrationOrganizationCard from "../components/public/RegistrationOrganizationCard";
 import FamilyPinChangeModal from "../components/public/FamilyPinChangeModal";
 import FamilyPinAccessScreen from "../components/public/FamilyPinAccessScreen";
+import InstallAppBanner from "../components/public/InstallAppBanner";
 import { Card, SectionTitle } from "../components/LayoutComponents";
 import { daysUntil, formatDate, shortDate } from "../utils/dateHelpers";
 import { eventToDetail, typeMeta } from "../utils/eventHelpers";
