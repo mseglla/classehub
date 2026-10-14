@@ -224,3 +224,23 @@
     font-size: 22px;
   }
 }
+
+.ch-setup-open-app {
+  padding: 12px;
+  border-radius: 12px;
+  background: #eaf2ff;
+}
+
+.ch-setup-open-app strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #234e9c;
+  font-size: 13px;
+}
+
+.ch-setup-open-app p {
+  margin: 0;
+  color: #334b73;
+  font-size: 13px;
+  line-height: 1.5;
+}

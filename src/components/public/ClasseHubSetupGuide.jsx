@@ -107,14 +107,26 @@ export default function ClasseHubSetupGuide({
                 <strong>Des del navegador del teu iPhone:</strong>
                 <p><Share2 size={16} /> Toca el botó de compartir.</p>
                 <p>Selecciona «Afegir a la pantalla d'inici».</p>
-                <p>Confirma i obre ClasseHub des de la nova icona.</p>
+                <div className="ch-setup-open-app">
+                  <strong>Important: obre la nova aplicació!</strong>
+                  <p>
+                    Torna a la pantalla d'inici de l'iPhone i toca la icona
+                    de ClasseHub per continuar amb les notificacions.
+                  </p>
+                </div>
               </>
             ) : isAndroid ? (
               <>
                 <strong>Des de Chrome al teu Android:</strong>
                 <p>Obre el menú de tres punts del navegador.</p>
                 <p>Selecciona «Instal·lar aplicació» o «Afegir a la pantalla d'inici».</p>
-                <p>Obre ClasseHub des de la nova icona.</p>
+                <div className="ch-setup-open-app">
+                  <strong>Important: obre la nova aplicació!</strong>
+                  <p>
+                    Torna a la pantalla d'inici i toca la icona de ClasseHub
+                    per continuar amb les notificacions.
+                  </p>
+                </div>
               </>
             ) : (
               <>
