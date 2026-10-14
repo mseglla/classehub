@@ -4093,7 +4093,7 @@ body,
 
 .registration-progress-card {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   padding: 18px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 24px;
@@ -4102,31 +4102,16 @@ body,
 
 .registration-progress-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 14px;
 }
 
-.registration-progress-header div {
-  display: grid;
-  gap: 4px;
-}
-
 .registration-progress-header strong {
   color: #0f172a;
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   font-weight: 950;
-}
-
-.registration-progress-header span {
-  color: #64748b;
-  font-size: 0.9rem;
-  font-weight: 800;
-}
-
-.registration-progress-percent {
-  flex: 0 0 auto;
-  font-size: 1.25rem !important;
+  line-height: 1.15;
 }
 
 .registration-progress-track {
@@ -4143,61 +4128,98 @@ body,
   background: linear-gradient(90deg, #0f172a 0%, #2563eb 100%);
 }
 
-.registration-kpi-grid,
-.registration-attendance-grid {
-  display: grid;
+.registration-response-summary {
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.registration-kpi-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.registration-attendance-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.registration-kpi-card {
-  display: grid;
+.registration-response-summary span {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  min-width: 0;
-  padding: 14px;
+  padding: 8px 12px;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 18px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.registration-response-summary strong {
+  color: #0f172a;
+  font-weight: 950;
+}
+
+.registration-attendance-summary {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
   background: #ffffff;
 }
 
-.registration-kpi-card span {
+.registration-attendance-heading span {
   color: #64748b;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.registration-attendance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.registration-attendance-card {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.registration-attendance-card span {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 900;
   letter-spacing: 0.08em;
   line-height: 1.15;
   text-transform: uppercase;
 }
 
-.registration-kpi-card strong {
+.registration-attendance-card strong {
   color: #0f172a;
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 950;
   line-height: 1;
 }
 
 @media (max-width: 640px) {
-  .registration-kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .registration-progress-header strong {
+    font-size: 1.15rem;
   }
 
-  .registration-attendance-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .registration-attendance-summary {
+    padding: 14px;
   }
 
-  .registration-kpi-card {
-    padding: 12px;
+  .registration-attendance-card {
+    padding: 11px 10px;
   }
 
-  .registration-kpi-card strong {
-    font-size: 1.55rem;
+  .registration-attendance-card span {
+    font-size: 0.66rem;
+  }
+
+  .registration-attendance-card strong {
+    font-size: 1.65rem;
   }
 }
 

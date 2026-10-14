@@ -1334,15 +1334,8 @@ function RegistrationResultsModal({
         <div className="registration-results-dashboard">
           <section className="registration-progress-card">
             <div className="registration-progress-header">
-              <div>
-                <strong>
-                  {totalResponses} de {totalFamilies} famílies han respost
-                </strong>
-                <span>{pendingCount} famílies pendents</span>
-              </div>
-
-              <strong className="registration-progress-percent">
-                {responseProgress}%
+              <strong>
+                {totalResponses}/{totalFamilies} famílies han respost
               </strong>
             </div>
 
@@ -1352,44 +1345,37 @@ function RegistrationResultsModal({
                 style={{ width: `${responseProgress}%` }}
               />
             </div>
-          </section>
 
-          <section className="registration-kpi-grid">
-            <div className="registration-kpi-card">
-              <span>Respostes</span>
-              <strong>{totalResponses}</strong>
-            </div>
-
-            <div className="registration-kpi-card">
-              <span>Pendents</span>
-              <strong>{pendingCount}</strong>
-            </div>
-
-            <div className="registration-kpi-card">
-              <span>Vindran</span>
-              <strong>{confirmedRegistrations.length}</strong>
-            </div>
-
-            <div className="registration-kpi-card">
-              <span>No vindran</span>
-              <strong>{notAttendingFamilies.length}</strong>
+            <div className="registration-response-summary">
+              <span>
+                <strong>{confirmedRegistrations.length}</strong> vindran
+              </span>
+              <span>
+                <strong>{notAttendingFamilies.length}</strong> no vindran
+              </span>
             </div>
           </section>
 
-          <section className="registration-attendance-grid">
-            <div className="registration-kpi-card registration-attendance-card">
-              <span>Adults</span>
-              <strong>{totalAdults}</strong>
+          <section className="registration-attendance-summary">
+            <div className="registration-attendance-heading">
+              <span>Assistència prevista</span>
             </div>
 
-            <div className="registration-kpi-card registration-attendance-card">
-              <span>Infants</span>
-              <strong>{totalChildren}</strong>
-            </div>
+            <div className="registration-attendance-grid">
+              <div className="registration-attendance-card">
+                <span>Adults</span>
+                <strong>{totalAdults}</strong>
+              </div>
 
-            <div className="registration-kpi-card registration-attendance-card">
-              <span>Menors de 3</span>
-              <strong>{totalUnder3}</strong>
+              <div className="registration-attendance-card">
+                <span>Infants</span>
+                <strong>{totalChildren}</strong>
+              </div>
+
+              <div className="registration-attendance-card">
+                <span>Menors de 3</span>
+                <strong>{totalUnder3}</strong>
+              </div>
             </div>
           </section>
         </div>
