@@ -4108,10 +4108,10 @@ body,
 }
 
 .registration-progress-header strong {
-  color: #0f172a;
-  font-size: 1.35rem;
-  font-weight: 950;
-  line-height: 1.15;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 850;
+  line-height: 1.25;
 }
 
 .registration-progress-track {
@@ -4202,10 +4202,6 @@ body,
 }
 
 @media (max-width: 640px) {
-  .registration-progress-header strong {
-    font-size: 1.15rem;
-  }
-
   .registration-attendance-summary {
     padding: 14px;
   }
