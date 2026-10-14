@@ -196,7 +196,7 @@ function FamilyPinAccessScreen({
 
           <a
             className="family-help-whatsapp-link"
-            href="https://wa.me/34607931880?text=Hola%2C%20tinc%20problemes%20per%20accedir%20a%20ClasseHub%20Orenetes."
+            href="https://wa.me/34607931880?text=Hola%2C%20tinc%20problemes%20per%20accedir%20a%20ClasseHub%20Orenetes"
             target="_blank"
             rel="noreferrer"
           >
