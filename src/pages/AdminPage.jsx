@@ -1447,7 +1447,6 @@ PIN: ${family.access_pin}`;
       .insert(payload)
       .select();
 
-console.log("Resultat guardar esdeveniment:", { data, error });
 
     setSaving(false);
 
