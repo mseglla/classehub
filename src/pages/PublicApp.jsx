@@ -3124,7 +3124,14 @@ const visibleEvents = showFullCalendar
                   <div className="class-birthday-list">
                     {group.families.map((family) => (
                       <div className="class-birthday-row" key={family.id}>
-                        <strong>{family.student_name}</strong>
+                        <div className="class-birthday-child">
+                          <strong>{family.student_name}</strong>
+                          {family.grade_label && (
+                            <span className="class-birthday-badge">
+                              {family.grade_label}
+                            </span>
+                          )}
+                        </div>
                         <span>{formatBirthdayDate(family.child_birth_date)}</span>
                       </div>
                     ))}
@@ -3140,7 +3147,14 @@ const visibleEvents = showFullCalendar
                 <div className="class-birthday-list">
                   {familiesWithoutBirthday.map((family) => (
                     <div className="class-birthday-row" key={family.id}>
-                      <strong>{family.student_name}</strong>
+                      <div className="class-birthday-child">
+                        <strong>{family.student_name}</strong>
+                        {family.grade_label && (
+                          <span className="class-birthday-badge">
+                            {family.grade_label}
+                          </span>
+                        )}
+                      </div>
                       <span>Data pendent</span>
                     </div>
                   ))}

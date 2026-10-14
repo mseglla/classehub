@@ -4383,6 +4383,13 @@ body,
   border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
+.class-birthday-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .class-birthday-row strong {
   min-width: 0;
   color: #0f172a;
@@ -4390,11 +4397,26 @@ body,
   font-weight: 850;
 }
 
-.class-birthday-row span {
+.class-birthday-row > span {
   flex: 0 0 auto;
   color: #64748b;
   font-size: 0.84rem;
   font-weight: 750;
+}
+
+.class-birthday-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: capitalize;
 }
 
 .class-birthday-empty {
