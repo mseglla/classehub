@@ -1918,6 +1918,74 @@ export default function PublicApp() {
     };
   }
 
+  async function handleEnablePushNotifications() {
+    if (!activeFamily || !classInfo?.id) {
+      setPushStatus("missing-family");
+      return;
+    }
+
+    if (!isPushSupported()) {
+      setPushStatus("unsupported");
+      return;
+    }
+
+    setPushLoading(true);
+    setPushStatus("");
+
+    try {
+      const result = await subscribeToPushNotifications({
+        familyId: activeFamily.id,
+        classId: classInfo.id,
+      });
+
+      if (result.success) {
+        setPushStatus("granted");
+      } else {
+        setPushStatus(result.error || "error");
+      }
+    } catch (error) {
+      console.error("Push subscription error:", error);
+      setPushStatus("error");
+    } finally {
+      setPushLoading(false);
+    }
+  }
+
+  async function handleSendTestPushNotification() {
+    if (!activeFamily) {
+      setPushStatus("missing-family");
+      return;
+    }
+
+    setPushLoading(true);
+    setPushStatus("");
+
+    try {
+      const response = await fetch("/api/send-test-push", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          familyId: activeFamily.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        setPushStatus(payload.error || "TEST_PUSH_FAILED");
+        return;
+      }
+
+      setPushStatus("test-sent");
+    } catch (error) {
+      console.error("Test push error:", error);
+      setPushStatus("TEST_PUSH_FAILED");
+    } finally {
+      setPushLoading(false);
+    }
+  }
+
   async function submitFamilyPin(event) {
     event.preventDefault();
 
