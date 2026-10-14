@@ -101,7 +101,7 @@ export default function AdminPage({ session }) {
     }
   }
 
-  async function handleSendPollReminders(poll) {
+  async function handleSendPollReminders(poll, testEmail = "") {
     if (!poll?.id) return;
 
     setMessage("");
@@ -125,6 +125,7 @@ export default function AdminPage({ session }) {
         },
         body: JSON.stringify({
           pollId: poll.id,
+          testEmail,
         }),
       });
 
@@ -2217,6 +2218,23 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                         onClick={() => copyPollPublicLink(poll)}
                       >
                         Copiar enllaç
+                      </button>
+
+                      <button
+                        type="button"
+                        className="secondary-action"
+                        disabled={
+                          pendingFamilies.length === 0 ||
+                          reminderSendingPollId === poll.id
+                        }
+                        onClick={() =>
+                          handleSendPollReminders(
+                            poll,
+                            "marcsegurallado@gmail.com"
+                          )
+                        }
+                      >
+                        Enviar prova
                       </button>
 
                       <button
