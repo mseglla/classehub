@@ -5006,3 +5006,63 @@ body,
   font-size: 0.82rem;
   font-weight: 800;
 }
+
+/* Adopció de ClasseHub */
+.class-adoption-summary {
+  margin: 16px 0 20px;
+  padding: 18px;
+  border: 1px solid #e5eaf0;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.class-adoption-summary > strong {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.class-adoption-summary > p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.class-adoption-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.class-adoption-metrics > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.class-adoption-metrics strong {
+  font-size: clamp(21px, 4vw, 28px);
+  line-height: 1.1;
+  font-weight: 750;
+}
+
+.class-adoption-metrics span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+  .class-adoption-summary {
+    padding: 14px;
+  }
+
+  .class-adoption-metrics {
+    gap: 8px;
+  }
+
+  .class-adoption-metrics span {
+    font-size: 11px;
+  }
+}

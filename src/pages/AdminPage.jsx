@@ -18,6 +18,10 @@ export default function AdminPage({ session }) {
   const [adminClassPermissions, setAdminClassPermissions] = useState([]);
   const [families, setFamilies] = useState([]);
   const [familyContacts, setFamilyContacts] = useState([]);
+  const [classAdoption, setClassAdoption] = useState(null);
+  const [adoptionLoading, setAdoptionLoading] = useState(false);
+  const [adoptionError, setAdoptionError] = useState("");
+
   const [adminPolls, setAdminPolls] = useState([]);
   const [adminPollVotes, setAdminPollVotes] = useState([]);
   const [adminEvents, setAdminEvents] = useState([]);
@@ -813,6 +817,66 @@ export default function AdminPage({ session }) {
     await loadAdminPolls(selectedClassId);
   }
 
+
+  async function loadClassAdoption(classId) {
+    const { data: { session: currentSession } } =
+      await supabase.auth.getSession();
+
+    if (!currentSession?.access_token) {
+      throw new Error("Cal iniciar sessió de nou.");
+    }
+
+    const response = await fetch("/api/get-class-adoption", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${currentSession.access_token}`,
+      },
+      body: JSON.stringify({ classId: Number(classId) }),
+    });
+
+    if (!response.ok) {
+      throw new Error("No s'han pogut carregar les dades d'adopció.");
+    }
+
+    return response.json();
+  }
+
+  useEffect(() => {
+    if (!selectedClassId || !session?.user?.id) {
+      setClassAdoption(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    setAdoptionLoading(true);
+    setAdoptionError("");
+    setClassAdoption(null);
+
+    loadClassAdoption(selectedClassId)
+      .then((result) => {
+        if (!cancelled) {
+          setClassAdoption({
+            ...result,
+            classId: String(selectedClassId),
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Class adoption error:", error);
+        if (!cancelled) {
+          setAdoptionError("No s'han pogut carregar les dades d'adopció.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setAdoptionLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedClassId, session?.user?.id]);
 
   async function loadFamilies(classId) {
     if (!classId) return;
@@ -1964,6 +2028,33 @@ PIN: ${family.access_pin}`;
               ? ` · ${inactiveFamiliesCount} desactivades`
               : ""}
           </p>
+
+          <div className="class-adoption-summary">
+            <strong>Adopció de ClasseHub</strong>
+
+            {adoptionLoading ? (
+              <p>Carregant dades d'adopció...</p>
+            ) : adoptionError ? (
+              <p role="alert">{adoptionError}</p>
+            ) : classAdoption?.classId === String(selectedClassId) ? (
+              <div className="class-adoption-metrics">
+                <div>
+                  <strong>{classAdoption.totalFamilies}</strong>
+                  <span>Famílies actives</span>
+                </div>
+                <div>
+                  <strong>—</strong>
+                  <span>PWA utilitzada</span>
+                </div>
+                <div>
+                  <strong>{classAdoption.familiesWithPush}</strong>
+                  <span>Amb notificacions</span>
+                </div>
+              </div>
+            ) : (
+              <p>Encara no hi ha dades d'adopció.</p>
+            )}
+          </div>
 
           <div className="admin-list">
             {families.length === 0 ? (
