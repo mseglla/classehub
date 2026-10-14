@@ -5066,3 +5066,31 @@ body,
     font-size: 11px;
   }
 }
+
+/* Estat d'adopció per família */
+.family-adoption-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 13px;
+}
+
+.family-adoption-line > span {
+  color: #64748b;
+}
+
+.family-adoption-line > strong {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.family-adoption-line > strong.family-adoption-active {
+  color: #178052;
+}

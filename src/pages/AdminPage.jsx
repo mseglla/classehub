@@ -2085,6 +2085,25 @@ PIN: ${family.access_pin}`;
                       )}
                     </div>
 
+                    {family.is_active !== false &&
+                      classAdoption?.classId === String(selectedClassId) && (() => {
+                        const adoption = classAdoption.families?.find(
+                          (item) => String(item.familyId) === String(family.id)
+                        );
+                        const devices = adoption?.pushDevices || 0;
+
+                        return (
+                          <div className="family-adoption-line">
+                            <span>🔔 Notificacions</span>
+                            <strong className={devices > 0 ? "family-adoption-active" : ""}>
+                              {devices > 0
+                                ? `Activades${devices > 1 ? ` · ${devices} dispositius` : ""}`
+                                : "Sense constància"}
+                            </strong>
+                          </div>
+                        );
+                      })()}
+
                     <div className="family-access-line">
                       <div className="family-pin-lean">
                         <span>PIN</span>
