@@ -70,6 +70,7 @@ export default function AdminPage({ session }) {
   const [checklistSaving, setChecklistSaving] = useState(false);
   const [checklistUpdatingId, setChecklistUpdatingId] = useState(null);
   const [reminderSendingOrganizationId, setReminderSendingOrganizationId] = useState(null);
+  const [reminderSendingPollId, setReminderSendingPollId] = useState(null);
   const [reminderStatusMessage, setReminderStatusMessage] = useState("");
   const [activeAdminTab, setActiveAdminTab] = useState("home");
 
@@ -97,6 +98,67 @@ export default function AdminPage({ session }) {
     } catch (error) {
       console.error(error);
       setMessage(pollUrl);
+    }
+  }
+
+  async function handleSendPollReminders(poll) {
+    if (!poll?.id) return;
+
+    setMessage("");
+    setReminderSendingPollId(poll.id);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        setMessage("Cal iniciar sessió com a admin per enviar recordatoris.");
+        return;
+      }
+
+      const response = await fetch("/api/send-poll-reminders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          pollId: poll.id,
+        }),
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        console.error(result);
+        setMessage(
+          `No s'han pogut enviar els recordatoris: ${
+            result.message || result.error || "error desconegut"
+          }`
+        );
+        return;
+      }
+
+      const sentFamiliesCount = result.sentFamilies ?? 0;
+      const pendingFamiliesCount = result.pendingFamilies ?? 0;
+
+      if (sentFamiliesCount === 0) {
+        setMessage("No hi ha famílies pendents amb email per recordar.");
+      } else {
+        setMessage(
+          `Recordatori enviat a ${sentFamiliesCount} famílies pendents de votar.`
+        );
+      }
+
+      if (pendingFamiliesCount === 0) {
+        setMessage("Totes les famílies ja han votat.");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("No s'han pogut enviar els recordatoris.");
+    } finally {
+      setReminderSendingPollId(null);
     }
   }
 
@@ -2155,6 +2217,20 @@ console.log("Resultat guardar esdeveniment:", { data, error });
                         onClick={() => copyPollPublicLink(poll)}
                       >
                         Copiar enllaç
+                      </button>
+
+                      <button
+                        type="button"
+                        className="secondary-action"
+                        disabled={
+                          pendingFamilies.length === 0 ||
+                          reminderSendingPollId === poll.id
+                        }
+                        onClick={() => handleSendPollReminders(poll)}
+                      >
+                        {reminderSendingPollId === poll.id
+                          ? "Enviant..."
+                          : "Enviar recordatori"}
                       </button>
 
                       <button
