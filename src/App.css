@@ -5000,3 +5000,9 @@ body,
   min-width: 0;
 }
 
+
+.footer-status {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 800;
+}

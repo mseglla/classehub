@@ -28,6 +28,11 @@ import {
   formatBirthdayDate,
   getBirthdayMonthDay,
 } from "../utils/birthdayHelpers";
+import {
+  getNotificationPermission,
+  isPushSupported,
+  subscribeToPushNotifications,
+} from "../utils/pushNotifications";
 
 function formatCalendarDate(date, time) {
   if (!date) return "";
@@ -1546,6 +1551,8 @@ export default function PublicApp() {
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
+  const [pushStatus, setPushStatus] = useState(() => getNotificationPermission());
+  const [pushLoading, setPushLoading] = useState(false);
   const [activePublicSection, setActivePublicSection] = useState("agenda");
 
   const agendaSectionRef = useRef(null);
@@ -1848,6 +1855,18 @@ export default function PublicApp() {
   }, []);
 
   const activeFamily = activeFamilyFromPin;
+
+  const pushStatusLabel = {
+    granted: "Notificacions activades",
+    denied: "Permís de notificacions denegat",
+    "PERMISSION_DENIED": "Permís de notificacions denegat",
+    unsupported: "Aquest dispositiu no suporta notificacions web",
+    NOT_SUPPORTED: "Aquest dispositiu no suporta notificacions web",
+    MISSING_VAPID_PUBLIC_KEY: "Falta configurar la clau pública de notificacions",
+    SAVE_FAILED: "No s'han pogut guardar les notificacions",
+    "missing-family": "Cal entrar amb el PIN familiar",
+    error: "No s'han pogut activar les notificacions",
+  }[pushStatus];
 
   function hasActiveFamilyResponded(organization) {
     if (!activeFamily || !organization) return false;
@@ -2839,6 +2858,21 @@ const visibleEvents = showFullCalendar
         <span>
           <Home size={16} /> Ara no hi ha excusa per no estar al dia de tot!
         </span>
+
+        {activeFamily && pushStatus !== "granted" && (
+          <button
+            type="button"
+            className="footer-link"
+            onClick={handleEnablePushNotifications}
+            disabled={pushLoading}
+          >
+            {pushLoading ? "Activant..." : "Activar notificacions"}
+          </button>
+        )}
+
+        {activeFamily && pushStatusLabel && (
+          <span className="footer-status">{pushStatusLabel}</span>
+        )}
 
         <button
           type="button"
