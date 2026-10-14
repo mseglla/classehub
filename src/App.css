@@ -4958,3 +4958,43 @@ body,
   background: #e5e7eb;
   box-shadow: none;
 }
+
+.inline-progress-summary {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.inline-progress-copy {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.inline-progress-copy strong {
+  color: #0f172a;
+  font-size: 1.02rem;
+  font-weight: 950;
+}
+
+.inline-progress-track {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.inline-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0f172a 0%, #2563eb 100%);
+}
+
+.inline-progress-detail {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.86rem;
+  font-weight: 800;
+}

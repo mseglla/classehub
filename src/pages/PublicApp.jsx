@@ -555,6 +555,35 @@ function DetailModal({
   );
 }
 
+function InlineProgressSummary({
+  answeredCount,
+  totalCount,
+  label = "famílies han respost",
+  detailText = "",
+}) {
+  const progress =
+    totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
+
+  return (
+    <div className="inline-progress-summary">
+      <p className="inline-progress-copy">
+        <strong>{answeredCount}/{totalCount}</strong> {label}
+      </p>
+
+      <div className="inline-progress-track">
+        <div
+          className="inline-progress-fill"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      {detailText && (
+        <p className="inline-progress-detail">{detailText}</p>
+      )}
+    </div>
+  );
+}
+
 function PollCard({ poll, families, votes, activeFamily, onOpenVote, onOpenResults }) {
   const pollVotes = votes.filter((vote) => vote.poll_id === poll.id);
   const votedFamilies = new Set(pollVotes.map((vote) => vote.family_id));
@@ -568,12 +597,11 @@ function PollCard({ poll, families, votes, activeFamily, onOpenVote, onOpenResul
       <div>
         <p className="tag">Votació</p>
         <h3>{poll.question}</h3>
-        <p className="action-summary">
-          <strong>
-            {votedFamilies.size}/{families.length}
-          </strong>{" "}
-          famílies han votat
-        </p>
+        <InlineProgressSummary
+          answeredCount={votedFamilies.size}
+          totalCount={families.length}
+          label="famílies han votat"
+        />
       </div>
 
       {activeFamily && (
@@ -1185,6 +1213,10 @@ function RegistrationOrganizationCard({
     orgResponses.map((item) => [item.family_id, item.response])
   );
 
+  const notAttendingFamiliesCount = availableFamilies.filter(
+    (family) => responseByFamily.get(family.id) === "no"
+  ).length;
+
   const answeredFamiliesCount = responseByFamily.size;
 
   const activeFamilyRegistration = activeFamily
@@ -1217,12 +1249,12 @@ function RegistrationOrganizationCard({
       </div>
 
       <div className="attendance-summary registration-card-summary">
-        <p className="action-summary">
-          <strong>
-            {answeredFamiliesCount}/{availableFamilies.length}
-          </strong>{" "}
-          famílies han respost · {orgRegistrations.length} inscrites
-        </p>
+        <InlineProgressSummary
+          answeredCount={answeredFamiliesCount}
+          totalCount={availableFamilies.length}
+          label="famílies han respost"
+          detailText={`${orgRegistrations.length} vindran · ${notAttendingFamiliesCount} no vindran`}
+        />
 
         {activeFamily && (
           <div
