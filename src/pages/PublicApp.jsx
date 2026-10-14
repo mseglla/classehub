@@ -1858,12 +1858,16 @@ export default function PublicApp() {
 
   const pushStatusLabel = {
     granted: "Notificacions activades",
+    "test-sent": "Push de prova enviada",
     denied: "Permís de notificacions denegat",
     "PERMISSION_DENIED": "Permís de notificacions denegat",
     unsupported: "Aquest dispositiu no suporta notificacions web",
     NOT_SUPPORTED: "Aquest dispositiu no suporta notificacions web",
     MISSING_VAPID_PUBLIC_KEY: "Falta configurar la clau pública de notificacions",
     SAVE_FAILED: "No s'han pogut guardar les notificacions",
+    NO_ACTIVE_SUBSCRIPTIONS: "No hi ha cap dispositiu subscrit",
+    MISSING_VAPID_KEYS: "Falten claus VAPID al servidor",
+    TEST_PUSH_FAILED: "No s'ha pogut enviar la push de prova",
     "missing-family": "Cal entrar amb el PIN familiar",
     error: "No s'han pogut activar les notificacions",
   }[pushStatus];
@@ -2867,6 +2871,17 @@ const visibleEvents = showFullCalendar
             disabled={pushLoading}
           >
             {pushLoading ? "Activant..." : "Activar notificacions"}
+          </button>
+        )}
+
+        {activeFamily && (pushStatus === "granted" || pushStatus === "test-sent") && (
+          <button
+            type="button"
+            className="footer-link"
+            onClick={handleSendTestPushNotification}
+            disabled={pushLoading}
+          >
+            {pushLoading ? "Enviant..." : "Enviar prova push"}
           </button>
         )}
 
