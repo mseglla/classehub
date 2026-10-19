@@ -1,13 +1,11 @@
 const { createClient } = require("@supabase/supabase-js");
-const { Resend } = require("resend");
+const { sendEmail } = require("./_lib/send-email");
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const resendApiKey = process.env.RESEND_API_KEY;
-const fromEmail =
-  process.env.WELCOME_FROM_EMAIL ||
-  process.env.REMINDER_FROM_EMAIL ||
-  "ClasseHub <onboarding@resend.dev>";
+const smtpUser = process.env.SMTP_USER;
+const smtpPassword = process.env.SMTP_PASSWORD;
+
 const publicAppUrl = process.env.PUBLIC_APP_URL || "https://classehub-psi.vercel.app";
 
 function escapeHtml(value) {
@@ -79,10 +77,10 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
   }
 
-  if (!supabaseUrl || !serviceRoleKey || !resendApiKey) {
+  if (!supabaseUrl || !serviceRoleKey || !smtpUser || !smtpPassword) {
     return res.status(500).json({
       error: "MISSING_SERVER_ENV",
-      message: "Missing SUPABASE URL, SUPABASE_SERVICE_ROLE_KEY or RESEND_API_KEY.",
+      message: "Missing Supabase or SMTP configuration.",
     });
   }
 
@@ -149,7 +147,6 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const resend = new Resend(resendApiKey);
   const accessUrl = `${publicAppUrl}/classe/${classData.slug}?pin=${family.access_pin}`;
 
   const { subject, text, html } = buildWelcomeCopy({
@@ -164,23 +161,16 @@ module.exports = async function handler(req, res) {
 
   for (const recipient of recipients) {
     try {
-      const emailResult = await resend.emails.send({
-        from: fromEmail,
+      const emailResult = await sendEmail({
         to: recipient,
         subject,
         text,
         html,
       });
 
-      if (emailResult?.error) {
-        throw new Error(
-          emailResult.error.message || JSON.stringify(emailResult.error)
-        );
-      }
-
       sent.push({
         email: recipient,
-        id: emailResult?.data?.id || null,
+        id: emailResult?.id || null,
       });
     } catch (error) {
       console.error(error);
