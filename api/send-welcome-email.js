@@ -1,5 +1,6 @@
 const { createClient } = require("@supabase/supabase-js");
 const { sendEmail } = require("./_lib/send-email");
+const { checkEmailRateLimit } = require("./_lib/email-rate-limit");
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -96,6 +97,17 @@ module.exports = async function handler(req, res) {
       autoRefreshToken: false,
     },
   });
+
+  try {
+    const allowed = await checkEmailRateLimit(supabase, req, "welcome_email");
+
+    if (!allowed) {
+      return res.status(429).json({ error: "RATE_LIMITED" });
+    }
+  } catch (error) {
+    console.error("Email rate limit failed:", error);
+    return res.status(503).json({ error: "RATE_LIMIT_UNAVAILABLE" });
+  }
 
   const { data: family, error: familyError } = await supabase
     .from("ch_families")
