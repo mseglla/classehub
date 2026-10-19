@@ -150,7 +150,9 @@ export default function AdminPage({ session }) {
       const errorCount = Array.isArray(result.errors) ? result.errors.length : 0;
       const skippedCount = result.skipped ?? 0;
 
-      if (pendingFamiliesCount === 0) {
+      if (testEmail && sentFamiliesCount === 1 && errorCount === 0) {
+        setMessage("Recordatori de prova acceptat per a 1 destinatari.");
+      } else if (pendingFamiliesCount === 0) {
         setMessage("Totes les famílies ja han votat.");
       } else if (errorCount > 0 || skippedCount > 0) {
         const details = [
@@ -171,7 +173,7 @@ export default function AdminPage({ session }) {
         );
       } else {
         setMessage(
-          `Recordatori acceptat per a ${sentFamiliesCount} famílies pendents de votar.`
+          `Recordatori acceptat per a ${sentFamiliesCount} ${sentFamiliesCount === 1 ? "família pendent" : "famílies pendents"} de votar.`
         );
       }
     } catch (error) {
