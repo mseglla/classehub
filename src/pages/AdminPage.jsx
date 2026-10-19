@@ -147,17 +147,34 @@ export default function AdminPage({ session }) {
 
       const sentFamiliesCount = result.sentFamilies ?? 0;
       const pendingFamiliesCount = result.pendingFamilies ?? 0;
+      const errorCount = Array.isArray(result.errors) ? result.errors.length : 0;
+      const skippedCount = result.skipped ?? 0;
 
-      if (sentFamiliesCount === 0) {
-        setMessage("No hi ha famílies pendents amb email per recordar.");
+      if (testEmail && sentFamiliesCount === 1 && errorCount === 0) {
+        setMessage("Recordatori de prova acceptat per a 1 destinatari.");
+      } else if (pendingFamiliesCount === 0) {
+        setMessage("Totes les famílies ja han votat.");
+      } else if (errorCount > 0 || skippedCount > 0) {
+        const details = [
+          `${sentFamiliesCount} famílies amb enviaments acceptats`,
+          `${errorCount} enviaments fallits`,
+          `${skippedCount} contactes omesos`,
+        ];
+
+        const firstError = result.errors?.[0]?.message;
+        if (firstError) {
+          details.push(`Motiu: ${firstError}`);
+        }
+
+        setMessage(`Resultat dels recordatoris: ${details.join(" · ")}`);
+      } else if (sentFamiliesCount === 0) {
+        setMessage(
+          `Hi ha ${pendingFamiliesCount} famílies pendents, però no s'ha enviat cap correu.`
+        );
       } else {
         setMessage(
-          `Recordatori enviat a ${sentFamiliesCount} famílies pendents de votar.`
+          `Recordatori acceptat per a ${sentFamiliesCount} ${sentFamiliesCount === 1 ? "família pendent" : "famílies pendents"} de votar.`
         );
-      }
-
-      if (pendingFamiliesCount === 0) {
-        setMessage("Totes les famílies ja han votat.");
       }
     } catch (error) {
       console.error(error);
@@ -2301,6 +2318,12 @@ PIN: ${family.access_pin}`;
               + Nova votació
             </button>
           </div>
+
+          {message && (
+            <p className="admin-message" role="status">
+              {message}
+            </p>
+          )}
 
           <div className="admin-list">
             {adminPolls.length === 0 ? (
