@@ -2317,6 +2317,12 @@ PIN: ${family.access_pin}`;
             </button>
           </div>
 
+          {message && (
+            <p className="admin-message" role="status">
+              {message}
+            </p>
+          )}
+
           <div className="admin-list">
             {adminPolls.length === 0 ? (
               <p>No hi ha cap votació creada per aquesta classe.</p>
