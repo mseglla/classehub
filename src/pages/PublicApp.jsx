@@ -2198,7 +2198,9 @@ export default function PublicApp() {
     setAccessEmailSending(true);
     setAccessEmailStatus("");
 
-    const pollParam = new URLSearchParams(window.location.search).get("poll");
+    const params = new URLSearchParams(window.location.search);
+    const pollParam = params.get("poll");
+    const orgParam = params.get("org");
 
     try {
       await fetch("/api/send-family-access-link", {
